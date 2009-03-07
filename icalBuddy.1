@@ -1,0 +1,171 @@
+.Dd 2009-02-06           \" DATE 
+.Dt ICALBUDDY 1          \" Program name and manual section number 
+.Os Darwin
+.Sh NAME                 \" Section Header - required - don't modify 
+.Nm icalBuddy
+.Nd query the OS X calendar database for items
+.Sh SYNOPSIS             \" Section Header - required - don't modify
+.Nm
+.Op Fl Vufn
+.Op Fl strEncoding Ar encoding
+.Op Fl sc
+.Op Fl sd
+.Op Fl nc
+.Op Fl nrd
+.Op Fl tf Ar format
+.Op Fl df Ar format
+.Op Fl dts Ar separator
+.Op Fl po Ar value
+.Op Fl b Ar value
+.Op Fl ab Ar value
+.Op Fl i Ar value
+.Op Fl ss Ar value
+.Op Fl ic Ar value
+.Op Fl ec Ar value
+.Op Fl iep Ar value
+.Op Fl eep Ar value
+.Op Fl itp Ar value
+.Op Fl etp Ar value
+.Op Ar output_type
+.Sh DESCRIPTION          \" Section Header - required - don't modify
+.Nm
+queries the OS X calendar database for items and outputs them.
+.Pp
+The options are as follows:
+.Bl -tag -width Fl
+.It Ar output_type
+Specifies what to output. Possible values are:
+.Pp
+\'eventsToday'        (events occurring today)
+.Pp
+\'eventsToday+NUM'    (events occurring between today and NUM days into the future (where NUM is an integer))
+.Pp
+\'eventsNow'          (events occurring at present time)
+.Pp
+\'uncompletedTasks'   (uncompleted tasks)
+.Pp
+\'calendars'          (all calendars)
+.Pp
+\'strEncodings'       (all the possible string encodings)
+.It Fl V , Fl -version
+Print version number and exit.
+.It Fl u , Fl -checkForUpdates
+Check for updates.
+.It Fl sc , Fl -separateByCalendar
+Separate events/tasks in the output by calendar.
+.It Fl sd , Fl -separateByDate
+Separate events/tasks in the output by date.
+.It Fl f , Fl -formatOutput
+Use ANSI escape sequences to format the output and hopefully make it more readable.
+.It Fl nc , Fl -noCalendarNames
+Omit calendar names from the output. Does not apply if the
+.Fl sc
+argument is used.
+.It Fl nrd , Fl -noRelativeDates
+Do not use "natural language relative dates" when displaying dates (e.g. "today", "yesterday" or "day after tomorrow".)
+.It Fl n , Fl -includeOnlyEventsFromNowOn
+If the
+.Ar output_type
+value 'eventsToday' is used, only output events that occur between the current time and the end of the day (as opposed to events that occur between the start and end of the day, as by default.)
+.It Fl -strEncoding Ar encoding
+Use the specified string encoding for the output. Run the app once with the 'strEncodings'
+.Ar output_type
+value to see all the possible values you can use here.
+.It Fl tf , Fl -timeFormat Ar format
+Format times included in the output based on the
+.Ar format
+formatting string. See http://tinyurl.com/b9mgyp [apple.com] for documentation on the syntax to use.
+.It Fl df , Fl -dateFormat Ar format
+Format dates included in the output based on the
+.Ar format
+formatting string. See http://tinyurl.com/b9mgyp [apple.com] for documentation on the syntax to use.
+.It Fl dts , Fl -dateTimeSeparator Ar value
+Sets
+.Ar value
+as the separator string to use between dates and times in the output. The default is " at ".
+.It Fl po , Fl -propertyOrder Ar value
+Print properties of events/tasks in the order specified by
+.Ar value
+, which must be a comma-separated list of property names. The allowed property names are: title, location, notes, url, datetime, priority.
+.It Fl b , Fl -bullet Ar value
+Sets
+.Ar value
+as the string to be used as the bullet point in the output. The default is "* ".
+.It Fl ab , Fl -alertBullet Ar value
+Sets
+.Ar value
+as the string to be used as the alert bullet point in the output. The default is "! ".
+.It Fl i , Fl -indent Ar value
+Sets
+.Ar value
+as the string to be used as the indentation of lines other than the first (bulleted) one in the output. The default is four spaces ("    ").
+.It Fl ss , Fl -sectionSeparator Ar value
+Sets
+.Ar value
+as the string to be used as the section separator in the output. The default is a bunch of minus/dash (-) characters.
+.It Fl ic , -includeCals Ar value
+Includes only items in calendars specified by
+.Ar value
+into the output.
+.Ar value
+must be a comma-separated list of calendar UIDs (which you can find out by using the 'calendars'
+.Ar output_type
+parameter.) You can also use titles, but remember that they may not be unique (as opposed to UIDs.) The
+.Fl ic
+and
+.Fl ec
+parameters will be handled in the order of first include, then exclude.
+.It Fl ec , -excludeCals Ar value
+Excludes items in calendars specified by
+.Ar value
+from the output. 
+.Ar value
+must be a comma-separated list of calendar UIDs (which you can find out by using the 'calendars'
+.Ar output_type
+parameter.) You can also use titles, but remember that they may not be unique (as opposed to UIDs.) The
+.Fl ic
+and
+.Fl ec
+parameters will be handled in the order of first include, then exclude.
+.It Fl iep , -includeEventProps Ar value
+Includes only event properties specified by
+.Ar value
+into the output.
+.Ar value
+must be a comma-separated list of property names. Possible property names are: location, url, notes, startDate and endDate.
+.It Fl eep , -excludeEventProps Ar value
+Excludes event properties specified by
+.Ar value
+from the output.
+.Ar value
+must be a comma-separated list of property names. See
+.Fl iep
+for a list of possible property names. A value of "*" will exclude all properties and make sure just the title is printed.
+.It Fl itp , -includeTaskProps Ar value
+Includes only task properties specified by
+.Ar value
+into the output.
+.Ar value
+must be a comma-separated list of property names. Possible property names are: url, notes, dueDate and priority.
+.It Fl etp , -excludeTaskProps Ar value
+Excludes task properties specified by
+.Ar value
+from the output.
+.Ar value
+must be a comma-separated list of property names. See
+.Fl itp
+for a list of possible property names. A value of "*" will exclude all properties and make sure just the title is printed.
+.El
+.Pp                      \" Inserts a space
+.Sh EXAMPLES
+.Dl $ icalBuddy -sc uncompletedTasks
+.Pp
+Outputs all uncompleted tasks, separated by calendar
+.Pp
+.Dl $ icalBuddy -sd -ic Work,Home -ec WeekNumbers eventsToday
+.Pp
+Outputs all events occurring today from all calendars where the title or UID matches 'Work' or 'Home' and the title or UID does not match 'WeekNumbers', separated by date
+.Pp                      \" Inserts a space
+.Sh AUTHORS
+This man page has been written by Ali Rantakari (http://hasseg.org)
+.Pp                      \" Inserts a space

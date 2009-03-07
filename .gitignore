@@ -1,0 +1,11 @@
+# ignored patterns
+
+Icon*
+.hg*
+.DS_Store
+deployment
+changelog.*
+icalBuddy
+deploymentScpTarget
+test.m
+a.out
