@@ -1,9 +1,9 @@
 
 TODO:
 
+- Add output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
+
 - Add timezone support (how to handle these?)
-
-
 
 
 Replace versionNumberCompare() with this: (is this adequate? must test. might break with more than single-digit numbers.)
