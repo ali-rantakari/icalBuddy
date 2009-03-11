@@ -78,8 +78,8 @@ THE SOFTWARE.
 
 
 const int VERSION_MAJOR = 1;
-const int VERSION_MINOR = 3;
-const int VERSION_BUILD = 7;
+const int VERSION_MINOR = 4;
+const int VERSION_BUILD = 0;
 
 
 
@@ -1542,6 +1542,11 @@ int main(int argc, char *argv[])
 		NSPrint(@"                      and NUM days into the future (where\n");
 		NSPrint(@"                      NUM is an integer value))\n");
 		NSPrint(@"  'eventsNow'        (events occurring at present time)\n");
+		NSPrint(@"  'eventsFrom:START to:END'\n");
+		NSPrint(@"                     (events occurring between the two\n");
+		NSPrint(@"                      specified dates (START and END), where\n");
+		NSPrint(@"                      both are specified in the format:\n");
+		NSPrint(@"                      YYYY-MM-DD HH:MM:SS ±HHMM)\n");
 		NSPrint(@"  'uncompletedTasks' (uncompleted tasks)\n");
 		NSPrint(@"  'calendars'        (all calendars)\n");
 		NSPrint(@"  'strEncodings'     (all the possible string encodings)\n");

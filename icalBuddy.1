@@ -38,9 +38,12 @@ Specifies what to output. Possible values are:
 .Pp
 \'eventsToday'        (events occurring today)
 .Pp
-\'eventsToday+NUM'    (events occurring between today and NUM days into the future (where NUM is an integer))
+\'eventsToday+NUM'    (events occurring between today and NUM days into the future, where NUM is an integer)
 .Pp
 \'eventsNow'          (events occurring at present time)
+.Pp
+\'eventsFrom:START to:END'
+                     (events occurring between the two specified dates (START and END), where both are specified in the format "YYYY-MM-DD HH:MM:SS +HHMM" (the +HHMM part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix))
 .Pp
 \'uncompletedTasks'   (uncompleted tasks)
 .Pp
@@ -165,6 +168,10 @@ Outputs all uncompleted tasks, separated by calendar
 .Dl $ icalBuddy -sd -ic Work,Home -ec WeekNumbers eventsToday
 .Pp
 Outputs all events occurring today from all calendars where the title or UID matches 'Work' or 'Home' and the title or UID does not match 'WeekNumbers', separated by date
+.Pp
+.Dl $ icalBuddy eventsFrom:"2009-01-01 00:00:00 +02:00" to:"2009-01-31 23:59:59 +02:00"
+.Pp
+Outputs all events occurring between the first of january, 2009 and the 31st of january, 2009 (using the timezone GMT+02:00)
 .Pp                      \" Inserts a space
 .Sh AUTHORS
 This man page has been written by Ali Rantakari (http://hasseg.org)
