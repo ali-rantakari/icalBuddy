@@ -1293,10 +1293,18 @@ int main(int argc, char *argv[])
 					NSPrintErr(@"Error: invalid start date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
 					return(0);
 				}
-				if (eventsDateRangeEnd == nil)
+				else if (eventsDateRangeEnd == nil)
 				{
 					NSPrintErr(@"Error: invalid end date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsTo);
 					return(0);
+				}
+				
+				if ([eventsDateRangeStart compare:eventsDateRangeEnd] == NSOrderedDescending)
+				{
+					// start date occurs before end date --> swap them
+					NSCalendarDate *tempSwapDate = eventsDateRangeStart;
+					eventsDateRangeStart = eventsDateRangeEnd;
+					eventsDateRangeEnd = tempSwapDate;
 				}
 				
 				events_printOptions &= ~PRINT_OPTION_SINGLE_DAY;

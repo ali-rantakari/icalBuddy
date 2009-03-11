@@ -1,8 +1,6 @@
 
 TODO:
 
-- Fix: date span not shown for all-day events that span more than one day when separating by date (they're only listed under the start date)
-
 - Add timezone support (how to handle these?)
 
 
