@@ -1019,6 +1019,10 @@ int main(int argc, char *argv[])
 	BOOL arg_output_is_uncompletedTasks = NO;
 	BOOL arg_output_is_eventsToday = NO;
 	BOOL arg_output_is_eventsNow = NO;
+	BOOL arg_output_is_eventsFromTo = NO;
+	NSString *arg_eventsFrom = nil;
+	NSString *arg_eventsTo = nil;
+	
 	
 	// get arguments
 	
@@ -1029,6 +1033,17 @@ int main(int argc, char *argv[])
 		arg_output_is_uncompletedTasks = [arg_output isEqualToString:@"uncompletedTasks"];
 		arg_output_is_eventsToday = [arg_output hasPrefix:@"eventsToday"];
 		arg_output_is_eventsNow = [arg_output isEqualToString:@"eventsNow"];
+		
+		if ([arg_output hasPrefix:@"to:"] && argc > 2)
+		{
+			NSString *secondToLastArg = [NSString stringWithCString: argv[argc-2] encoding: NSASCIIStringEncoding];
+			if ([secondToLastArg hasPrefix:@"eventsFrom:"])
+			{
+				arg_eventsFrom = [secondToLastArg substringFromIndex:11]; // "eventsFrom:" has 11 chars
+				arg_eventsTo = [arg_output substringFromIndex:3]; // "to:" has 3 chars
+				arg_output_is_eventsFromTo = YES;
+			}
+		}
 	}
 	
 	
@@ -1236,9 +1251,10 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print events or tasks
 	// ------------------------------------------------------------------
-	else if (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_uncompletedTasks)
+	else if (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo || arg_output_is_uncompletedTasks)
 	{
-		BOOL printingEvents = (arg_output_is_eventsToday || arg_output_is_eventsNow);
+		BOOL printingEvents = (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo);
+		BOOL printingAlsoPastEvents = (arg_output_is_eventsFromTo);
 		BOOL printingTasks = arg_output_is_uncompletedTasks;
 		
 		// get all calendars
@@ -1279,6 +1295,24 @@ int main(int argc, char *argv[])
 			{
 				eventsDateRangeStart = now;
 				eventsDateRangeEnd = now;
+			}
+			else if (arg_output_is_eventsFromTo)
+			{
+				eventsDateRangeStart = [NSCalendarDate dateWithString:arg_eventsFrom];
+				eventsDateRangeEnd = [NSCalendarDate dateWithString:arg_eventsTo];
+				
+				if (eventsDateRangeStart == nil)
+				{
+					NSPrintErr(@"Error: invalid start date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
+					return(0);
+				}
+				if (eventsDateRangeEnd == nil)
+				{
+					NSPrintErr(@"Error: invalid end date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsTo);
+					return(0);
+				}
+				
+				events_printOptions &= ~PRINT_OPTION_SINGLE_DAY;
 			}
 			NSCAssert((eventsDateRangeStart != nil && eventsDateRangeEnd != nil), @"start or end date is nil");
 			
@@ -1351,8 +1385,8 @@ int main(int argc, char *argv[])
 		{
 			NSMutableArray *byDateSections = [NSMutableArray arrayWithCapacity:[eventsArr count]];
 			
-			// keys: NSDates (representing *days* to use as sections), values: NSArrays of CalCalendarItems
-			// that match those days
+			// keys: NSDates (representing *days* to use as sections),
+			// values: NSArrays of CalCalendarItems that match those days
 			NSMutableDictionary *allDays = [NSMutableDictionary dictionaryWithCapacity:[eventsArr count]];
 			
 			if (printingEvents)
@@ -1392,9 +1426,11 @@ int main(int argc, char *argv[])
 						
 						NSComparisonResult dayToAddToNowComparisonResult = [dayToAdd compare:today];
 						
-						if (dayToAddToNowComparisonResult == NSOrderedDescending ||
+						if (printingAlsoPastEvents ||
+							dayToAddToNowComparisonResult == NSOrderedDescending ||
 							dayToAddToNowComparisonResult == NSOrderedSame ||
-							datesRepresentSameDay(now, dayToAdd))
+							datesRepresentSameDay(now, dayToAdd)
+							)
 						{
 							if (![[allDays allKeys] containsObject:dayToAdd])
 								[allDays setObject:[NSMutableArray arrayWithCapacity:20] forKey:dayToAdd];
