@@ -654,21 +654,8 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 		{
 			if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
 			{
-				// special case for events in the Birthdays calendar (they don't seem to have titles
-				// so we have to use the URI to find the ABPerson from the Address Book
-				// and print their name from there)
-				
-				NSString *personId = [[NSString stringWithFormat:@"%@", [event url]] stringByReplacingOccurrencesOfString:@"addressbook://" withString:@""];
-				ABRecord *person = [[ABAddressBook sharedAddressBook] recordForUniqueId:personId];
-				
-				if (person != nil)
-				{
-					if ([person isMemberOfClass: [ABPerson class]])
-					{
-						if (!(printOptions & PRINT_OPTION_SINGLE_DAY))
-							thisPropOutputValue = dateStr([event startDate], true, false);
-					}
-				}
+				if (!(printOptions & PRINT_OPTION_SINGLE_DAY))
+					thisPropOutputValue = dateStr([event startDate], true, false);
 			}
 			else
 			{
