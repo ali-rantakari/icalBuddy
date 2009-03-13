@@ -4,6 +4,7 @@ TODO:
 user requests:
 -------------------------
 
+- Fix problem with right-to-left text: bullet points appear on the wrong side of the output
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
 - Different properties on the same lines
 - Expose some way to localize/change all of the natural language relative date strings
