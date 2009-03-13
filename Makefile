@@ -57,9 +57,11 @@ docs: icalBuddy.1 faq.markdown
 	@echo
 	@echo ---- Generating HTML from FAQ:
 	@echo ======================================
-	echo "<html><head><title>icalBuddy FAQ</title></head><body>" > $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<html><head><title>icalBuddy FAQ</title>" > $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<style type='text/css'>#main{width:600px; margin:30 auto 300 auto;} p{margin-bottom:30px;}</style>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "</head><body><div id='main'>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 	perl utils/markdown/Markdown.pl faq.markdown >> $(TEMP_DEPLOYMENT_FAQFILE)
-	echo "</body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "</div></body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 
 
 
