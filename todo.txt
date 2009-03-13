@@ -1,7 +1,17 @@
 
 TODO:
 
-- Add output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
+user requests:
+-------------------------
+
+- Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
+- Different properties on the same lines
+- Expose some way to localize/change all of the natural language relative date strings
+
+
+
+other (my own ideas):
+-------------------------
 
 - Add timezone support (how to handle these?)
 

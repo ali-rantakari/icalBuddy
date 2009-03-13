@@ -9,6 +9,7 @@ APP_VERSION=$(shell ./icalBuddy -V)
 TEMP_DEPLOYMENT_DIR=deployment/$(APP_VERSION)
 TEMP_DEPLOYMENT_ZIPFILE=$(TEMP_DEPLOYMENT_DIR)/icalBuddy-v$(APP_VERSION).zip
 TEMP_DEPLOYMENT_MANFILE="deployment/man.html"
+TEMP_DEPLOYMENT_FAQFILE="deployment/faq.html"
 VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
 SCP_TARGET=$(shell cat ./deploymentScpTarget)
@@ -45,13 +46,20 @@ icalBuddy: icalBuddy.m
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
-# generate HTML from manpage
+# generate HTML from manpage and faq
 #-------------------------------------------------------------------------
-docs: icalBuddy.1
+docs: icalBuddy.1 faq.markdown
 	@echo
 	@echo ---- Generating HTML from manpage:
 	@echo ======================================
-	utils/manserver.pl icalBuddy.1 | sed -e 's/<BODY .*>/<BODY>/' > deployment/man.html
+	utils/manserver.pl icalBuddy.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_MANFILE)
+	
+	@echo
+	@echo ---- Generating HTML from FAQ:
+	@echo ======================================
+	echo "<html><head><title>icalBuddy FAQ</title></head><body>" > $(TEMP_DEPLOYMENT_FAQFILE)
+	perl utils/markdown/Markdown.pl faq.markdown >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "</body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 
 
 
@@ -103,7 +111,7 @@ deploy: package
 	@( if [ "`./icalBuddy -u | grep -c \"latest: $(APP_VERSION)\"`" == "0" ];then\
 		echo "Version number is $(APP_VERSION). Press enter to continue uploading to server or Ctrl-C to cancel.";\
 		read INPUTSTR;\
-		scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(SCP_TARGET);\
+		scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(TEMP_DEPLOYMENT_FAQFILE) $(SCP_TARGET);\
 	else\
 		echo "It looks like you haven't remembered to increment the version number ($(APP_VERSION)).";\
 		echo "Cancelling deployment.";\
