@@ -5,7 +5,6 @@ user requests:
 -------------------------
 
 - localization:
-	- write documentation
 	- write FAQ entry
 	- make error messages more clear when format specifiers are missing?
 - Fix problem with right-to-left text: bullet points appear on the wrong side of the output

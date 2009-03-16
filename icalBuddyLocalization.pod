@@ -1,0 +1,189 @@
+=head1 NAME
+
+B<icalBuddyLocalization> -- documentation for the icalBuddy localization file
+
+=head1 SYNOPSIS
+
+The icalBuddy localization file should be saved in C<~/.icalBuddyLocalization.plist> and is thus per-user. The contents of this file are expected to be a valid property list, so it's recommended that you use the Property List Editor application distributed with the OS X Developer Tools to edit it. If you want to edit this file manually, please consult the plist(5) and plutil(1) man pages. The example at the end of this man page might also be of help.
+
+=head1 DESCRIPTION
+
+=head2 Structure of the Localization File
+
+The root object of the localization file should be a dictionary. Keys in this dictionary should be localization string identifiers that uniquely identify specific strings that icalBuddy would like to display to the user (see below,) and the corresponding values should be the actual strings that will be displayed.
+
+=head2 General Considerations
+
+Some localization string identifiers require a specific substring to be present in their values, such as %d or %@, in order to specify the location of some variable, like a number or a string. See below for info on which identifiers have such requirements. If any localization string identifiers are missing in the localization file, icalBuddy will simply display the corresponding default strings, which will be in english.
+
+=head2 Available Localization String Identifiers
+
+The following localization string identifiers may be used:
+
+=over 16
+
+=item B<C<title>>
+
+The name of the "title" property of a calendar item (event or task.)
+
+=item B<C<notes>>
+
+The name of the "notes" property of a calendar item (event or task.)
+
+=item B<C<title>>
+
+The name of the "title" property of a calendar item (event or task.)
+
+=item B<C<notes>>
+
+The name of the "notes" property of a calendar item (event or task.)
+
+=item B<C<url>>
+
+The name of the "url" property of a calendar item (event or task.)
+
+=item B<C<location>>
+
+The name of the "location" property of an event.
+
+=item B<C<dueDate>>
+
+The name of the "due date" property of a task.
+
+=item B<C<noDueDate>>
+
+The words used to describe the lack of a due date for a task.
+
+=item B<C<priority>>
+
+The name of the "priority" property of a task.
+
+=item B<C<high>>
+
+The translation of the value "high" for the "priority" property of a task.
+
+=item B<C<medium>>
+
+The translation of the value "medium" for the "priority" property of a task.
+
+=item B<C<low>>
+
+The translation of the value "low" for the "priority" property of a task.
+
+=item B<C<someonesBirthday>>
+
+The title for an event in the Birthdays calendar (e.g. C<%@'s Birthday>.) Must include substring %@ to specify the location of the person's name.
+
+=item B<C<today>>
+
+The translation of "today".
+
+=item B<C<tomorrow>>
+
+The translation of "tomorrow".
+
+=item B<C<yesterday>>
+
+The translation of "yesterday".
+
+=item B<C<dayBeforeYesterday>>
+
+The translation of "day before yesterday".
+
+=item B<C<dayAfterTomorrow>>
+
+The translation of "day after tomorrow".
+
+=item B<C<xDaysAgo>>
+
+The translation of "%d days ago", where %d is a number of days (the %d must be included to specify the location of this number.)
+
+=item B<C<xDaysFromNow>>
+
+The translation of "%d days from now", where %d is a number of days (the %d must be included to specify the location of this number.)
+
+=item B<C<thisWeek>>
+
+The translation of "this week".
+
+=item B<C<lastWeek>>
+
+The translation of "last week".
+
+=item B<C<nextWeek>>
+
+The translation of "next week".
+
+=item B<C<xWeeksAgo>>
+
+The translation of "%d weeks ago", where %d is a number of weeks (the %d must be included to specify the location of this number.)
+
+=item B<C<xWeeksFromNow>>
+
+The translation of "%d weeks from now", where %d is a number of weeks (the %d must be included to specify the location of this number.)
+
+=back
+
+=head1 EXAMPLES
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+	<plist version="1.0">
+	<dict>
+		<key>title</key>
+		<string>title</string>
+		<key>location</key>
+		<string>location</string>
+		<key>notes</key>
+		<string>notes</string>
+		<key>url</key>
+		<string>url</string>
+		<key>dueDate</key>
+		<string>due</string>
+		<key>noDueDate</key>
+		<string>no due date</string>
+		<key>priority</key>
+		<string>priority</string>
+		<key>someonesBirthday</key>
+		<string>%@'s Birthday</string>
+		<key>today</key>
+		<string>today</string>
+		<key>tomorrow</key>
+		<string>tomorrow</string>
+		<key>yesterday</key>
+		<string>yesterday</string>
+		<key>dayBeforeYesterday</key>
+		<string>day before yesterday</string>
+		<key>dayAfterTomorrow</key>
+		<string>day after tomorrow</string>
+		<key>xDaysAgo</key>
+		<string>%d days ago</string>
+		<key>xDaysFromNow</key>
+		<string>%d days from now</string>
+		<key>thisWeek</key>
+		<string>this week</string>
+		<key>lastWeek</key>
+		<string>last week</string>
+		<key>nextWeek</key>
+		<string>next week</string>
+		<key>xWeeksAgo</key>
+		<string>%d weeks ago</string>
+		<key>xWeeksFromNow</key>
+		<string>%d weeks from now</string>
+		<key>high</key>
+		<string>high</string>
+		<key>medium</key>
+		<string>medium</string>
+		<key>low</key>
+		<string>low</string>
+	</dict>
+	</plist>
+
+=head1 SEE ALSO
+
+plist(5), plutil(1)
+
+=head1 AUTHORS
+
+This man page has been written by Ali Rantakari (http://hasseg.org)
+

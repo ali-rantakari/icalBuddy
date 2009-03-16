@@ -22,6 +22,4 @@ clean:
 	-rm icalBuddy
 
 
-install: icalBuddy icalBuddy.1
-	./install.sh
 
