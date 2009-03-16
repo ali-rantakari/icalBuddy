@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>otsikko</string>
+	<key>location</key>
+	<string>sijainti</string>
+	<key>notes</key>
+	<string>muistiinpanot</string>
+	<key>url</key>
+	<string>url</string>
+	<key>dueDate</key>
+	<string>eräpäivä</string>
+	<key>noDueDate</key>
+	<string>ei eräpäivää</string>
+	<key>priority</key>
+	<string>prioriteetti</string>
+	<key>someonesBirthday</key>
+	<string>%@:n Syntymäpäivä</string>
+	<key>today</key>
+	<string>tänään</string>
+	<key>tomorrow</key>
+	<string>huomenna</string>
+	<key>yesterday</key>
+	<string>eilen</string>
+	<key>dayBeforeYesterday</key>
+	<string>toissapäivänä</string>
+	<key>dayAfterTomorrow</key>
+	<string>ylihuomenna</string>
+	<key>xDaysAgo</key>
+	<string>%d päivää sitten</string>
+	<key>xDaysFromNow</key>
+	<string>%d päivän kuluttua</string>
+	<key>thisWeek</key>
+	<string>tällä viikolla</string>
+	<key>lastWeek</key>
+	<string>viime viikolla</string>
+	<key>nextWeek</key>
+	<string>ensi viikolla</string>
+	<key>xWeeksAgo</key>
+	<string>%d viikkoa sitten</string>
+	<key>xWeeksFromNow</key>
+	<string>%d viikon päästä</string>
+	<key>high</key>
+	<string>korkea</string>
+	<key>medium</key>
+	<string>normaali</string>
+	<key>low</key>
+	<string>alhainen</string>
+</dict>
+</plist>

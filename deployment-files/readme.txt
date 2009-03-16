@@ -23,6 +23,27 @@ locations where icalBuddy will be installed to and then prompt you to continue.
 
 
 
+HELP / GETTING STARTED:
+--------------------------------
+
+After installation you can:
+
+* Run "man icalBuddy" in the terminal to read the program's manual page.
+  Here you'll find documentation for all of the arguments you can use
+  when calling icalBuddy.
+
+* Copy one of the included example localization files to
+  ~/.icalBuddyLocalization.plist in order to start using them. This
+  is only if you're interested in making icalBuddy output in a
+  language other than english.
+
+* Run "man icalBuddyLocalization" in the terminal to read the localization
+  manual page. This is if you're interested in writing your own
+  localization(s).
+
+
+
+
 
 LICENSE:
 --------------------------------
