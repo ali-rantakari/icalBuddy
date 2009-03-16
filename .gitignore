@@ -1,11 +1,19 @@
 # ignored patterns
 
+# OS X junk
 Icon*
-.hg*
 .DS_Store
+
+# generated files
 deployment
 changelog.*
 icalBuddy
-deploymentScpTarget
+icalBuddyLocalization.1
+
+# temp files
 test.m
 a.out
+
+# other
+deploymentScpTarget
+.hg*
