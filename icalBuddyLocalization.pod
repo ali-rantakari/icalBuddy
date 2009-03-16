@@ -30,14 +30,6 @@ The name of the "title" property of a calendar item (event or task.)
 
 The name of the "notes" property of a calendar item (event or task.)
 
-=item B<C<title>>
-
-The name of the "title" property of a calendar item (event or task.)
-
-=item B<C<notes>>
-
-The name of the "notes" property of a calendar item (event or task.)
-
 =item B<C<url>>
 
 The name of the "url" property of a calendar item (event or task.)

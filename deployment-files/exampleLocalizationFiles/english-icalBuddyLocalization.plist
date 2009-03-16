@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>title</string>
+	<key>location</key>
+	<string>location</string>
+	<key>notes</key>
+	<string>notes</string>
+	<key>url</key>
+	<string>url</string>
+	<key>dueDate</key>
+	<string>due</string>
+	<key>noDueDate</key>
+	<string>no due date</string>
+	<key>priority</key>
+	<string>priority</string>
+	<key>someonesBirthday</key>
+	<string>%@'s Birthday</string>
+	<key>today</key>
+	<string>today</string>
+	<key>tomorrow</key>
+	<string>tomorrow</string>
+	<key>yesterday</key>
+	<string>yesterday</string>
+	<key>dayBeforeYesterday</key>
+	<string>day before yesterday</string>
+	<key>dayAfterTomorrow</key>
+	<string>day after tomorrow</string>
+	<key>xDaysAgo</key>
+	<string>%d days ago</string>
+	<key>xDaysFromNow</key>
+	<string>%d days from now</string>
+	<key>thisWeek</key>
+	<string>this week</string>
+	<key>lastWeek</key>
+	<string>last week</string>
+	<key>nextWeek</key>
+	<string>next week</string>
+	<key>xWeeksAgo</key>
+	<string>%d weeks ago</string>
+	<key>xWeeksFromNow</key>
+	<string>%d weeks from now</string>
+	<key>high</key>
+	<string>high</string>
+	<key>medium</key>
+	<string>medium</string>
+	<key>low</key>
+	<string>low</string>
+</dict>
+</plist>
+
