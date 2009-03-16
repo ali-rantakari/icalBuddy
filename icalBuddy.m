@@ -1044,7 +1044,7 @@ int main(int argc, char *argv[])
 	];
 	
 	
-	// set default strings
+	// default localization strings (english)
 	defaultStringsDict = [NSDictionary dictionaryWithObjectsAndKeys:
 		@"title",			@"title",
 		@"location",		@"location",
@@ -1095,7 +1095,7 @@ int main(int argc, char *argv[])
 	
 	
 	
-	// read localization configuration file
+	// read and validate localization configuration file
 	
 	l10nStringsDict = nil;
 	NSString *l10nFilePath = [kL10nFilePath stringByExpandingTildeInPath];
@@ -1103,39 +1103,44 @@ int main(int argc, char *argv[])
 	BOOL l10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:l10nFilePath isDirectory:&l10nFileIsDir];
 	if (l10nFileExists && !l10nFileIsDir)
 	{
+		BOOL l10nFileIsValid = YES;
+		
 		l10nStringsDict = [NSDictionary dictionaryWithContentsOfFile:l10nFilePath];
 		
 		if (l10nStringsDict == nil)
 		{
-			NSPrintErr(@"* Error in localization file \"%@\":\ncan not recognize file format -- must be a valid property list\nwith a structure specified in the icalBuddyLocalization man page.\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n", l10nFilePath, l10nFilePath);
-			return(10);
+			NSPrintErr(@"* Error in localization file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyLocalization man page.\n", l10nFilePath);
+			l10nFileIsValid = NO;
 		}
 		
-		// validate some specific keys in localization config
-		BOOL l10nFileIsValid = YES;
-		NSDictionary *l10nKeysRequiringSubstrings = [NSDictionary dictionaryWithObjectsAndKeys:
-			@"%d", @"xWeeksFromNow",
-			@"%d", @"xWeeksAgo",
-			@"%d", @"xDaysAgo",
-			@"%d", @"xDaysFromNow",
-			@"%@", @"someonesBirthday",
-			nil
-		];
-		NSString *thisKey;
-		NSString *thisVal;
-		NSString *requiredSubstring;
-		for (thisKey in [l10nKeysRequiringSubstrings allKeys])
+		if (l10nFileIsValid)
 		{
-			requiredSubstring = [l10nKeysRequiringSubstrings objectForKey:thisKey];
-			thisVal = [l10nStringsDict objectForKey:thisKey];
-			if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
+			// validate some specific keys in localization config
+			NSDictionary *l10nKeysRequiringSubstrings = [NSDictionary dictionaryWithObjectsAndKeys:
+				@"%d", @"xWeeksFromNow",
+				@"%d", @"xWeeksAgo",
+				@"%d", @"xDaysAgo",
+				@"%d", @"xDaysFromNow",
+				@"%@", @"someonesBirthday",
+				nil
+			];
+			NSString *thisKey;
+			NSString *thisVal;
+			NSString *requiredSubstring;
+			for (thisKey in [l10nKeysRequiringSubstrings allKeys])
 			{
-				NSPrintErr(@"* Error in localization file \"%@\"\n  (key: \"%@\", value: \"%@\"):\n  value must include %@ to indicate position for a variable.\n", l10nFilePath, thisKey, thisVal, requiredSubstring);
-				l10nFileIsValid = NO;
+				requiredSubstring = [l10nKeysRequiringSubstrings objectForKey:thisKey];
+				thisVal = [l10nStringsDict objectForKey:thisKey];
+				if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
+				{
+					NSPrintErr(@"* Error in localization file \"%@\"\n  (key: \"%@\", value: \"%@\"):\n  value must include %@ to indicate position for a variable.\n", l10nFilePath, thisKey, thisVal, requiredSubstring);
+					l10nFileIsValid = NO;
+				}
 			}
 		}
+		
 		if (!l10nFileIsValid)
-			return(10);
+			NSPrintErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", l10nFilePath);
 	}
 	
 	
