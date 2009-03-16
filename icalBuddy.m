@@ -76,7 +76,7 @@ THE SOFTWARE.
 // the default order and include all of the allowed property names)
 #define kDefaultPropertyOrder [NSArray arrayWithObjects:kPropName_title, kPropName_location, kPropName_notes, kPropName_url, kPropName_datetime, kPropName_priority, nil]
 
-// configuration file path
+// localization configuration file path
 #define kL10nFilePath @"~/.icalBuddyLocalization.plist"
 
 
