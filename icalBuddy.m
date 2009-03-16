@@ -39,14 +39,14 @@ THE SOFTWARE.
 #define kVersionCheckURL [NSURL URLWithString:@"http://hasseg.org/icalBuddy/?versioncheck=y"]
 
 
-#define kANSIEscapeReset @"\033[0m"
-#define kANSIEscapeBold @"\033[01m"
-#define kANSIEscapeRed @"\033[31m"
-#define kANSIEscapeGreen @"\033[32m"
-#define kANSIEscapeYellow @"\033[33m"
-#define kANSIEscapeBlue @"\033[34m"
-#define kANSIEscapeMagenta @"\033[35m"
-#define kANSIEscapeCyan @"\033[36m"
+#define kANSIEscapeReset 	@"\033[0m"
+#define kANSIEscapeBold 	@"\033[01m"
+#define kANSIEscapeRed 		@"\033[31m"
+#define kANSIEscapeGreen 	@"\033[32m"
+#define kANSIEscapeYellow 	@"\033[33m"
+#define kANSIEscapeBlue 	@"\033[34m"
+#define kANSIEscapeMagenta 	@"\033[35m"
+#define kANSIEscapeCyan		@"\033[36m"
 
 #define kSectionTitleANSIEscape kANSIEscapeBlue
 
@@ -54,31 +54,35 @@ THE SOFTWARE.
 #define kRelativeWeekFormatSpecifier @"%RW"
 
 // keys for the "sections" dictionary (see printItemSections())
-#define kSectionDictKey_title @"sectionTitle"
-#define kSectionDictKey_items @"sectionItems"
-#define kSectionDictKey_eventsContextDay @"eventsContextDay"
+#define kSectionDictKey_title 				@"sectionTitle"
+#define kSectionDictKey_items 				@"sectionItems"
+#define kSectionDictKey_eventsContextDay 	@"eventsContextDay"
 
 
 // property names
-#define kPropName_title @"title"
-#define kPropName_location @"location"
-#define kPropName_notes @"notes"
-#define kPropName_url @"url"
-#define kPropName_datetime @"datetime"
-#define kPropName_priority @"priority"
+#define kPropName_title 	@"title"
+#define kPropName_location 	@"location"
+#define kPropName_notes 	@"notes"
+#define kPropName_url 		@"url"
+#define kPropName_datetime 	@"datetime"
+#define kPropName_priority 	@"priority"
 
 // human-readable priority values
-#define kPriorityStr_high @"high"
+#define kPriorityStr_high 	@"high"
 #define kPriorityStr_medium @"medium"
-#define kPriorityStr_low @"low"
+#define kPriorityStr_low 	@"low"
 
 // default item property order + list of allowed property names (i.e. these must be in
 // the default order and include all of the allowed property names)
 #define kDefaultPropertyOrder [NSArray arrayWithObjects:kPropName_title, kPropName_location, kPropName_notes, kPropName_url, kPropName_datetime, kPropName_priority, nil]
 
+// configuration file path
+#define kL10nFilePath @"~/.icalBuddyLocalization.plist"
+
+
 
 const int VERSION_MAJOR = 1;
-const int VERSION_MINOR = 4;
+const int VERSION_MINOR = 5;
 const int VERSION_BUILD = 0;
 
 
@@ -107,18 +111,18 @@ NSStringEncoding outputStrEncoding = NSUTF8StringEncoding; // default
 NSArray *propertyOrder;
 
 // the prefix strings
-NSString *prefixStrBullet = @"* ";
-NSString *prefixStrBulletAlert = @"! ";
-NSString *prefixStrIndent = @"    ";
-NSString *sectionSeparatorStr = @"------------------------";
+NSString *prefixStrBullet = 		@"* ";
+NSString *prefixStrBulletAlert = 	@"! ";
+NSString *prefixStrIndent = 		@"    ";
+NSString *sectionSeparatorStr = 	@"------------------------";
 
-NSString *timeFormatStr = @"%H:%M";
-NSString *dateFormatStr = @"%Y-%m-%d";
-NSString *dateTimeSeparatorStr = @" at ";
-NSSet *includedEventProperties = nil;
-NSSet *excludedEventProperties = nil;
-NSSet *includedTaskProperties = nil;
-NSSet *excludedTaskProperties = nil;
+NSString *timeFormatStr = 			@"%H:%M";
+NSString *dateFormatStr = 			@"%Y-%m-%d";
+NSString *dateTimeSeparatorStr = 	@" at ";
+NSSet *includedEventProperties = 	nil;
+NSSet *excludedEventProperties = 	nil;
+NSSet *includedTaskProperties = 	nil;
+NSSet *excludedTaskProperties = 	nil;
 
 BOOL displayRelativeDates = YES;
 
@@ -127,6 +131,11 @@ NSCalendarDate *now;
 NSCalendarDate *today;
 
 
+// dictionary for localization values
+NSDictionary *l10nStringsDict;
+
+// default version of l10nStringsDict
+NSDictionary *defaultStringsDict;
 
 
 
@@ -227,6 +236,44 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 		return NSOrderedSame;
 }
 
+
+
+// returns localized, human-readable string corresponding to the
+// specified localization dictionary key
+NSString* localizedStr(NSString *str)
+{
+	if (str == nil)
+		return nil;
+	
+	if (l10nStringsDict != nil)
+	{
+		NSString *localizedStr = [l10nStringsDict objectForKey:str];
+		if (localizedStr != nil)
+			return localizedStr;
+	}
+	
+	NSString *defaultStr = [defaultStringsDict objectForKey:str];
+	NSCAssert((defaultStr != nil), @"defaultStr is nil");
+	return defaultStr;
+}
+
+
+
+// returns a string filled with specified number of spaces
+NSString* getWhitespace(NSUInteger length)
+{
+	if (length == 0)
+		return @"";
+	
+	NSString *ret = @" ";
+	NSUInteger i;
+	for (i = 0; i < length-1; i++)
+	{
+		ret = [ret stringByAppendingString:@" "];
+	}
+	
+	return ret;
+}
 
 
 
@@ -473,19 +520,19 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 	{
 		if (displayRelativeDates &&
 			datesRepresentSameDay(calDate, now))
-			outputDate = @"today";
+			outputDate = localizedStr(@"today");
 		else if (displayRelativeDates &&
 				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0]))
-			outputDate = @"tomorrow";
+			outputDate = localizedStr(@"tomorrow");
 		else if (displayRelativeDates &&
 				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:2 hours:0 minutes:0 seconds:0]))
-			outputDate = @"day after tomorrow";
+			outputDate = localizedStr(@"dayAfterTomorrow");
 		else if (displayRelativeDates &&
 				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0]))
-			outputDate = @"yesterday";
+			outputDate = localizedStr(@"yesterday");
 		else if (displayRelativeDates &&
 				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-2 hours:0 minutes:0 seconds:0]))
-			outputDate = @"day before yesterday";
+			outputDate = localizedStr(@"dayBeforeYesterday");
 		else
 		{
 			NSString *useDateFormatStr = dateFormatStr;
@@ -500,15 +547,15 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 				
 				NSString *weekDiffStr = nil;
 				if (weekDiff < -1)
-					weekDiffStr = [NSString stringWithFormat:@"%d weeks ago", abs(weekDiff)];
+					weekDiffStr = [NSString stringWithFormat:localizedStr(@"xWeeksAgo"), abs(weekDiff)];
 				else if (weekDiff == -1)
-					weekDiffStr = @"last week";
+					weekDiffStr = localizedStr(@"lastWeek");
 				else if (weekDiff == 0)
-					weekDiffStr = @"this week";
+					weekDiffStr = localizedStr(@"thisWeek");
 				else if (weekDiff == 1)
-					weekDiffStr = @"next week";
+					weekDiffStr = localizedStr(@"nextWeek");
 				else if (weekDiff > 1)
-					weekDiffStr = [NSString stringWithFormat:@"%d weeks from now", weekDiff];
+					weekDiffStr = [NSString stringWithFormat:localizedStr(@"xWeeksFromNow"), weekDiff];
 				
 				if (weekDiffStr != nil)
 					useDateFormatStr = [useDateFormatStr
@@ -568,11 +615,11 @@ NSString* getPropValueANSIEscapeStr(NSString *propName, NSString *propValue)
 	{
 		if (propValue != nil)
 		{
-			if ([propValue isEqual:kPriorityStr_high])
+			if ([propValue isEqual:localizedStr(kPriorityStr_high)])
 				return kANSIEscapeRed;
-			else if ([propValue isEqual:kPriorityStr_medium])
+			else if ([propValue isEqual:localizedStr(kPriorityStr_medium)])
 				return kANSIEscapeYellow;
-			else if ([propValue isEqual:kPriorityStr_low])
+			else if ([propValue isEqual:localizedStr(kPriorityStr_low)])
 				return kANSIEscapeGreen;
 		}
 	}
@@ -609,7 +656,8 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 				{
 					if ([person isMemberOfClass: [ABPerson class]])
 					{
-						NSString *thisTitle = [NSString stringWithFormat:@"%@ %@'s Birthday", [person valueForProperty:kABFirstNameProperty], [person valueForProperty:kABLastNameProperty]];
+						NSString *contactFullName = [[[person valueForProperty:kABFirstNameProperty] stringByAppendingString:@" "] stringByAppendingString:[person valueForProperty:kABLastNameProperty]];
+						NSString *thisTitle = [NSString stringWithFormat:localizedStr(@"someonesBirthday"), contactFullName];
 						if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
 							thisPropOutputValue = thisTitle;
 						else
@@ -627,24 +675,24 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 		}
 		else if ([propName isEqualToString:kPropName_location])
 		{
-			thisPropOutputName = @"location:";
+			thisPropOutputName = [localizedStr(@"location") stringByAppendingString:@":"];
 			
 			if ([event location] != nil && ![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 				thisPropOutputValue = [event location];
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
-			thisPropOutputName = @"notes:";
+			thisPropOutputName = [localizedStr(@"notes") stringByAppendingString:@":"];
 			
 			if ([event notes] != nil && ![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
-				thisPropOutputValue = [
-					[event notes] stringByReplacingOccurrencesOfString:@"\n"
-						withString:[NSString stringWithFormat:@"\n%@       ",prefixStrIndent]
+				thisPropOutputValue = [[event notes]
+					stringByReplacingOccurrencesOfString:@"\n"
+					withString:[NSString stringWithFormat:@"\n%@ %@",prefixStrIndent,getWhitespace([thisPropOutputName length])]
 				];
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
-			thisPropOutputName = @"url:";
+			thisPropOutputName = [localizedStr(@"url") stringByAppendingString:@":"];
 			
 			if ([event url] != nil &&
 				![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
@@ -807,41 +855,44 @@ NSString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions)
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
-			thisPropOutputName = @"notes:";
+			thisPropOutputName = [localizedStr(@"notes") stringByAppendingString:@":"];
 			
 			if ([task notes] != nil && ![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
-				thisPropOutputValue = [[task notes] stringByReplacingOccurrencesOfString:@"\n" withString:[NSString stringWithFormat:@"\n%@       ",prefixStrIndent]];
+				thisPropOutputValue = [[task notes]
+					stringByReplacingOccurrencesOfString:@"\n"
+					withString:[NSString stringWithFormat:@"\n%@ %@",prefixStrIndent,getWhitespace([thisPropOutputName length])]
+				];
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
-			thisPropOutputName = @"url:";
+			thisPropOutputName = [localizedStr(@"url") stringByAppendingString:@":"];
 			
 			if ([task url] != nil)
 				thisPropOutputValue = [NSString stringWithFormat:@"%@", [task url]];
 		}
 		else if ([propName isEqualToString:kPropName_datetime])
 		{
-			thisPropOutputName = @"due:";
+			thisPropOutputName = [localizedStr(@"dueDate") stringByAppendingString:@":"];
 			
 			if ([task dueDate] != nil && !(printOptions & PRINT_OPTION_SINGLE_DAY))
 				thisPropOutputValue = dateStr([task dueDate], true, false);
 		}
 		else if ([propName isEqualToString:kPropName_priority])
 		{
-			thisPropOutputName = @"priority:";
+			thisPropOutputName = [localizedStr(@"priority") stringByAppendingString:@":"];
 			
 			if ([task priority] != CalPriorityNone)
 			{
 				switch([task priority])
 				{
 					case CalPriorityHigh:
-						thisPropOutputValue = kPriorityStr_high;
+						thisPropOutputValue = localizedStr(kPriorityStr_high);
 						break;
 					case CalPriorityMedium:
-						thisPropOutputValue = kPriorityStr_medium;
+						thisPropOutputValue = localizedStr(kPriorityStr_medium);
 						break;
 					case CalPriorityLow:
-						thisPropOutputValue = kPriorityStr_low;
+						thisPropOutputValue = localizedStr(kPriorityStr_low);
 						break;
 					default:
 						thisPropOutputValue = [NSString stringWithFormat:@"%d", [task priority]];
@@ -974,6 +1025,9 @@ void printItemSections(NSArray *sections, int printOptions)
 
 
 
+
+
+
 int main(int argc, char *argv[])
 {
 	NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
@@ -987,6 +1041,35 @@ int main(int argc, char *argv[])
 		day:[now dayOfMonth]
 		hour:0 minute:0 second:0
 		timeZone:[now timeZone]
+	];
+	
+	
+	// set default strings
+	defaultStringsDict = [NSDictionary dictionaryWithObjectsAndKeys:
+		@"title",			@"title",
+		@"location",		@"location",
+		@"notes", 			@"notes",
+		@"url", 			@"url",
+		@"due",		 		@"dueDate",
+		@"no due date",		@"noDueDate",
+		@"priority", 		@"priority",
+		@"%@'s Birthday",	@"someonesBirthday",
+		@"today", 					@"today",
+		@"tomorrow", 				@"tomorrow",
+		@"yesterday", 				@"yesterday",
+		@"day before yesterday",	@"dayBeforeYesterday",
+		@"day after tomorrow",		@"dayAfterTomorrow",
+		@"%d days ago",				@"xDaysAgo",
+		@"%d days from now",		@"xDaysFromNow",
+		@"this week",				@"thisWeek",
+		@"last week",				@"lastWeek",
+		@"next week",				@"nextWeek",
+		@"%d weeks ago",			@"xWeeksAgo",
+		@"%d weeks from now",		@"xWeeksFromNow",
+		@"high",		@"high",
+		@"medium",		@"medium",
+		@"low",			@"low",
+		nil
 	];
 	
 	
@@ -1009,6 +1092,47 @@ int main(int argc, char *argv[])
 	BOOL arg_output_is_eventsFromTo = NO;
 	NSString *arg_eventsFrom = nil;
 	NSString *arg_eventsTo = nil;
+	
+	
+	
+	// read configuration file
+	
+	l10nStringsDict = nil;
+	NSString *l10nFilePath = [kL10nFilePath stringByExpandingTildeInPath];
+	BOOL l10nFileIsDir;
+	BOOL l10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:l10nFilePath isDirectory:&l10nFileIsDir];
+	if (l10nFileExists && !l10nFileIsDir)
+	{
+		l10nStringsDict = [NSDictionary dictionaryWithContentsOfFile:l10nFilePath];
+		
+		// validate some stuff in localization config file
+		BOOL l10nFileIsValid = YES;
+		NSDictionary *l10nKeysRequiringSubstrings = [NSDictionary dictionaryWithObjectsAndKeys:
+			@"%d", @"xWeeksFromNow",
+			@"%d", @"xWeeksAgo",
+			@"%d", @"xDaysAgo",
+			@"%d", @"xDaysFromNow",
+			@"%@", @"someonesBirthday",
+			nil
+		];
+		NSString *thisKey;
+		NSString *thisVal;
+		NSString *requiredSubstring;
+		for (thisKey in [l10nKeysRequiringSubstrings allKeys])
+		{
+			requiredSubstring = [l10nKeysRequiringSubstrings objectForKey:thisKey];
+			thisVal = [l10nStringsDict objectForKey:thisKey];
+			if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
+			{
+				NSPrintErr(@"* Error in localization file \"%@\" (key: \"%@\", value: \"%@\"): value must include %@ to indicate position for a variable.\n", l10nFilePath, thisKey, thisVal, requiredSubstring);
+				l10nFileIsValid = NO;
+			}
+		}
+		if (!l10nFileIsValid)
+			return(10);
+	}
+	
+	
 	
 	
 	// get arguments
@@ -1494,7 +1618,7 @@ int main(int argc, char *argv[])
 				if ([aDayKey isKindOfClass:[NSCalendarDate class]])
 					thisSectionTitle = dateStr(aDayKey, true, false);
 				else if ([aDayKey isEqual:[NSNull null]])
-					thisSectionTitle = @"(no due date)";
+					thisSectionTitle = [NSString stringWithFormat:@"(%@)", localizedStr(@"noDueDate")];
 				[thisSectionDict setObject:thisSectionTitle forKey:kSectionDictKey_title];
 				
 				[byDateSections addObject:thisSectionDict];
