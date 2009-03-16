@@ -19,6 +19,11 @@ icalBuddy uses unicode (UTF-8) string encoding by default in its output, so make
 You can use the `-tf` (or `--timeFormat`) argument to specify the format in which to display times. For example, `icalBuddy -tf "%1I:%M %p" eventsToday` would display times such as `5:00 PM`. See [Apple's documentation][datetimeformats] for all the possible values you can use for date and time formatting (there's also the `-df` (or `--dateFormat`) argument for date formatting, which works similarly to this one.)
 
 
+### Q: I would like icalBuddy to speak my language instead of just english. Can it be localized?
+
+As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonline] for documentation on how to do this. If you think you have managed to write a nice general localization file for your language, please [contact me][hassegcontact] and I'll include it into the distribution package so that others who'd like to use a localized icalBuddy in your language wouldn't have to redo that work.
+
+
 ### Q: How can I change the bullet points used in the output? We don't like them asterisks around these here parts.
 
 You can use the `-b` (or `--bullet`) argument to change the normal bullet point value (`"* "` by default) and `-ab` (or `--alertBullet`) to change the alert bullet point value (`"! "` by default, used for tasks that are late from their due date.) Also note that you can change indenting for non-bulleted lines with the `-i` (or `--indent`) argument. See [the manual page][manpageonline] for more info.
@@ -26,12 +31,12 @@ You can use the `-b` (or `--bullet`) argument to change the normal bullet point 
 
 ### Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
-The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. The only workaround I've come up with so far is to try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`
+The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. The only workaround I've come up with so far is to try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. If you know how to fix this in a smarter way, please [let me know][hassegcontact].
 
 
 ### Q: The question I had in mind is not answered here. What should I do?
 
-You should look through icalBuddy's [manual page][manpageonline] and see if what you're looking for is documented there. Just type `man icalBuddy` into the terminal to see it. If what you're looking for is not in the manual, you can [contact the author][hassegcontact].
+You should look through icalBuddy's [manual page][manpageonline] and see if what you're looking for is documented there. Just type `man icalBuddy` into the terminal to see it. If what you're looking for is not in the manual, you can [contact the me, the author][hassegcontact].
 
 
 
@@ -39,6 +44,7 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 
 [wikipediamanpages]: http://en.wikipedia.org/wiki/Manual_page_(Unix)
 [manpageonline]: http://hasseg.org/icalBuddy/man.html
+[l10nmanpageonline]: http://hasseg.org/icalBuddy/localization-man.html
 [geektool]: http://projects.tynsoe.org/en/geektool
 [xulian]: http://sites.google.com/site/lianxukeefo/Home/research/geektool-utf8
 [datetimeformats]: http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
