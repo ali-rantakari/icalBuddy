@@ -6,7 +6,7 @@ icalBuddy FAQ
 
 ### Q: Does icalBuddy have a manual? If so, where is it?
 
-Yes indeed: icalBuddy, like most other Unix-type command line applications, has something called a [man page][wikipediamanpages]. You can read it by typing `man icalBuddy` into the terminal, and the man page for the latest version of icalBuddy is also [available online][manpageonline].
+Yes indeed: icalBuddy, like most other Unix-type command line applications, has something called a [man page][wikipediamanpages]. You can read it by typing `man icalBuddy` into the terminal, and the man page for the latest version of icalBuddy is also [available online][manpageonline]. If you'd prefer to use a dedicated application for reading manual pages in normal GUI windows, see the TUAW post ["Here comes your man (viewer)"][tuawmanviewers].
 
 
 ### Q: The output of my calendar items is garbled! What gives?
@@ -44,6 +44,7 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 
 [wikipediamanpages]: http://en.wikipedia.org/wiki/Manual_page_(Unix)
 [manpageonline]: http://hasseg.org/icalBuddy/man.html
+[tuawmanviewers]: http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
 [l10nmanpageonline]: http://hasseg.org/icalBuddy/localization-man.html
 [geektool]: http://projects.tynsoe.org/en/geektool
 [xulian]: http://sites.google.com/site/lianxukeefo/Home/research/geektool-utf8

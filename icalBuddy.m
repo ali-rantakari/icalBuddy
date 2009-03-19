@@ -39,16 +39,72 @@ THE SOFTWARE.
 #define kVersionCheckURL [NSURL URLWithString:@"http://hasseg.org/icalBuddy/?versioncheck=y"]
 
 
-#define kANSIEscapeReset 	@"\033[0m"
-#define kANSIEscapeBold 	@"\033[01m"
-#define kANSIEscapeRed 		@"\033[31m"
-#define kANSIEscapeGreen 	@"\033[32m"
-#define kANSIEscapeYellow 	@"\033[33m"
-#define kANSIEscapeBlue 	@"\033[34m"
-#define kANSIEscapeMagenta 	@"\033[35m"
-#define kANSIEscapeCyan		@"\033[36m"
+// ANSI escape sequences
 
-#define kSectionTitleANSIEscape kANSIEscapeBlue
+#define kANSIEscapeResetAll		@"\033[0m"
+
+#define kANSIEscapeIntensityBold	@"\033[1m"
+#define kANSIEscapeIntensityFaint	@"\033[2m"
+#define kANSIEscapeIntensityNormal	@"\033[22m"
+
+#define kANSIEscapeUnderlineSingle	@"\033[4m"
+#define kANSIEscapeUnderlineDouble	@"\033[21m"
+#define kANSIEscapeUnderlineNone	@"\033[24m"
+
+#define kANSIEscapeFgBlack 		@"\033[30m"
+#define kANSIEscapeFgRed 		@"\033[31m"
+#define kANSIEscapeFgGreen 		@"\033[32m"
+#define kANSIEscapeFgYellow 	@"\033[33m"
+#define kANSIEscapeFgBlue 		@"\033[34m"
+#define kANSIEscapeFgMagenta 	@"\033[35m"
+#define kANSIEscapeFgCyan		@"\033[36m"
+#define kANSIEscapeFgWhite		@"\033[37m"
+#define kANSIEscapeFgReset		@"\033[39m"
+
+#define kANSIEscapeBgBlack 		@"\033[40m"
+#define kANSIEscapeBgRed 		@"\033[41m"
+#define kANSIEscapeBgGreen 		@"\033[42m"
+#define kANSIEscapeBgYellow 	@"\033[43m"
+#define kANSIEscapeBgBlue 		@"\033[44m"
+#define kANSIEscapeBgMagenta 	@"\033[45m"
+#define kANSIEscapeBgCyan		@"\033[46m"
+#define kANSIEscapeBgWhite		@"\033[47m"
+#define kANSIEscapeBgReset		@"\033[49m"
+
+
+#define kFormattingStringToANSIEscapeDict	[NSDictionary dictionaryWithObjectsAndKeys:\
+											 kANSIEscapeFgBlack, @"fg:black",\
+											 kANSIEscapeFgRed, @"fg:red",\
+											 kANSIEscapeFgGreen, @"fg:green",\
+											 kANSIEscapeFgYellow, @"fg:yellow",\
+											 kANSIEscapeFgBlue, @"fg:blue",\
+											 kANSIEscapeFgMagenta, @"fg:magenta",\
+											 kANSIEscapeFgWhite, @"fg:white",\
+											 kANSIEscapeFgCyan, @"fg:cyan",\
+											 kANSIEscapeFgBlack, @"black",\
+											 kANSIEscapeFgRed, @"red",\
+											 kANSIEscapeFgGreen, @"green",\
+											 kANSIEscapeFgYellow, @"yellow",\
+											 kANSIEscapeFgBlue, @"blue",\
+											 kANSIEscapeFgMagenta, @"magenta",\
+											 kANSIEscapeFgWhite, @"white",\
+											 kANSIEscapeFgCyan, @"cyan",\
+											 kANSIEscapeBgBlack, @"bg:black",\
+											 kANSIEscapeBgRed, @"bg:red",\
+											 kANSIEscapeBgGreen, @"bg:green",\
+											 kANSIEscapeBgYellow, @"bg:yellow",\
+											 kANSIEscapeBgBlue, @"bg:blue",\
+											 kANSIEscapeBgMagenta, @"bg:magenta",\
+											 kANSIEscapeBgWhite, @"bg:white",\
+											 kANSIEscapeBgCyan, @"bg:cyan",\
+											 kANSIEscapeIntensityBold, @"bold",\
+											 kANSIEscapeUnderlineSingle, @"underlined",\
+											 kANSIEscapeUnderlineDouble, @"double-underlined",\
+											 nil]
+
+
+
+#define kSectionTitleANSIEscape kANSIEscapeFgBlue
 
 // custom date-formatting specifier ("relative week")
 #define kRelativeWeekFormatSpecifier @"%RW"
@@ -79,10 +135,12 @@ THE SOFTWARE.
 // localization configuration file path
 #define kL10nFilePath @"~/.icalBuddyLocalization.plist"
 
+// general configuration file path
+#define kConfigFilePath @"~/.icalBuddyConfig.plist"
 
 
 const int VERSION_MAJOR = 1;
-const int VERSION_MINOR = 5;
+const int VERSION_MINOR = 6;
 const int VERSION_BUILD = 0;
 
 
@@ -101,6 +159,13 @@ enum calItemPrintOption
 } CalItemPrintOption;
 
 
+typedef struct _AnsiSequences
+{
+	NSString *start;
+	NSString *end;
+} AnsiSequences;
+
+AnsiSequences emptyAnsiSequences = { @"", @"" };
 
 
 
@@ -130,6 +195,12 @@ BOOL displayRelativeDates = YES;
 NSCalendarDate *now;
 NSCalendarDate *today;
 
+NSString *firstLineANSIEscapeStrBegin = kANSIEscapeIntensityBold;
+NSString *firstLineANSIEscapeStrEnd = kANSIEscapeIntensityNormal;
+NSDictionary *formattingStringToANSIEscapeDict;
+
+// dictionary for configuration values
+NSDictionary *configDict;
 
 // dictionary for localization values
 NSDictionary *l10nStringsDict;
@@ -590,15 +661,110 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 
 
 
+AnsiSequences formattingConfigToAnsiEscapeStrs(NSString *formattingConfig)
+{
+	AnsiSequences retVal;
+	retVal.start = @"";
+	retVal.end = @"";
+	BOOL hasFgFormatting = NO;
+	BOOL hasBgFormatting = NO;
+	BOOL hasIntensityFormatting = NO;
+	BOOL hasUnderlineFormatting = NO;
+	NSArray *parts = [formattingConfig componentsSeparatedByString:@","];
+	NSString *part;
+	for (part in parts)
+	{
+		part = [part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		NSString *thisANSIStr = [formattingStringToANSIEscapeDict objectForKey:part];
+		if (thisANSIStr != nil)
+			retVal.start = [retVal.start stringByAppendingString:thisANSIStr];
+		
+		if (!hasFgFormatting)
+			hasFgFormatting = ([part hasPrefix:@"fg:"] || [part hasPrefix:@"black"] ||
+								[part hasPrefix:@"red"] || [part hasPrefix:@"green"] ||
+								[part hasPrefix:@"yellow"] || [part hasPrefix:@"blue"] ||
+								[part hasPrefix:@"magenta"] || [part hasPrefix:@"cyan"] ||
+								[part hasPrefix:@"white"]
+								);
+		if (!hasBgFormatting)
+			hasBgFormatting = [part hasPrefix:@"bg:"];
+		if (!hasIntensityFormatting)
+			hasIntensityFormatting = [part hasPrefix:@"bold"];
+		if (!hasUnderlineFormatting)
+			hasUnderlineFormatting = [part hasSuffix:@"underlined"];
+	}
+	
+	if (hasFgFormatting)
+		retVal.end = [retVal.end stringByAppendingString:kANSIEscapeFgReset];
+	if (hasBgFormatting)
+		retVal.end = [retVal.end stringByAppendingString:kANSIEscapeBgReset];
+	if (hasIntensityFormatting)
+		retVal.end = [retVal.end stringByAppendingString:kANSIEscapeIntensityNormal];
+	if (hasUnderlineFormatting)
+		retVal.end = [retVal.end stringByAppendingString:kANSIEscapeUnderlineNone];
+	
+	return retVal;
+}
 
-// returns the ANSI escape string for formatting a property name,
-// or an empty string for no formatting
-NSString* getPropNameANSIEscapeStr(NSString *propName)
+
+
+AnsiSequences getSectionTitleANSIEscapeStartStrs(NSString *sectionTitle)
+{
+	if (configDict != nil)
+	{
+		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
+		if (formattingConfigDict != nil)
+		{
+			NSString *formattingConfig = [formattingConfigDict objectForKey:@"sectionTitle"];
+			if (formattingConfig != nil)
+			{
+				AnsiSequences retVal = formattingConfigToAnsiEscapeStrs(formattingConfig);
+				retVal.end = kANSIEscapeResetAll;
+				return retVal;
+			}
+		}
+	}
+	
+	return emptyAnsiSequences;
+}
+
+
+
+AnsiSequences getBulletANSIEscapeStrs(BOOL isAlertBullet)
+{
+	if (configDict != nil)
+	{
+		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
+		if (formattingConfigDict != nil)
+		{
+			NSString *formattingConfig = [formattingConfigDict objectForKey:((isAlertBullet)?@"alertBullet":@"bullet")];
+			if (formattingConfig != nil)
+				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+		}
+	}
+	
+	return emptyAnsiSequences;
+}
+
+
+
+AnsiSequences getPropNameANSIEscapeStrs(NSString *propName)
 {
 	if (propName == nil)
-		return @"";
+		return emptyAnsiSequences;
 	
-	return kANSIEscapeCyan;
+	if (configDict != nil)
+	{
+		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
+		if (formattingConfigDict != nil)
+		{
+			NSString *formattingConfig = [formattingConfigDict objectForKey:[propName stringByAppendingString:@"Name"]];
+			if (formattingConfig != nil)
+				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+		}
+	}
+	
+	return emptyAnsiSequences;
 }
 
 
@@ -609,18 +775,33 @@ NSString* getPropValueANSIEscapeStr(NSString *propName, NSString *propValue)
 {
 	if (propName == nil)
 		return @"";
-	else if (propName == kPropName_datetime)
-		return kANSIEscapeYellow;
-	else if (propName == kPropName_priority)
+	
+	if (configDict != nil)
 	{
-		if (propValue != nil)
+		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
+		if (formattingConfigDict != nil)
 		{
-			if ([propValue isEqual:localizedStr(kPriorityStr_high)])
-				return kANSIEscapeRed;
-			else if ([propValue isEqual:localizedStr(kPriorityStr_medium)])
-				return kANSIEscapeYellow;
-			else if ([propValue isEqual:localizedStr(kPriorityStr_low)])
-				return kANSIEscapeGreen;
+			NSString *formattingConfigKey = nil;
+			
+			if (propName == kPropName_priority)
+			{
+				if (propValue != nil)
+				{
+					if ([propValue isEqual:localizedStr(kPriorityStr_high)])
+						formattingConfigKey = @"priorityValueHigh";
+					else if ([propValue isEqual:localizedStr(kPriorityStr_medium)])
+						formattingConfigKey = @"priorityValueMedium";
+					else if ([propValue isEqual:localizedStr(kPriorityStr_low)])
+						formattingConfigKey = @"priorityValueLow";
+				}
+			}
+			
+			if (formattingConfigKey == nil)
+				formattingConfigKey = [propName stringByAppendingString:@"Value"];
+			
+			NSString *formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
+			if (formattingConfig != nil)
+				return formattingConfigToAnsiEscapeStrs(formattingConfig).start;
 		}
 	}
 	
@@ -774,12 +955,15 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 		
 		
 		if (thisPropOutputName != nil && formatOutput)
-			thisPropOutputName = [NSString stringWithFormat:@"%@%@%@", getPropNameANSIEscapeStr(propName), thisPropOutputName, kANSIEscapeReset];
+		{
+			AnsiSequences nameAnsiSequences = getPropNameANSIEscapeStrs(propName);
+			thisPropOutputName = [NSString stringWithFormat:@"%@%@%@", nameAnsiSequences.start, thisPropOutputName, nameAnsiSequences.end];
+		}
 		
 		if (thisPropOutputValue != nil)
 		{
 			if (formatOutput)
-				thisPropOutputValue = [[getPropValueANSIEscapeStr(propName, thisPropOutputValue) stringByAppendingString:thisPropOutputValue] stringByAppendingString:kANSIEscapeReset];
+				thisPropOutputValue = [[getPropValueANSIEscapeStr(propName, thisPropOutputValue) stringByAppendingString:thisPropOutputValue] stringByAppendingString:kANSIEscapeResetAll];
 			thisPropOutputValue = [thisPropOutputValue stringByReplacingOccurrencesOfString:@"%" withString:@"%%"];
 		}
 		
@@ -811,15 +995,27 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 				if (thisPropStr != nil && ![thisPropStr isEqualToString:@""])
 				{
 					if (formatOutput && firstPrintedProperty)
-						NSPrint(kANSIEscapeBold);
+						NSPrint(firstLineANSIEscapeStrBegin);
 					
-					NSString *prefixStr = (firstPrintedProperty) ? prefixStrBullet : prefixStrIndent;
+					NSString *prefixStr;
+					if (firstPrintedProperty)
+					{
+						if (formatOutput)
+						{
+							AnsiSequences bulletAnsiSequences = getBulletANSIEscapeStrs(NO);
+							prefixStr = [[bulletAnsiSequences.start stringByAppendingString:prefixStrBullet] stringByAppendingString:bulletAnsiSequences.end];
+						}
+						else
+							prefixStr = prefixStrBullet;
+					}
+					else
+						prefixStr = prefixStrIndent;
 					
 					NSPrint(prefixStr);
 					NSPrint(thisPropStr);
 					
 					if (formatOutput && firstPrintedProperty)
-						NSPrint(kANSIEscapeReset);
+						NSPrint(firstLineANSIEscapeStrEnd);
 					
 					firstPrintedProperty = NO;
 				}
@@ -903,12 +1099,15 @@ NSString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions)
 		
 		
 		if (thisPropOutputName != nil && formatOutput)
-			thisPropOutputName = [NSString stringWithFormat:@"%@%@%@", getPropNameANSIEscapeStr(propName), thisPropOutputName, kANSIEscapeReset];
+		{
+			AnsiSequences nameAnsiSequences = getPropNameANSIEscapeStrs(propName);
+			thisPropOutputName = [NSString stringWithFormat:@"%@%@%@", nameAnsiSequences.start, thisPropOutputName, nameAnsiSequences.end];
+		}
 		
 		if (thisPropOutputValue != nil)
 		{
 			if (formatOutput)
-				thisPropOutputValue = [[getPropValueANSIEscapeStr(propName, thisPropOutputValue) stringByAppendingString:thisPropOutputValue] stringByAppendingString:kANSIEscapeReset];
+				thisPropOutputValue = [[getPropValueANSIEscapeStr(propName, thisPropOutputValue) stringByAppendingString:thisPropOutputValue] stringByAppendingString:kANSIEscapeResetAll];
 			thisPropOutputValue = [thisPropOutputValue stringByReplacingOccurrencesOfString:@"%" withString:@"%%"];
 		}
 		
@@ -940,19 +1139,31 @@ void printCalTask(CalTask *task, int printOptions)
 				if (thisPropStr != nil && ![thisPropStr isEqualToString:@""])
 				{
 					if (formatOutput && firstPrintedProperty)
-						NSPrint(kANSIEscapeBold);
+						NSPrint(firstLineANSIEscapeStrBegin);
 					
-					NSString *prefixStr = (firstPrintedProperty) ? prefixStrBullet : prefixStrIndent;
-					// if task's due date is in the past, use ! in place of the bullet point (*)
-					if (firstPrintedProperty && [task dueDate] != nil &&
-						[now compare:[task dueDate]] == NSOrderedDescending)
-						prefixStr = prefixStrBulletAlert;
+					
+					NSString *prefixStr;
+					if (firstPrintedProperty)
+					{
+						BOOL useAlertBullet = 	(firstPrintedProperty && [task dueDate] != nil &&
+												 [now compare:[task dueDate]] == NSOrderedDescending);
+						if (formatOutput)
+						{
+							AnsiSequences bulletAnsiSequences = getBulletANSIEscapeStrs(useAlertBullet);
+							prefixStr = [[bulletAnsiSequences.start stringByAppendingString:(useAlertBullet)?prefixStrBulletAlert:prefixStrBullet] stringByAppendingString:bulletAnsiSequences.end];
+						}
+						else
+							prefixStr = prefixStrBullet;
+					}
+					else
+						prefixStr = prefixStrIndent;
+					
 					
 					NSPrint(prefixStr);
 					NSPrint(thisPropStr);
 					
 					if (formatOutput && firstPrintedProperty)
-						NSPrint(kANSIEscapeReset);
+						NSPrint(firstLineANSIEscapeStrEnd);
 					
 					firstPrintedProperty = NO;
 				}
@@ -991,13 +1202,17 @@ void printItemSections(NSArray *sections, int printOptions)
 				if (!currentIsFirstPrintedSection)
 					NSPrint(@"\n");
 				
+				AnsiSequences sectionTitleAnsiSequences = emptyAnsiSequences;
 				if (formatOutput)
-					NSPrint(kSectionTitleANSIEscape);
+				{
+					sectionTitleAnsiSequences = getSectionTitleANSIEscapeStartStrs(sectionTitle);
+					NSPrint(sectionTitleAnsiSequences.start);
+				}
 				
 				NSPrint(@"%@:\n%@\n", sectionTitle, sectionSeparatorStr);
 				
 				if (formatOutput)
-					NSPrint(kANSIEscapeReset);
+					NSPrint(sectionTitleAnsiSequences.end);
 				
 				titlePrintedForCurrentSection = YES;
 				currentIsFirstPrintedSection = NO;
@@ -1043,6 +1258,8 @@ int main(int argc, char *argv[])
 		timeZone:[now timeZone]
 	];
 	
+	
+	formattingStringToANSIEscapeDict = kFormattingStringToANSIEscapeDict;
 	
 	// default localization strings (english)
 	defaultStringsDict = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1093,6 +1310,28 @@ int main(int argc, char *argv[])
 	NSString *arg_eventsFrom = nil;
 	NSString *arg_eventsTo = nil;
 	
+	
+	// read and validate general configuration file
+	
+	configDict = nil;
+	NSString *configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
+	BOOL configFileIsDir;
+	BOOL configFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&configFileIsDir];
+	if (configFileExists && !configFileIsDir)
+	{
+		BOOL configFileIsValid = YES;
+		
+		configDict = [NSDictionary dictionaryWithContentsOfFile:configFilePath];
+		
+		if (configDict == nil)
+		{
+			NSPrintErr(@"* Error in configuration file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyConfig man page.\n", configFilePath);
+			configFileIsValid = NO;
+		}
+		
+		if (!configFileIsValid)
+			NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
+	}
 	
 	
 	// read and validate localization configuration file

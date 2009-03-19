@@ -14,13 +14,7 @@ TEMP_DEPLOYMENT_FAQFILE="deployment/faq.html"
 VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
 SCP_TARGET=$(shell cat ./deploymentScpTarget)
-
-DEPLOYMENTFILES=$(shell OUTPUT="";\
-for FILE in "deployment-files/"*;\
-do\
-	OUTPUT="$$OUTPUT\\\"$$FILE\\\" ";\
-done;\
-echo "$$OUTPUT";)
+DEPLOYMENT_INCLUDES_DIR="./deployment-files"
 
 
 
@@ -91,7 +85,8 @@ package: icalBuddy docs
 	
 # create zip archive
 	mkdir -p $(TEMP_DEPLOYMENT_DIR)
-	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddy.m $(DEPLOYMENTFILES)" | xargs zip
+	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddy.m" | xargs zip
+	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
 	
 # if changelog doesn't already exist in the deployment dir
 # for this version, get 'general' changelog file from root if
