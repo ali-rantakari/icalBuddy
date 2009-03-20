@@ -49,6 +49,8 @@ THE SOFTWARE.
 #define kANSIEscapeSGREnd		@"m"
 
 
+#define kPropertyListEditorAppName @"Property List Editor"
+
 // custom date-formatting specifier ("relative week")
 #define kRelativeWeekFormatSpecifier @"%RW"
 
@@ -80,6 +82,12 @@ THE SOFTWARE.
 
 // general configuration file path
 #define kConfigFilePath @"~/.icalBuddyConfig.plist"
+
+// contents for a new configuration file "stub"
+#define kConfigFileStub [NSDictionary dictionaryWithObjectsAndKeys:\
+						 [NSDictionary dictionary], @"formatting",\
+						 nil\
+						]
 
 
 const int VERSION_MAJOR = 1;
@@ -1663,6 +1671,87 @@ int main(int argc, char *argv[])
 		for (cal in allCalendars)
 		{
 			NSPrint(@"* %@\n  uid: %@\n", [cal title], [cal uid]);
+		}
+	}
+	// ------------------------------------------------------------------
+	// ------------------------------------------------------------------
+	// open config file for editing
+	// ------------------------------------------------------------------
+	else if ([arg_output hasPrefix:@"editConfig"])
+	{
+		if (!configFileExists)
+		{
+			[kConfigFileStub writeToFile:configFilePath atomically:YES];
+			NSPrint(@"Configuration file did not exist; it has now been created.\n");
+		}
+		
+		if (configFileIsDir)
+			NSPrintErr(@"There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n", configFilePath);
+		else
+		{
+			if ([arg_output hasSuffix:@"GUI"])
+			{
+				if ([[NSWorkspace sharedWorkspace] fullPathForApplication:kPropertyListEditorAppName] != nil)
+				{
+					NSPrint(@"Opening configuration file with the Property List\nEditor application.\n");
+					[[NSWorkspace sharedWorkspace] openFile:configFilePath withApplication:kPropertyListEditorAppName];
+				}
+				else
+				{
+					NSPrint(@"Opening configuration file with the default application\nassociated with the property list type.\n");
+					[[NSWorkspace sharedWorkspace] openFile:configFilePath];
+				}
+			}
+			else
+			{
+				NSString *foundEditorPath = nil;
+				
+				NSMutableArray *preferredEditors = [NSMutableArray arrayWithObjects:@"vim", @"vi", @"nano", @"pico", @"emacs", @"ed", nil];
+				NSString *pathEnvironmentVariable = [[[NSProcessInfo processInfo] environment] objectForKey:@"PATH"];
+				NSString *editorEnvironmentVariable = [[[NSProcessInfo processInfo] environment] objectForKey:@"EDITOR"];
+				
+				if (editorEnvironmentVariable != nil)
+				{
+					if ([[NSFileManager defaultManager] isExecutableFileAtPath:editorEnvironmentVariable])
+						foundEditorPath = editorEnvironmentVariable;
+					else
+					{
+						[preferredEditors removeObject:[editorEnvironmentVariable lastPathComponent]];
+						[preferredEditors insertObject:[editorEnvironmentVariable lastPathComponent] atIndex:0];
+					}
+				}
+				
+				if (foundEditorPath == nil && pathEnvironmentVariable != nil)
+				{
+					NSArray *separatePaths = [pathEnvironmentVariable componentsSeparatedByString:@":"];
+					NSString *thisFullEditorPathCandidate;
+					NSString *thisEditor;
+					for (thisEditor in preferredEditors)
+					{
+						NSString *thisPath;
+						for (thisPath in separatePaths)
+						{
+							thisFullEditorPathCandidate = strConcat(thisPath, @"/", thisEditor, nil);
+							if ([[NSFileManager defaultManager] isExecutableFileAtPath:thisFullEditorPathCandidate])
+							{
+								foundEditorPath = thisFullEditorPathCandidate;
+								break;
+							}
+						}
+						if (foundEditorPath != nil)
+							break;
+					}
+				}
+				
+				if (foundEditorPath != nil)
+				{
+					NSPrint(@"Opening config file for editing with %@ -- press\nany key to continue or Ctrl-C to cancel.\n", foundEditorPath);
+					if (system("read") == 0)
+						system([strConcat(@"'", foundEditorPath, @"' '", configFilePath, @"'", nil) UTF8String]);
+				}
+				else
+					NSPrintErr(@"Error: Can not find or execute any of the following\neditors in your $PATH: %@\n", [preferredEditors componentsJoinedByString:@", "]);
+			}
 		}
 	}
 	// ------------------------------------------------------------------
