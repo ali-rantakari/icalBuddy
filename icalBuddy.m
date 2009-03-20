@@ -151,7 +151,9 @@ NSCalendarDate *today;
 
 
 // dictionary for configuration values
-NSDictionary *configDict;
+NSMutableDictionary *configDict;
+
+NSDictionary *defaultFormattingConfigDict;
 
 // dictionary for localization values
 NSDictionary *l10nStringsDict;
@@ -755,12 +757,14 @@ ANSISequences formattingConfigToAnsiSequences(NSString *formattingConfig)
 // return an ANSISequences struct for formatting a section title
 ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 {
+	NSString *formattingConfig = nil;
+	NSString *formattingConfigKey = @"sectionTitle";
 	if (configDict != nil)
 	{
 		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
 		if (formattingConfigDict != nil)
 		{
-			NSString *formattingConfig = [formattingConfigDict objectForKey:@"sectionTitle"];
+			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
 			{
 				ANSISequences retVal = formattingConfigToAnsiSequences(formattingConfig);
@@ -768,6 +772,12 @@ ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 			}
 		}
 	}
+	
+	if (formattingConfig == nil)
+		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
+	
+	if (formattingConfig != nil)
+		return formattingConfigToAnsiSequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -777,16 +787,24 @@ ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 // line for a calendar item
 ANSISequences getFirstLineANSISequences()
 {
+	NSString *formattingConfig = nil;
+	NSString *formattingConfigKey = @"firstItemLine";
 	if (configDict != nil)
 	{
 		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
 		if (formattingConfigDict != nil)
 		{
-			NSString *formattingConfig = [formattingConfigDict objectForKey:@"firstItemLine"];
+			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
 				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
+	
+	if (formattingConfig == nil)
+		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
+	
+	if (formattingConfig != nil)
+		return formattingConfigToAnsiSequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -796,16 +814,24 @@ ANSISequences getFirstLineANSISequences()
 // return an ANSISequences struct for formatting a bullet point
 ANSISequences getBulletANSISequences(BOOL isAlertBullet)
 {
+	NSString *formattingConfig = nil;
+	NSString *formattingConfigKey = ((isAlertBullet)?@"alertBullet":@"bullet");
 	if (configDict != nil)
 	{
 		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
 		if (formattingConfigDict != nil)
 		{
-			NSString *formattingConfig = [formattingConfigDict objectForKey:((isAlertBullet)?@"alertBullet":@"bullet")];
+			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
 				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
+	
+	if (formattingConfig == nil)
+		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
+	
+	if (formattingConfig != nil)
+		return formattingConfigToAnsiSequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -818,16 +844,24 @@ ANSISequences getPropNameANSISequences(NSString *propName)
 	if (propName == nil)
 		return emptyANSISequences;
 	
+	NSString *formattingConfig = nil;
+	NSString *formattingConfigKey = [propName stringByAppendingString:@"Name"];
 	if (configDict != nil)
 	{
 		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
 		if (formattingConfigDict != nil)
 		{
-			NSString *formattingConfig = [formattingConfigDict objectForKey:[propName stringByAppendingString:@"Name"]];
+			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
 				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
+	
+	if (formattingConfig == nil)
+		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
+	
+	if (formattingConfig != nil)
+		return formattingConfigToAnsiSequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -839,13 +873,13 @@ ANSISequences getPropValueANSISequences(NSString *propName, NSString *propValue)
 	if (propName == nil)
 		return emptyANSISequences;
 	
+	NSString *formattingConfig = nil;
+	NSString *formattingConfigKey = nil;
 	if (configDict != nil)
 	{
 		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
 		if (formattingConfigDict != nil)
 		{
-			NSString *formattingConfigKey = nil;
-			
 			if (propName == kPropName_priority)
 			{
 				if (propValue != nil)
@@ -862,11 +896,15 @@ ANSISequences getPropValueANSISequences(NSString *propName, NSString *propValue)
 			if (formattingConfigKey == nil)
 				formattingConfigKey = [propName stringByAppendingString:@"Value"];
 			
-			NSString *formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
-			if (formattingConfig != nil)
-				return formattingConfigToAnsiSequences(formattingConfig);
+			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 		}
 	}
+	
+	if (formattingConfig == nil)
+		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
+	
+	if (formattingConfig != nil)
+		return formattingConfigToAnsiSequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -1347,6 +1385,30 @@ int main(int argc, char *argv[])
 		nil
 	];
 	
+	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
+		@"cyan",		 		@"datetimeName",
+		@"yellow",		 		@"datetimeValue",
+		@"",		 	 		@"titleValue",
+		@"cyan", 	 			@"notesName",
+		@"", 		 			@"notesValue",
+		@"cyan", 		 		@"urlName",
+		@"", 			 		@"urlValue",
+		@"cyan", 		 		@"locationName",
+		@"", 		 			@"locationValue",
+		@"cyan", 		 		@"dueDateName",
+		@"", 			 		@"dueDateValue",
+		@"cyan", 	 			@"priorityName",
+		@"", 		 			@"priorityValue",
+		@"red",		 			@"priorityValueHigh",
+		@"yellow",	 			@"priorityValueMedium",
+		@"green",				@"priorityValueLow",
+		@"blue", 				@"sectionTitle",
+		@"bold",				@"firstItemLine",
+		@"", 					@"bullet",
+		@"red,bold",			@"alertBullet",
+		nil
+	];
+	
 	
 	// variables for arguments
 	NSString *arg_output = nil;
@@ -1392,6 +1454,7 @@ int main(int argc, char *argv[])
 		if (!configFileIsValid)
 			NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
 	}
+	
 	
 	
 	// read and validate localization configuration file

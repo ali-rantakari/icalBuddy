@@ -13,6 +13,7 @@ user requests:
 other (my own ideas):
 -------------------------
 
+- Figure out some smart way to deal with overlapping formatting runs (e.g. firstItemLine = bold, bullet = bold ---> only bullet is bold)
 - Write man page for the config file
 	- Formatting section keys and value syntax
 - Write documentation for the editConfig and editConfigCLI arguments
