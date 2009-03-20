@@ -33,20 +33,13 @@ THE SOFTWARE.
 #import <CalendarStore/CalendarStore.h>
 #import <AppKit/AppKit.h>
 #import <AddressBook/AddressBook.h>
+#import "ANSIEscapeHelper.h"
 
 
 #define kAppSiteURLPrefix @"http://hasseg.org/icalBuddy/"
 #define kVersionCheckURL [NSURL URLWithString:@"http://hasseg.org/icalBuddy/?versioncheck=y"]
 
 
-// the ANSI escape sequence CSI (Control Sequence Initiator)
-// -- i.e. "escape sequence prefix".
-// (add your own CSI:Miami joke here)
-#define kANSIEscapeCSI			@"\033["
-
-// the end byte of an SGR (Select Graphic Rendition)
-// ANSI Escape Sequence
-#define kANSIEscapeSGREnd		@"m"
 
 
 #define kPropertyListEditorAppName @"Property List Editor"
@@ -110,43 +103,7 @@ enum calItemPrintOption
 } CalItemPrintOption;
 
 
-// SGR (Select Graphic Rendition) ANSI control codes.
-enum sgrCode
-{
-	SGRCodeNoneOrInvalid =		-1,
-	
-	SGRCodeAllReset =			0,
-	
-	SGRCodeIntensityBold =		1,
-	SGRCodeIntensityFaint =		2,
-	SGRCodeIntensityNormal =	22,
-	
-	SGRCodeItalicOn =			3,
-	
-	SGRCodeUnderlineSingle =	4,
-	SGRCodeUnderlineDouble =	21,
-	SGRCodeUnderlineNone =		24,
-	
-	SGRCodeFgBlack =		30,
-	SGRCodeFgRed =			31,
-	SGRCodeFgGreen =		32,
-	SGRCodeFgYellow =		33,
-	SGRCodeFgBlue =			34,
-	SGRCodeFgMagenta =		35,
-	SGRCodeFgCyan =			36,
-	SGRCodeFgWhite =		37,
-	SGRCodeFgReset =		39,
-	
-	SGRCodeBgBlack =		40,
-	SGRCodeBgRed =			41,
-	SGRCodeBgGreen =		42,
-	SGRCodeBgYellow =		43,
-	SGRCodeBgBlue =			44,
-	SGRCodeBgMagenta =		45,
-	SGRCodeBgCyan =			46,
-	SGRCodeBgWhite =		47,
-	SGRCodeBgReset =		49
-};
+
 
 
 typedef struct _ANSISequences
@@ -205,6 +162,11 @@ NSDictionary *defaultStringsDict;
 
 BOOL bufferStdout = NO;
 NSString *stdoutBuffer = @"";
+
+
+ANSIEscapeHelper *ansiEscapeHelper;
+
+
 
 
 
@@ -1354,6 +1316,9 @@ int main(int argc, char *argv[])
 	];
 	
 	
+	ansiEscapeHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
+	
+	
 	// default localization strings (english)
 	defaultStringsDict = [NSDictionary dictionaryWithObjectsAndKeys:
 		@"title",			@"title",
@@ -2115,63 +2080,105 @@ int main(int argc, char *argv[])
 			if (formattedKeywords != nil)
 			{
 				// it seems we need to do some search & replace for the output
-				// before pushing the buffer to stdout
+				// before pushing the buffer to stdout.
+				// OMG this needs cleaning up... so bad.
 				
 				NSString *keyword;
 				for (keyword in [formattedKeywords allKeys])
 				{
+					/*
+					Get the escape codes from the string like so:
+					   ___   ___   ___
+					  |___| |___| |___|  <-- escapeCodes
+					 __\ /___\ /___\ /__
+					|___|_____|_____|___|  <-- cleanString
+					
+					*/
+					
 					ANSISequences thisSequences = formattingConfigToAnsiSequences([formattedKeywords objectForKey:keyword]);
 					NSString *formattedKeyword = strWrappedInANSISequences(keyword, thisSequences);
 					
-					if (![keyword hasPrefix:kANSIEscapeSGREnd])
-						stdoutBuffer = [stdoutBuffer stringByReplacingOccurrencesOfString:keyword withString:formattedKeyword];
-					else
+					NSString *cleanString;
+					NSMutableArray *escapeCodes = [[ansiEscapeHelper escapeCodesForString:stdoutBuffer cleanString:&cleanString] mutableCopy];
+					NSArray *escapeCodesBeforeInsertion = [NSArray arrayWithArray:escapeCodes];
+					
+					// find all occurrences of keyword within the clean string, then add the start and end
+					// codes into the escapeCodes array along with their corresponding locations
+					NSRange searchRange = NSMakeRange(0,[cleanString length]);
+					NSRange foundRange;
+					do
 					{
-						// keyword begins with the end character of SGR ANSI escape sequences -- we'll
-						// want to make sure we won't mess up the formatting by replacing any escape sequences'
-						// end characters here so we'll (sigh..) have to do the search+replace manually
-						// and for each match, check that it doesn't overlap with an escape sequence
-						
-						NSRange searchRange = NSMakeRange(0,[stdoutBuffer length]);
-						NSRange foundRange;
-						do
+						foundRange = [cleanString rangeOfString:keyword options:NSLiteralSearch range:searchRange];
+						if (foundRange.location != NSNotFound)
 						{
-							foundRange = [stdoutBuffer rangeOfString:keyword options:NSLiteralSearch range:searchRange];
-							if (foundRange.location != NSNotFound)
+							NSMutableArray *startCodes = nil;
+							if ([thisSequences.start length] >= 3)
 							{
-								// check if this match steps on an ANSI escape sequence's toes by
-								// going backwards through the buffer string one character at a time.
-								// if we only see characters that match the ASCII symbols 0-9 or ; or [
-								// and then an escape character, we have indeed stepped on an
-								// escape sequence's toes.
-								BOOL isOKToReplace = YES;
-								NSUInteger offset = 1;
-								NSInteger thisIndex;
-								for(;;)
+								NSString *startCodesStr = [thisSequences.start substringWithRange:NSMakeRange(2,([thisSequences.start length]-3))];
+								startCodes = [[startCodesStr componentsSeparatedByString:@";"] mutableCopy];
+								NSString *thisStartCode;
+								for (thisStartCode in startCodes)
 								{
-									thisIndex = (foundRange.location-offset);
-									if (thisIndex < 0)
-										break;
-									int c = (int)[stdoutBuffer characterAtIndex:thisIndex];
-									if (!asciiCharacterMayBePartOfANSISGRSequence(c) || (c == 109))
-										break;
-									if (c == 27) // we've reached an escape character
-									{
-										isOKToReplace = NO;
-										break;
-									}
-									offset++;
+									[escapeCodes addObject:[NSDictionary dictionaryWithObjectsAndKeys:
+										[NSNumber numberWithInt:[thisStartCode intValue]], @"code",
+										[NSNumber numberWithUnsignedInteger:foundRange.location], @"location",
+										nil
+									]];
 								}
-								
-								if (isOKToReplace)
-									stdoutBuffer = [stdoutBuffer stringByReplacingCharactersInRange:foundRange withString:formattedKeyword];
-								
-								searchRange.location = foundRange.location+((isOKToReplace)?[formattedKeyword length]:[keyword length]);
-								searchRange.length = [stdoutBuffer length]-searchRange.location;
 							}
+							
+							NSMutableArray *endCodes = nil;
+							if ([thisSequences.end length] >= 3)
+							{
+								NSString *endCodesStr = [thisSequences.end substringWithRange:NSMakeRange(2,([thisSequences.end length]-3))];
+								endCodes = [[endCodesStr componentsSeparatedByString:@";"] mutableCopy];
+								NSString *thisEndCode;
+								for (thisEndCode in endCodes)
+								{
+									[escapeCodes addObject:[NSDictionary dictionaryWithObjectsAndKeys:
+										[NSNumber numberWithInt:[thisEndCode intValue]], @"code",
+										[NSNumber numberWithUnsignedInteger:foundRange.location+foundRange.length], @"location",
+										nil
+									]];
+								}
+							}
+							
+							if (startCodes != nil && endCodes != nil)
+							{
+								// we want to enforce this formatting so let's find all codes between the start
+								// and end we have that might stop this formatting run and remove them
+								NSMutableArray *codeDictionariesToRemove = [NSMutableArray array];
+								NSDictionary *thisEscapeCode;
+								for (thisEscapeCode in escapeCodesBeforeInsertion)
+								{
+									enum sgrCode thisCode = [[thisEscapeCode objectForKey:@"code"] unsignedIntValue];
+									BOOL shouldRemoveThis = NO;
+									NSUInteger thisLocation = [[thisEscapeCode objectForKey:@"location"] unsignedIntegerValue];
+									if ((foundRange.location <= thisLocation) && (thisLocation < (foundRange.location+foundRange.length)))
+									{
+										NSString *thisStartCode;
+										for (thisStartCode in startCodes)
+										{
+											if ([ansiEscapeHelper sgrCode:thisCode endsFormattingIntroducedByCode:[thisStartCode intValue]])
+											{
+												shouldRemoveThis = YES;
+												break;
+											}
+										}
+									}
+									if (shouldRemoveThis)
+										[codeDictionariesToRemove addObject:thisEscapeCode];
+								}
+								[escapeCodes removeObjectsInArray:codeDictionariesToRemove];
+							}
+							
+							searchRange.location = foundRange.location+[formattedKeyword length];
+							searchRange.length = [cleanString length]-searchRange.location;
 						}
-						while(foundRange.location != NSNotFound);
 					}
+					while (foundRange.location != NSNotFound);
+					
+					stdoutBuffer = [ansiEscapeHelper ansiFormattedStringWithCodesAndLocations:escapeCodes cleanString:cleanString];
 				}
 			}
 		}
