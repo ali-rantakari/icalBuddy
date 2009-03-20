@@ -176,7 +176,7 @@ NSArray *propertyOrder;
 NSString *prefixStrBullet = 		@"* ";
 NSString *prefixStrBulletAlert = 	@"! ";
 NSString *prefixStrIndent = 		@"    ";
-NSString *sectionSeparatorStr = 	@"------------------------";
+NSString *sectionSeparatorStr = 	@"\n------------------------";
 
 NSString *timeFormatStr = 			@"%H:%M";
 NSString *dateFormatStr = 			@"%Y-%m-%d";
@@ -665,6 +665,9 @@ NSString* strWrappedInANSISequences(NSString *str, ANSISequences ansiSequences)
 
 
 
+// returns an ANSISequences struct based on a formatting configuration string
+// (something from the config file's formatting section's values like:
+// "red, bg:white, bold")
 ANSISequences formattingConfigToAnsiEscapeStrs(NSString *formattingConfig)
 {
 	ANSISequences retVal;
@@ -775,6 +778,7 @@ ANSISequences formattingConfigToAnsiEscapeStrs(NSString *formattingConfig)
 
 
 
+// return an ANSISequences struct for formatting a section title
 ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 {
 	if (configDict != nil)
@@ -795,16 +799,27 @@ ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 }
 
 
+// return an ANSISequences struct for formatting the first printed
+// line for a calendar item
 ANSISequences getFirstLineANSISequences()
 {
-	return makeANSISequences(
-			strConcat(kANSIEscapeCSI, [NSString stringWithFormat:@"%d", SGRCodeIntensityBold], kANSIEscapeSGREnd, nil),
-			strConcat(kANSIEscapeCSI, [NSString stringWithFormat:@"%d", SGRCodeIntensityNormal], kANSIEscapeSGREnd, nil)
-			);
+	if (configDict != nil)
+	{
+		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
+		if (formattingConfigDict != nil)
+		{
+			NSString *formattingConfig = [formattingConfigDict objectForKey:@"firstItemLine"];
+			if (formattingConfig != nil)
+				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+		}
+	}
+	
+	return emptyANSISequences;
 }
 
 
 
+// return an ANSISequences struct for formatting a bullet point
 ANSISequences getBulletANSISequences(BOOL isAlertBullet)
 {
 	if (configDict != nil)
@@ -823,6 +838,7 @@ ANSISequences getBulletANSISequences(BOOL isAlertBullet)
 
 
 
+// return an ANSISequences struct for formatting a property name
 ANSISequences getPropNameANSISequences(NSString *propName)
 {
 	if (propName == nil)
@@ -843,7 +859,7 @@ ANSISequences getPropNameANSISequences(NSString *propName)
 }
 
 
-
+// return an ANSISequences struct for formatting a property value
 ANSISequences getPropValueANSISequences(NSString *propName, NSString *propValue)
 {
 	if (propName == nil)
@@ -1276,7 +1292,7 @@ void printItemSections(NSArray *sections, int printOptions)
 					NSPrint(sectionTitleANSISequences.start);
 				}
 				
-				NSPrint(@"%@:\n%@\n", sectionTitle, sectionSeparatorStr);
+				NSPrint(@"%@:%@\n", sectionTitle, sectionSeparatorStr);
 				
 				if (formatOutput)
 					NSPrint(sectionTitleANSISequences.end);

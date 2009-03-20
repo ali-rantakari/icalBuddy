@@ -13,6 +13,11 @@ user requests:
 other (my own ideas):
 -------------------------
 
+- Write man page for the config file
+	- Formatting section keys and value syntax
+- Write documentation for the editConfig and editConfigCLI arguments
+
+
 - Add timezone support (how to handle these?)
 
 
