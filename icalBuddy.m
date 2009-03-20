@@ -203,6 +203,8 @@ NSDictionary *l10nStringsDict;
 NSDictionary *defaultStringsDict;
 
 
+BOOL bufferStdout = NO;
+NSString *stdoutBuffer = @"";
 
 
 
@@ -229,7 +231,10 @@ void NSPrint(NSString *aStr, ...)
 	];
 	va_end(argList);
 	
-	[str writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
+	if (bufferStdout)
+		stdoutBuffer = [stdoutBuffer stringByAppendingString:str];
+	else
+		[str writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
 }
 
 void NSPrintErr(NSString *aStr, ...)
@@ -653,7 +658,14 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 	else if (outputDate == nil && outputTime != nil)
 		return outputTime;
 	else
-		return [NSString stringWithFormat:@"%@%@%@", outputDate, dateTimeSeparatorStr, outputTime];
+		return strConcat(outputDate, dateTimeSeparatorStr, outputTime, nil);
+}
+
+
+
+BOOL asciiCharacterMayBePartOfANSISGRSequence(int c)
+{
+	return ((c == 109) || ((48 <= c) && (c <= 57)) || (c == 59) || (c == 91) || (c == 27)); // one of: m 0-9 ; [ esc
 }
 
 
@@ -668,7 +680,7 @@ NSString* strWrappedInANSISequences(NSString *str, ANSISequences ansiSequences)
 // returns an ANSISequences struct based on a formatting configuration string
 // (something from the config file's formatting section's values like:
 // "red, bg:white, bold")
-ANSISequences formattingConfigToAnsiEscapeStrs(NSString *formattingConfig)
+ANSISequences formattingConfigToAnsiSequences(NSString *formattingConfig)
 {
 	ANSISequences retVal;
 	retVal.start = @"";
@@ -789,7 +801,7 @@ ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 			NSString *formattingConfig = [formattingConfigDict objectForKey:@"sectionTitle"];
 			if (formattingConfig != nil)
 			{
-				ANSISequences retVal = formattingConfigToAnsiEscapeStrs(formattingConfig);
+				ANSISequences retVal = formattingConfigToAnsiSequences(formattingConfig);
 				return retVal;
 			}
 		}
@@ -810,7 +822,7 @@ ANSISequences getFirstLineANSISequences()
 		{
 			NSString *formattingConfig = [formattingConfigDict objectForKey:@"firstItemLine"];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
 	
@@ -829,7 +841,7 @@ ANSISequences getBulletANSISequences(BOOL isAlertBullet)
 		{
 			NSString *formattingConfig = [formattingConfigDict objectForKey:((isAlertBullet)?@"alertBullet":@"bullet")];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
 	
@@ -851,7 +863,7 @@ ANSISequences getPropNameANSISequences(NSString *propName)
 		{
 			NSString *formattingConfig = [formattingConfigDict objectForKey:[propName stringByAppendingString:@"Name"]];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
 	
@@ -890,7 +902,7 @@ ANSISequences getPropValueANSISequences(NSString *propName, NSString *propValue)
 			
 			NSString *formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiEscapeStrs(formattingConfig);
+				return formattingConfigToAnsiSequences(formattingConfig);
 		}
 	}
 	
@@ -945,14 +957,14 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 		}
 		else if ([propName isEqualToString:kPropName_location])
 		{
-			thisPropOutputName = [localizedStr(@"location") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"location"), @":", nil);
 			
 			if ([event location] != nil && ![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 				thisPropOutputValue = [event location];
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
-			thisPropOutputName = [localizedStr(@"notes") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
 			
 			if ([event notes] != nil && ![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 				thisPropOutputValue = [[event notes]
@@ -962,7 +974,7 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
-			thisPropOutputName = [localizedStr(@"url") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"url"), @":", nil);
 			
 			if ([event url] != nil &&
 				![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
@@ -1054,9 +1066,9 @@ NSString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions,
 		}
 		
 		if (thisPropOutputName == nil && thisPropOutputValue != nil)
-			return [NSString stringWithFormat: @"%@\n", thisPropOutputValue];
+			return strConcat(thisPropOutputValue, @"\n", nil);
 		else if (thisPropOutputName != nil && thisPropOutputValue != nil)
-			return [NSString stringWithFormat: @"%@ %@\n", thisPropOutputName, thisPropOutputValue];
+			return strConcat(thisPropOutputName, @" ", thisPropOutputValue, @"\n", nil);
 	}
 	return nil;
 }
@@ -1137,7 +1149,7 @@ NSString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions)
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
-			thisPropOutputName = [localizedStr(@"notes") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
 			
 			if ([task notes] != nil && ![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 				thisPropOutputValue = [[task notes]
@@ -1147,21 +1159,21 @@ NSString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions)
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
-			thisPropOutputName = [localizedStr(@"url") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"url"), @":", nil);
 			
 			if ([task url] != nil)
 				thisPropOutputValue = [NSString stringWithFormat:@"%@", [task url]];
 		}
 		else if ([propName isEqualToString:kPropName_datetime])
 		{
-			thisPropOutputName = [localizedStr(@"dueDate") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"dueDate"), @":", nil);
 			
 			if ([task dueDate] != nil && !(printOptions & PRINT_OPTION_SINGLE_DAY))
 				thisPropOutputValue = dateStr([task dueDate], true, false);
 		}
 		else if ([propName isEqualToString:kPropName_priority])
 		{
-			thisPropOutputName = [localizedStr(@"priority") stringByAppendingString:@":"];
+			thisPropOutputName = strConcat(localizedStr(@"priority"), @":", nil);
 			
 			if ([task priority] != CalPriorityNone)
 			{
@@ -1195,9 +1207,9 @@ NSString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions)
 		}
 		
 		if (thisPropOutputName == nil && thisPropOutputValue != nil)
-			return [NSString stringWithFormat: @"%@\n", thisPropOutputValue];
+			return strConcat(thisPropOutputValue, @"\n", nil);
 		else if (thisPropOutputName != nil && thisPropOutputValue != nil)
-			return [NSString stringWithFormat: @"%@ %@\n", thisPropOutputName, thisPropOutputValue];
+			return strConcat(thisPropOutputName, @" ", thisPropOutputValue, @"\n", nil);
 	}
 	return nil;
 }
@@ -1233,7 +1245,7 @@ void printCalTask(CalTask *task, int printOptions)
 						if (formatOutput)
 						{
 							ANSISequences bulletANSISequences = getBulletANSISequences(useAlertBullet);
-							prefixStr = [[bulletANSISequences.start stringByAppendingString:(useAlertBullet)?prefixStrBulletAlert:prefixStrBullet] stringByAppendingString:bulletANSISequences.end];
+							prefixStr = strWrappedInANSISequences(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), bulletANSISequences);
 						}
 						else
 							prefixStr = prefixStrBullet;
@@ -1292,7 +1304,7 @@ void printItemSections(NSArray *sections, int printOptions)
 					NSPrint(sectionTitleANSISequences.start);
 				}
 				
-				NSPrint(@"%@:%@\n", sectionTitle, sectionSeparatorStr);
+				NSPrint(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
 				
 				if (formatOutput)
 					NSPrint(sectionTitleANSISequences.end);
@@ -1409,6 +1421,8 @@ int main(int argc, char *argv[])
 			NSPrintErr(@"* Error in configuration file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyConfig man page.\n", configFilePath);
 			configFileIsValid = NO;
 		}
+		else
+			bufferStdout = [[configDict allKeys] containsObject:@"formattedKeywords"];
 		
 		if (!configFileIsValid)
 			NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
@@ -2089,6 +2103,84 @@ int main(int argc, char *argv[])
 		NSPrint(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org\n");
 		NSPrint(@"\n");
 	}
+	
+	
+	// if we've been buffering the output for stdout into a string,
+	// now's the time to print out that buffer.
+	if (bufferStdout)
+	{
+		if (arg_useFormatting && configDict != nil)
+		{
+			NSDictionary *formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
+			if (formattedKeywords != nil)
+			{
+				// it seems we need to do some search & replace for the output
+				// before pushing the buffer to stdout
+				
+				NSString *keyword;
+				for (keyword in [formattedKeywords allKeys])
+				{
+					ANSISequences thisSequences = formattingConfigToAnsiSequences([formattedKeywords objectForKey:keyword]);
+					NSString *formattedKeyword = strWrappedInANSISequences(keyword, thisSequences);
+					
+					if (![keyword hasPrefix:kANSIEscapeSGREnd])
+						stdoutBuffer = [stdoutBuffer stringByReplacingOccurrencesOfString:keyword withString:formattedKeyword];
+					else
+					{
+						// keyword begins with the end character of SGR ANSI escape sequences -- we'll
+						// want to make sure we won't mess up the formatting by replacing any escape sequences'
+						// end characters here so we'll (sigh..) have to do the search+replace manually
+						// and for each match, check that it doesn't overlap with an escape sequence
+						
+						NSRange searchRange = NSMakeRange(0,[stdoutBuffer length]);
+						NSRange foundRange;
+						do
+						{
+							foundRange = [stdoutBuffer rangeOfString:keyword options:NSLiteralSearch range:searchRange];
+							if (foundRange.location != NSNotFound)
+							{
+								// check if this match steps on an ANSI escape sequence's toes by
+								// going backwards through the buffer string one character at a time.
+								// if we only see characters that match the ASCII symbols 0-9 or ; or [
+								// and then an escape character, we have indeed stepped on an
+								// escape sequence's toes.
+								BOOL isOKToReplace = YES;
+								NSUInteger offset = 1;
+								NSInteger thisIndex;
+								for(;;)
+								{
+									thisIndex = (foundRange.location-offset);
+									if (thisIndex < 0)
+										break;
+									int c = (int)[stdoutBuffer characterAtIndex:thisIndex];
+									if (!asciiCharacterMayBePartOfANSISGRSequence(c) || (c == 109))
+										break;
+									if (c == 27) // we've reached an escape character
+									{
+										isOKToReplace = NO;
+										break;
+									}
+									offset++;
+								}
+								
+								if (isOKToReplace)
+									stdoutBuffer = [stdoutBuffer stringByReplacingCharactersInRange:foundRange withString:formattedKeyword];
+								
+								searchRange.location = foundRange.location+((isOKToReplace)?[formattedKeyword length]:[keyword length]);
+								searchRange.length = [stdoutBuffer length]-searchRange.location;
+							}
+						}
+						while(foundRange.location != NSNotFound);
+					}
+				}
+			}
+		}
+		
+		bufferStdout = NO;
+		NSPrint([stdoutBuffer stringByReplacingOccurrencesOfString:@"%" withString:@"%%"]);
+	}
+	
+	
 	
 	
 	[autoReleasePool release];

@@ -16,7 +16,7 @@ other (my own ideas):
 - Write man page for the config file
 	- Formatting section keys and value syntax
 - Write documentation for the editConfig and editConfigCLI arguments
-
+- Make the "formattedKeywords" support work even over escape sequences (now the search+replace doesn't work if there are escape sequences in the middle of potential matches)
 
 - Add timezone support (how to handle these?)
 
