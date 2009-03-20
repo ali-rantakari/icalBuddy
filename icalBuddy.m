@@ -1689,20 +1689,7 @@ int main(int argc, char *argv[])
 			NSPrintErr(@"There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n", configFilePath);
 		else
 		{
-			if ([arg_output hasSuffix:@"GUI"])
-			{
-				if ([[NSWorkspace sharedWorkspace] fullPathForApplication:kPropertyListEditorAppName] != nil)
-				{
-					NSPrint(@"Opening configuration file with the Property List\nEditor application.\n");
-					[[NSWorkspace sharedWorkspace] openFile:configFilePath withApplication:kPropertyListEditorAppName];
-				}
-				else
-				{
-					NSPrint(@"Opening configuration file with the default application\nassociated with the property list type.\n");
-					[[NSWorkspace sharedWorkspace] openFile:configFilePath];
-				}
-			}
-			else
+			if ([arg_output hasSuffix:@"CLI"])
 			{
 				NSString *foundEditorPath = nil;
 				
@@ -1751,6 +1738,19 @@ int main(int argc, char *argv[])
 				}
 				else
 					NSPrintErr(@"Error: Can not find or execute any of the following\neditors in your $PATH: %@\n", [preferredEditors componentsJoinedByString:@", "]);
+			}
+			else
+			{
+				if ([[NSWorkspace sharedWorkspace] fullPathForApplication:kPropertyListEditorAppName] != nil)
+				{
+					NSPrint(@"Opening configuration file with the Property List\nEditor application.\n");
+					[[NSWorkspace sharedWorkspace] openFile:configFilePath withApplication:kPropertyListEditorAppName];
+				}
+				else
+				{
+					NSPrint(@"Opening configuration file with the default application\nassociated with the property list type.\n");
+					[[NSWorkspace sharedWorkspace] openFile:configFilePath];
+				}
 			}
 		}
 	}
