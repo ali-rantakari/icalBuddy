@@ -82,6 +82,8 @@ THE SOFTWARE.
 						 nil\
 						]
 
+#define kEmptyMutableAttributedString [[[NSMutableAttributedString alloc] init] autorelease]
+
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
@@ -174,7 +176,7 @@ NSMutableAttributedString* strToAttrStr(NSString *string)
 
 
 
-void Buffer(NSMutableAttributedString *aStr)
+void addToOutputBuffer(NSMutableAttributedString *aStr)
 {
 	[stdoutBuffer appendAttributedString:aStr];
 }
@@ -1016,7 +1018,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
 			}
 			
-			NSMutableAttributedString *retVal = strToAttrStr(@"");
+			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
 			if (thisPropOutputValue != nil)
 				[thisPropOutputValueAttrStr appendAttributedString:strToAttrStr(@"\n")];
@@ -1065,14 +1067,14 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					else
 						prefixStr = strToAttrStr(prefixStrIndent);
 					
-					NSMutableAttributedString *thisOutput = strToAttrStr(@"");
+					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
 					if (formatOutput && firstPrintedProperty)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
-					Buffer(thisOutput);
+					addToOutputBuffer(thisOutput);
 					
 					firstPrintedProperty = NO;
 				}
@@ -1169,7 +1171,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 					thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
 			}
 			
-			NSMutableAttributedString *retVal = strToAttrStr(@"");
+			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
 			if (thisPropOutputValue != nil)
 				[thisPropOutputValueAttrStr appendAttributedString:strToAttrStr(@"\n")];
@@ -1221,14 +1223,14 @@ void printCalTask(CalTask *task, int printOptions)
 					else
 						prefixStr = strToAttrStr(prefixStrIndent);
 					
-					NSMutableAttributedString *thisOutput = strToAttrStr(@"");
+					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
 					if (formatOutput && firstPrintedProperty)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
-					Buffer(thisOutput);
+					addToOutputBuffer(thisOutput);
 					
 					firstPrintedProperty = NO;
 				}
@@ -1265,14 +1267,14 @@ void printItemSections(NSArray *sections, int printOptions)
 			if (!titlePrintedForCurrentSection)
 			{
 				if (!currentIsFirstPrintedSection)
-					Buffer(strToAttrStr(@"\n"));
+					addToOutputBuffer(strToAttrStr(@"\n"));
 				
 				NSMutableAttributedString *thisOutput = strToAttrStr(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
 				
 				if (formatOutput)
 					[thisOutput addAttributes:getSectionTitleStringAttributes(sectionTitle) range:NSMakeRange(0,[[thisOutput string] length])];
 				
-				Buffer(thisOutput);
+				addToOutputBuffer(thisOutput);
 				
 				titlePrintedForCurrentSection = YES;
 				currentIsFirstPrintedSection = NO;
@@ -1308,7 +1310,7 @@ int main(int argc, char *argv[])
 	NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
 	
 	
-	stdoutBuffer = [[[NSMutableAttributedString alloc] init] autorelease];
+	stdoutBuffer = kEmptyMutableAttributedString;
 	
 	
 	// set current datetime and day representations into globals
@@ -1517,27 +1519,27 @@ int main(int argc, char *argv[])
 		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
 			displayRelativeDates = NO;
 		else if (((strcmp(argv[i], "-i") == 0) || (strcmp(argv[i], "--indent") == 0)) && (i+1 < argc))
-			prefixStrIndent = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			prefixStrIndent = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
-			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
-			prefixStrBulletAlert = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			prefixStrBulletAlert = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ss") == 0) || (strcmp(argv[i], "--sectionSeparator") == 0)) && (i+1 < argc))
-			sectionSeparatorStr = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			sectionSeparatorStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-tf") == 0) || (strcmp(argv[i], "--timeFormat") == 0)) && (i+1 < argc))
-			timeFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			timeFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-df") == 0) || (strcmp(argv[i], "--dateFormat") == 0)) && (i+1 < argc))
-			dateFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			dateFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-dts") == 0) || (strcmp(argv[i], "--dateTimeSeparator") == 0)) && (i+1 < argc))
-			dateTimeSeparatorStr = [NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding];
+			dateTimeSeparatorStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-iep") == 0) || (strcmp(argv[i], "--includeEventProps") == 0)) && (i+1 < argc))
-			includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding]);
+			includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-eep") == 0) || (strcmp(argv[i], "--excludeEventProps") == 0)) && (i+1 < argc))
-			excludedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding]);
+			excludedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-itp") == 0) || (strcmp(argv[i], "--includeTaskProps") == 0)) && (i+1 < argc))
-			includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding]);
+			includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-etp") == 0) || (strcmp(argv[i], "--excludeTaskProps") == 0)) && (i+1 < argc))
-			excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSASCIIStringEncoding]);
+			excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 	}
 	
 	NSString *includeCalsStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"ic"];
