@@ -9,6 +9,10 @@
 /*
  todo:
  
+ - don't add useless "reset" escape codes to the string in
+   -ansiEscapedStringWithAttributedString:
+ - use NSMaxRange() instead of range.location+range.length
+ - use NSMutableString in -ansiEscapedStringWithCodesAndLocations:cleanString: (?) 
  
  */
 
@@ -48,6 +52,9 @@
 #define kAttrDictKey_attrName		@"attributeName"
 #define kAttrDictKey_attrValue		@"attributeValue"
 
+// minimum weight for an NSFont for it to be considered bold
+#define kBoldFontMinWeight 9
+
 
 @implementation ANSIEscapeHelper
 
@@ -66,6 +73,122 @@
 	return self;
 }
 
+
+
+- (NSAttributedString*) attributedStringWithANSIEscapedString:(NSString*)aString
+{
+	if (aString == nil)
+		return nil;
+	
+	NSString *cleanString;
+	NSArray *attributesAndRanges = [self attributesForString:aString cleanString:&cleanString];
+	NSMutableAttributedString *attributedString = [[[NSMutableAttributedString alloc]
+													initWithString:cleanString
+													attributes:[NSDictionary dictionaryWithObject:self.font forKey:NSFontAttributeName]
+												   ] autorelease];
+	
+	NSDictionary *thisAttributeDict;
+	for (thisAttributeDict in attributesAndRanges)
+	{
+		[attributedString
+		 addAttribute:[thisAttributeDict objectForKey:@"attributeName"]
+		 value:[thisAttributeDict objectForKey:@"attributeValue"]
+		 range:[[thisAttributeDict objectForKey:@"range"] rangeValue]
+		 ];
+	}
+	
+	return attributedString;
+}
+
+
+- (NSString*) ansiEscapedStringWithAttributedString:(NSAttributedString*)aAttributedString;
+{
+	NSRange limitRange;
+	NSRange effectiveRange;
+	id attributeValue;
+	
+	NSMutableArray *codesAndLocations = [NSMutableArray array];
+	
+	NSArray *attrNames = [NSArray arrayWithObjects:
+						  NSFontAttributeName, NSForegroundColorAttributeName,
+						  NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName,
+						  nil
+						  ];
+	NSString *thisAttrName;
+	for (thisAttrName in attrNames)
+	{
+		limitRange = NSMakeRange(0, [aAttributedString length]);
+		while (limitRange.length > 0)
+		{
+			attributeValue = [aAttributedString
+							  attribute:thisAttrName
+							  atIndex:limitRange.location
+							  longestEffectiveRange:&effectiveRange
+							  inRange:limitRange
+							  ];
+			
+			enum sgrCode thisSGRCode = SGRCodeNoneOrInvalid;
+			
+			if ([thisAttrName isEqualToString:NSForegroundColorAttributeName])
+			{
+				if (attributeValue != nil)
+					thisSGRCode = [self sgrCodeForColor:attributeValue isForegroundColor:YES];
+				else
+					thisSGRCode = SGRCodeFgReset;
+			}
+			else if ([thisAttrName isEqualToString:NSBackgroundColorAttributeName])
+			{
+				if (attributeValue != nil)
+					thisSGRCode = [self sgrCodeForColor:attributeValue isForegroundColor:NO];
+				else
+					thisSGRCode = SGRCodeBgReset;
+			}
+			else if ([thisAttrName isEqualToString:NSFontAttributeName])
+			{
+				// we currently only use NSFontAttributeName for bolding so
+				// here we assume that the formatting "type" in ANSI SGR
+				// terms is indeed intensity
+				if (attributeValue != nil)
+					thisSGRCode = ([[NSFontManager sharedFontManager] weightOfFont:attributeValue] >= kBoldFontMinWeight)
+									? SGRCodeIntensityBold : SGRCodeIntensityNormal;
+				else
+					thisSGRCode = SGRCodeIntensityNormal;
+			}
+			else if ([thisAttrName isEqualToString:NSUnderlineStyleAttributeName])
+			{
+				if (attributeValue != nil)
+				{
+					if ([attributeValue intValue] == NSUnderlineStyleSingle)
+						thisSGRCode = SGRCodeUnderlineSingle;
+					else if ([attributeValue intValue] == NSUnderlineStyleDouble)
+						thisSGRCode = SGRCodeUnderlineDouble;
+					else
+						thisSGRCode = SGRCodeUnderlineNone;
+				}
+				else
+					thisSGRCode = SGRCodeUnderlineNone;
+			}
+			
+			if (thisSGRCode != SGRCodeNoneOrInvalid)
+			{
+				[codesAndLocations addObject:
+				 [NSDictionary dictionaryWithObjectsAndKeys:
+				  [NSNumber numberWithInt:thisSGRCode], kCodeDictKey_code,
+				  [NSNumber numberWithUnsignedInteger:effectiveRange.location], kCodeDictKey_location,
+				  nil
+				 ]
+				];
+			}
+			
+			limitRange = NSMakeRange(NSMaxRange(effectiveRange),
+									 NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
+		}
+	}
+	
+	NSString *ansiEscapedString = [self ansiEscapedStringWithCodesAndLocations:codesAndLocations cleanString:[aAttributedString string]];
+	
+	return ansiEscapedString;
+}
 
 
 - (NSArray*) escapeCodesForString:(NSString*)aString cleanString:(NSString**)aCleanString
@@ -175,7 +298,7 @@
 
 
 
-- (NSString*) ansiFormattedStringWithCodesAndLocations:(NSArray*)aCodesArray cleanString:(NSString*)aCleanString
+- (NSString*) ansiEscapedStringWithCodesAndLocations:(NSArray*)aCodesArray cleanString:(NSString*)aCleanString
 {
 	NSString* retStr = @"";
 	
@@ -223,7 +346,8 @@
 		return nil;
 	if ([aString length] <= [kANSIEscapeCSI length])
 	{
-		*aCleanString = [NSString stringWithString:aString];
+		if (aCleanString != NULL)
+			*aCleanString = [NSString stringWithString:aString];
 		return [NSArray array];
 	}
 	
@@ -353,7 +477,7 @@
 			}
 		}
 		if (formattingRunEndLocation == -1)
-			formattingRunEndLocation = [aString length];
+			formattingRunEndLocation = [cleanString length];
 		
 		// add attribute name, attribute value and formatting run range
 		// to the array we're going to return
@@ -367,7 +491,8 @@
 		];
 	}
 	
-	*aCleanString = cleanString;
+	if (aCleanString != NULL)
+		*aCleanString = cleanString;
 	
 	return attrsAndRanges;
 }
@@ -493,6 +618,67 @@
 	}
 	
 	return kDefaultANSIColorFgBlack;
+}
+
+
+- (enum sgrCode) sgrCodeForColor:(NSColor*)aColor isForegroundColor:(BOOL)aForeground
+{
+	if (self.ansiColors != nil)
+	{
+		NSArray *codesForGivenColor = [self.ansiColors allKeysForObject:aColor];
+		
+		if (codesForGivenColor != nil && [codesForGivenColor count] > 0)
+		{
+			NSNumber *thisCode;
+			for (thisCode in codesForGivenColor)
+			{
+				BOOL thisIsForegroundColor = ([thisCode intValue] < 40);
+				if (aForeground == thisIsForegroundColor)
+					return [thisCode intValue];
+			}
+		}
+	}
+	
+	if (aForeground)
+	{
+		if ([aColor isEqual:kDefaultANSIColorFgBlack])
+			return SGRCodeFgBlack;
+		else if ([aColor isEqual:kDefaultANSIColorFgRed])
+			return SGRCodeFgRed;
+		else if ([aColor isEqual:kDefaultANSIColorFgGreen])
+			return SGRCodeFgGreen;
+		else if ([aColor isEqual:kDefaultANSIColorFgYellow])
+			return SGRCodeFgYellow;
+		else if ([aColor isEqual:kDefaultANSIColorFgBlue])
+			return SGRCodeFgBlue;
+		else if ([aColor isEqual:kDefaultANSIColorFgMagenta])
+			return SGRCodeFgMagenta;
+		else if ([aColor isEqual:kDefaultANSIColorFgCyan])
+			return SGRCodeFgCyan;
+		else if ([aColor isEqual:kDefaultANSIColorFgWhite])
+			return SGRCodeFgWhite;
+	}
+	else
+	{
+		if ([aColor isEqual:kDefaultANSIColorBgBlack])
+			return SGRCodeBgBlack;
+		else if ([aColor isEqual:kDefaultANSIColorBgRed])
+			return SGRCodeBgRed;
+		else if ([aColor isEqual:kDefaultANSIColorBgGreen])
+			return SGRCodeBgGreen;
+		else if ([aColor isEqual:kDefaultANSIColorBgYellow])
+			return SGRCodeBgYellow;
+		else if ([aColor isEqual:kDefaultANSIColorBgBlue])
+			return SGRCodeBgBlue;
+		else if ([aColor isEqual:kDefaultANSIColorBgMagenta])
+			return SGRCodeBgMagenta;
+		else if ([aColor isEqual:kDefaultANSIColorBgCyan])
+			return SGRCodeBgCyan;
+		else if ([aColor isEqual:kDefaultANSIColorBgWhite])
+			return SGRCodeBgWhite;
+	}
+	
+	return SGRCodeNoneOrInvalid;
 }
 
 

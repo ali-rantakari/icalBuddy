@@ -14,6 +14,7 @@ other (my own ideas):
 -------------------------
 
 - Figure out some smart way to deal with overlapping formatting runs (e.g. firstItemLine = bold, bullet = bold ---> only bullet is bold)
+	- solution: use NSMutableAttributedStrings for formatting and at the end convert them to a normal string with ANSI escape sequences for output.
 - Write man page for the config file
 	- Formatting section keys and value syntax
 - Write documentation for the editConfig and editConfigCLI arguments

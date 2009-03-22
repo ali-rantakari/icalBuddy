@@ -644,7 +644,7 @@ NSString* strWrappedInANSISequences(NSString *str, ANSISequences ansiSequences)
 // returns an ANSISequences struct based on a formatting configuration string
 // (something from the config file's formatting section's values like:
 // "red, bg:white, bold")
-ANSISequences formattingConfigToAnsiSequences(NSString *formattingConfig)
+ANSISequences formattingConfigToANSISequences(NSString *formattingConfig)
 {
 	ANSISequences retVal;
 	retVal.start = @"";
@@ -767,7 +767,7 @@ ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
 			{
-				ANSISequences retVal = formattingConfigToAnsiSequences(formattingConfig);
+				ANSISequences retVal = formattingConfigToANSISequences(formattingConfig);
 				return retVal;
 			}
 		}
@@ -777,7 +777,7 @@ ANSISequences getSectionTitleANSISequences(NSString *sectionTitle)
 		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
 	
 	if (formattingConfig != nil)
-		return formattingConfigToAnsiSequences(formattingConfig);
+		return formattingConfigToANSISequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -796,7 +796,7 @@ ANSISequences getFirstLineANSISequences()
 		{
 			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiSequences(formattingConfig);
+				return formattingConfigToANSISequences(formattingConfig);
 		}
 	}
 	
@@ -804,7 +804,7 @@ ANSISequences getFirstLineANSISequences()
 		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
 	
 	if (formattingConfig != nil)
-		return formattingConfigToAnsiSequences(formattingConfig);
+		return formattingConfigToANSISequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -823,7 +823,7 @@ ANSISequences getBulletANSISequences(BOOL isAlertBullet)
 		{
 			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiSequences(formattingConfig);
+				return formattingConfigToANSISequences(formattingConfig);
 		}
 	}
 	
@@ -831,7 +831,7 @@ ANSISequences getBulletANSISequences(BOOL isAlertBullet)
 		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
 	
 	if (formattingConfig != nil)
-		return formattingConfigToAnsiSequences(formattingConfig);
+		return formattingConfigToANSISequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -853,7 +853,7 @@ ANSISequences getPropNameANSISequences(NSString *propName)
 		{
 			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
 			if (formattingConfig != nil)
-				return formattingConfigToAnsiSequences(formattingConfig);
+				return formattingConfigToANSISequences(formattingConfig);
 		}
 	}
 	
@@ -861,7 +861,7 @@ ANSISequences getPropNameANSISequences(NSString *propName)
 		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
 	
 	if (formattingConfig != nil)
-		return formattingConfigToAnsiSequences(formattingConfig);
+		return formattingConfigToANSISequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -904,7 +904,7 @@ ANSISequences getPropValueANSISequences(NSString *propName, NSString *propValue)
 		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
 	
 	if (formattingConfig != nil)
-		return formattingConfigToAnsiSequences(formattingConfig);
+		return formattingConfigToANSISequences(formattingConfig);
 	
 	return emptyANSISequences;
 }
@@ -2137,111 +2137,49 @@ int main(int argc, char *argv[])
 	// now's the time to print out that buffer.
 	if (bufferStdout)
 	{
-		if (arg_useFormatting && configDict != nil)
+		if ((arg_useFormatting && configDict != nil) &&
+			(arg_output_is_eventsToday || arg_output_is_eventsNow ||
+			arg_output_is_eventsFromTo || arg_output_is_uncompletedTasks)
+			)
 		{
 			NSDictionary *formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
 			if (formattedKeywords != nil)
 			{
 				// it seems we need to do some search & replace for the output
 				// before pushing the buffer to stdout.
-				// OMG this needs cleaning up... so bad.
 				
 				NSString *keyword;
 				for (keyword in [formattedKeywords allKeys])
 				{
-					/*
-					Get the escape codes from the string like so:
-					   ___   ___   ___
-					  |___| |___| |___|  <-- escapeCodes
-					 __\ /___\ /___\ /__
-					|___|_____|_____|___|  <-- cleanString
+					ANSISequences thisSequences = formattingConfigToANSISequences([formattedKeywords objectForKey:keyword]);
 					
-					*/
+					NSMutableAttributedString *tempAttrStr = [[[NSMutableAttributedString alloc] init] autorelease];
+					[tempAttrStr setAttributedString:[ansiEscapeHelper attributedStringWithANSIEscapedString:stdoutBuffer]];
 					
-					ANSISequences thisSequences = formattingConfigToAnsiSequences([formattedKeywords objectForKey:keyword]);
-					NSString *formattedKeyword = strWrappedInANSISequences(keyword, thisSequences);
+					NSArray *formatAttributes = [ansiEscapeHelper attributesForString:thisSequences.start cleanString:NULL];
 					
-					NSString *cleanString;
-					NSMutableArray *escapeCodes = [[ansiEscapeHelper escapeCodesForString:stdoutBuffer cleanString:&cleanString] mutableCopy];
-					NSArray *escapeCodesBeforeInsertion = [NSArray arrayWithArray:escapeCodes];
-					
-					// find all occurrences of keyword within the clean string, then add the start and end
-					// codes into the escapeCodes array along with their corresponding locations
-					NSRange searchRange = NSMakeRange(0,[cleanString length]);
-					NSRange foundRange;
+					NSString *cleanStdoutBuffer = [tempAttrStr string];
+					NSRange searchRange = NSMakeRange(0,[tempAttrStr length]);
+					NSRange foundRange = NSMakeRange(NSNotFound,0);
 					do
 					{
-						foundRange = [cleanString rangeOfString:keyword options:NSLiteralSearch range:searchRange];
+						foundRange = [cleanStdoutBuffer rangeOfString:keyword options:NSLiteralSearch range:searchRange];
 						if (foundRange.location != NSNotFound)
 						{
-							NSMutableArray *startCodes = nil;
-							if ([thisSequences.start length] >= 3)
+							NSDictionary *attrDict;
+							for (attrDict in formatAttributes)
 							{
-								NSString *startCodesStr = [thisSequences.start substringWithRange:NSMakeRange(2,([thisSequences.start length]-3))];
-								startCodes = [[startCodesStr componentsSeparatedByString:@";"] mutableCopy];
-								NSString *thisStartCode;
-								for (thisStartCode in startCodes)
-								{
-									[escapeCodes addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-										[NSNumber numberWithInt:[thisStartCode intValue]], @"code",
-										[NSNumber numberWithUnsignedInteger:foundRange.location], @"location",
-										nil
-									]];
-								}
+								NSString *attrName = [attrDict objectForKey:@"attributeName"];
+								NSObject *attrValue = [attrDict objectForKey:@"attributeValue"];
+								[tempAttrStr addAttribute:attrName value:attrValue range:foundRange];
 							}
-							
-							NSMutableArray *endCodes = nil;
-							if ([thisSequences.end length] >= 3)
-							{
-								NSString *endCodesStr = [thisSequences.end substringWithRange:NSMakeRange(2,([thisSequences.end length]-3))];
-								endCodes = [[endCodesStr componentsSeparatedByString:@";"] mutableCopy];
-								NSString *thisEndCode;
-								for (thisEndCode in endCodes)
-								{
-									[escapeCodes addObject:[NSDictionary dictionaryWithObjectsAndKeys:
-										[NSNumber numberWithInt:[thisEndCode intValue]], @"code",
-										[NSNumber numberWithUnsignedInteger:foundRange.location+foundRange.length], @"location",
-										nil
-									]];
-								}
-							}
-							
-							if (startCodes != nil && endCodes != nil)
-							{
-								// we want to enforce this formatting so let's find all codes between the start
-								// and end we have that might stop this formatting run and remove them
-								NSMutableArray *codeDictionariesToRemove = [NSMutableArray array];
-								NSDictionary *thisEscapeCode;
-								for (thisEscapeCode in escapeCodesBeforeInsertion)
-								{
-									enum sgrCode thisCode = [[thisEscapeCode objectForKey:@"code"] unsignedIntValue];
-									BOOL shouldRemoveThis = NO;
-									NSUInteger thisLocation = [[thisEscapeCode objectForKey:@"location"] unsignedIntegerValue];
-									if ((foundRange.location <= thisLocation) && (thisLocation < (foundRange.location+foundRange.length)))
-									{
-										NSString *thisStartCode;
-										for (thisStartCode in startCodes)
-										{
-											if ([ansiEscapeHelper sgrCode:thisCode endsFormattingIntroducedByCode:[thisStartCode intValue]])
-											{
-												shouldRemoveThis = YES;
-												break;
-											}
-										}
-									}
-									if (shouldRemoveThis)
-										[codeDictionariesToRemove addObject:thisEscapeCode];
-								}
-								[escapeCodes removeObjectsInArray:codeDictionariesToRemove];
-							}
-							
-							searchRange.location = foundRange.location+[formattedKeyword length];
-							searchRange.length = [cleanString length]-searchRange.location;
+							searchRange.location = NSMaxRange(foundRange);
+							searchRange.length = [tempAttrStr length]-searchRange.location;
 						}
 					}
 					while (foundRange.location != NSNotFound);
 					
-					stdoutBuffer = [ansiEscapeHelper ansiFormattedStringWithCodesAndLocations:escapeCodes cleanString:cleanString];
+					stdoutBuffer = [ansiEscapeHelper ansiEscapedStringWithAttributedString:tempAttrStr];
 				}
 			}
 		}
