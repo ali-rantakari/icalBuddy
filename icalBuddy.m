@@ -82,7 +82,9 @@ THE SOFTWARE.
 						 nil\
 						]
 
-#define kEmptyMutableAttributedString [[[NSMutableAttributedString alloc] init] autorelease]
+// helper macros for dealing with NSMutableAttributedStrings
+#define kEmptyMutableAttributedString 			[[[NSMutableAttributedString alloc] init] autorelease]
+#define kMutableAttributedStringWithString(x) 	[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
 
 
 const int VERSION_MAJOR = 1;
@@ -142,6 +144,10 @@ NSCalendarDate *today;
 // dictionary for configuration values
 NSMutableDictionary *configDict;
 
+// default version of the formatting styles dictionary
+// that normally is under the "formatting" key in
+// configDict (if the user has defined it in the
+// configuration file.)
 NSDictionary *defaultFormattingConfigDict;
 
 // dictionary for localization values
@@ -150,9 +156,13 @@ NSDictionary *l10nStringsDict;
 // default version of l10nStringsDict
 NSDictionary *defaultStringsDict;
 
-
+// the output buffer string where we add everything we
+// want to print out, and right before terminating
+// convert to an ANSI-escaped string and push it to
+// the standard output. this way we can easily modify
+// the formatting of the output right up until the
+// last minute.
 NSMutableAttributedString *stdoutBuffer;
-
 
 ANSIEscapeHelper *ansiEscapeHelper;
 
@@ -160,7 +170,11 @@ ANSIEscapeHelper *ansiEscapeHelper;
 
 
 
-// helper method
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// BEGIN: Misc. helper functions
+
+
 NSString* versionNumber()
 {
 	return [NSString stringWithFormat:@"%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD];
@@ -168,24 +182,18 @@ NSString* versionNumber()
 
 
 
-
-NSMutableAttributedString* strToAttrStr(NSString *string)
-{
-	return [[[NSMutableAttributedString alloc] initWithString:string] autorelease];
-}
-
-
-
-void addToOutputBuffer(NSMutableAttributedString *aStr)
+// adds the specified attributed string to the output buffer.
+void addToOutputBuffer(NSAttributedString *aStr)
 {
 	[stdoutBuffer appendAttributedString:aStr];
 }
 
 
 
-// helper methods
+// helper methods for printing to stdout and stderr
 // 		from: http://www.sveinbjorn.org/objectivec_stdout
-// 		(modified to use non-deprecated version of writeToFile:...)
+// 		(modified to use non-deprecated version of writeToFile:...
+//       and allow for using the "string format" syntax)
 void NSPrint(NSString *aStr, ...)
 {
 	va_list argList;
@@ -635,6 +643,17 @@ NSMutableAttributedString* mutableAttrStrWithAttrs(NSString *string, NSDictionar
 
 
 
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// BEGIN: Functions for formatting the output
+
+
+// returns a dictionary of attribute name (key) - attribute value (value)
+// pairs (suitable for using directly with NSMutableAttributedString's
+// attribute setter methods) based on a user-defined formatting specification
+// (from the config file, like: "red,bg:blue,bold")
 NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig)
 {
 	NSMutableDictionary *returnAttributes = [NSMutableDictionary dictionary];
@@ -863,6 +882,15 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 
 
 
+
+
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// BEGIN: Functions for pretty-printing data
+
+
 // returns a pretty-printed string representation of the specified event property
 NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions, NSCalendarDate *contextDay)
 {
@@ -887,8 +915,19 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				{
 					if ([person isMemberOfClass: [ABPerson class]])
 					{
-						NSString *contactFullName = [[[person valueForProperty:kABFirstNameProperty] stringByAppendingString:@" "] stringByAppendingString:[person valueForProperty:kABLastNameProperty]];
-						NSString *thisTitle = [NSString stringWithFormat:localizedStr(@"someonesBirthday"), contactFullName];
+						NSString *thisTitle;
+						if ([person isEqual:[[ABAddressBook sharedAddressBook] me]])
+							thisTitle = localizedStr(@"myBirthday");
+						else
+						{
+							NSString *contactFullName = strConcat(
+								[person valueForProperty:kABFirstNameProperty],
+								@" ",
+								[person valueForProperty:kABLastNameProperty],
+								nil
+							);
+							thisTitle = [NSString stringWithFormat:localizedStr(@"someonesBirthday"), contactFullName];
+						}
 						if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
 							thisPropOutputValue = thisTitle;
 						else
@@ -1021,11 +1060,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
 			if (thisPropOutputValue != nil)
-				[thisPropOutputValueAttrStr appendAttributedString:strToAttrStr(@"\n")];
+				[thisPropOutputValueAttrStr appendAttributedString:kMutableAttributedStringWithString(@"\n")];
 			
 			if (thisPropOutputName != nil)
 			{
-				[thisPropOutputNameAttrStr appendAttributedString:strToAttrStr(@" ")];
+				[thisPropOutputNameAttrStr appendAttributedString:kMutableAttributedStringWithString(@" ")];
 				[retVal appendAttributedString:thisPropOutputNameAttrStr];
 			}
 			
@@ -1062,10 +1101,10 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 						if (formatOutput)
 							prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
 						else
-							prefixStr = strToAttrStr(prefixStrBullet);
+							prefixStr = kMutableAttributedStringWithString(prefixStrBullet);
 					}
 					else
-						prefixStr = strToAttrStr(prefixStrIndent);
+						prefixStr = kMutableAttributedStringWithString(prefixStrIndent);
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
@@ -1174,11 +1213,11 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
 			if (thisPropOutputValue != nil)
-				[thisPropOutputValueAttrStr appendAttributedString:strToAttrStr(@"\n")];
+				[thisPropOutputValueAttrStr appendAttributedString:kMutableAttributedStringWithString(@"\n")];
 			
 			if (thisPropOutputName != nil)
 			{
-				[thisPropOutputNameAttrStr appendAttributedString:strToAttrStr(@" ")];
+				[thisPropOutputNameAttrStr appendAttributedString:kMutableAttributedStringWithString(@" ")];
 				[retVal appendAttributedString:thisPropOutputNameAttrStr];
 			}
 			
@@ -1218,10 +1257,10 @@ void printCalTask(CalTask *task, int printOptions)
 						if (formatOutput)
 							prefixStr = mutableAttrStrWithAttrs(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), getBulletStringAttributes(useAlertBullet));
 						else
-							prefixStr = strToAttrStr(prefixStrBullet);
+							prefixStr = kMutableAttributedStringWithString(prefixStrBullet);
 					}
 					else
-						prefixStr = strToAttrStr(prefixStrIndent);
+						prefixStr = kMutableAttributedStringWithString(prefixStrIndent);
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
@@ -1267,9 +1306,9 @@ void printItemSections(NSArray *sections, int printOptions)
 			if (!titlePrintedForCurrentSection)
 			{
 				if (!currentIsFirstPrintedSection)
-					addToOutputBuffer(strToAttrStr(@"\n"));
+					addToOutputBuffer(kMutableAttributedStringWithString(@"\n"));
 				
-				NSMutableAttributedString *thisOutput = strToAttrStr(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
+				NSMutableAttributedString *thisOutput = kMutableAttributedStringWithString(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
 				
 				if (formatOutput)
 					[thisOutput addAttributes:getSectionTitleStringAttributes(sectionTitle) range:NSMakeRange(0,[[thisOutput string] length])];
@@ -1292,8 +1331,6 @@ void printItemSections(NSArray *sections, int printOptions)
 		}
 	}
 }
-
-
 
 
 
@@ -1337,6 +1374,7 @@ int main(int argc, char *argv[])
 		@"no due date",		@"noDueDate",
 		@"priority", 		@"priority",
 		@"%@'s Birthday",	@"someonesBirthday",
+		@"My Birthday",		@"myBirthday",
 		@"today", 					@"today",
 		@"tomorrow", 				@"tomorrow",
 		@"yesterday", 				@"yesterday",
@@ -1355,6 +1393,7 @@ int main(int argc, char *argv[])
 		nil
 	];
 	
+	// default formatting for different output elements
 	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
 		@"cyan",		 		@"datetimeName",
 		@"yellow",		 		@"datetimeValue",

@@ -66,6 +66,10 @@ The translation of the value "low" for the "priority" property of a task.
 
 The title for an event in the Birthdays calendar (e.g. C<%@'s Birthday>.) Must include substring %@ to specify the location of the person's name.
 
+=item B<C<myBirthday>>
+
+The title for your own birthday event (e.g. "My Birthday".)
+
 =item B<C<today>>
 
 The translation of "today".

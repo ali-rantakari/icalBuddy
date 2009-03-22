@@ -18,8 +18,9 @@ other (my own ideas):
 - Add argument -lf (--localizationFile) for specifying an alternate localization file location
 - Write man page for the config file
 	- Formatting section keys and value syntax
+- Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
 - Write documentation for the editConfig and editConfigCLI arguments
-
+- Add possibility to specify any arguments in a static manner in the config file
 - Add timezone support (how to handle these?)
 
 
