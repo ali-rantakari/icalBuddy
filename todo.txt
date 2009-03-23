@@ -13,13 +13,14 @@ user requests:
 other (my own ideas):
 -------------------------
 
-- Implement support for italic text via ANSI escape sequences
-- Add argument -cf (--configFile) for specifying an alternate config file location
-- Add argument -lf (--localizationFile) for specifying an alternate localization file location
+- Add argument for specifying the number of extra indenting whitespace characters to use when indenting additional lines in the "notes" property values
 - Write man page for the config file
 	- Formatting section keys and value syntax
 - Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
-- Write documentation for the editConfig and editConfigCLI arguments
+- Write documentation for:
+	- the editConfig and editConfigCLI arguments
+	- the -cf (--configFile) and -lf (--localizationFile) arguments
+- Add concise list of arguments to the "usage" output.
 - Add possibility to specify any arguments in a static manner in the config file
 - Add timezone support (how to handle these?)
 

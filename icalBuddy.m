@@ -151,9 +151,9 @@ NSMutableDictionary *configDict;
 NSDictionary *defaultFormattingConfigDict;
 
 // dictionary for localization values
-NSDictionary *l10nStringsDict;
+NSDictionary *L10nStringsDict;
 
-// default version of l10nStringsDict
+// default version of L10nStringsDict
 NSDictionary *defaultStringsDict;
 
 // the output buffer string where we add everything we
@@ -309,9 +309,9 @@ NSString* localizedStr(NSString *str)
 	if (str == nil)
 		return nil;
 	
-	if (l10nStringsDict != nil)
+	if (L10nStringsDict != nil)
 	{
-		NSString *localizedStr = [l10nStringsDict objectForKey:str];
+		NSString *localizedStr = [L10nStringsDict objectForKey:str];
 		if (localizedStr != nil)
 			return localizedStr;
 	}
@@ -1440,76 +1440,140 @@ int main(int argc, char *argv[])
 	NSString *arg_eventsTo = nil;
 	
 	
+	
+	NSString *configFilePath = nil;
+	NSString *L10nFilePath = nil;
+	
+	// read user arguments for specifying paths to the config and
+	// localization files before reading any other arguments (we
+	// want to load the config first and then read the arguments
+	// so that the arguments could override whatever is set in
+	// the config. the localization stuff is just along for the
+	// ride (it's good friends with the config stuff and I don't
+	// have the heart to separate them))
+	int i;
+	for (i = 0; i < argc; i++)
+	{
+		if (((strcmp(argv[i], "-cf") == 0) || (strcmp(argv[i], "--configFile") == 0)) && (i+1 < argc))
+		{
+			configFilePath = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath];
+			if ([configFilePath length] > 0)
+			{
+				BOOL userSpecifiedConfigFileIsDir;
+				BOOL userSpecifiedConfigFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&userSpecifiedConfigFileIsDir];
+				if (!userSpecifiedConfigFileExists)
+				{
+					NSPrintErr(@"Error: specified configuration file doesn't exist: '%@'\n", configFilePath);
+					configFilePath = nil;
+				}
+				else if (userSpecifiedConfigFileIsDir)
+				{
+					NSPrintErr(@"Error: specified configuration file is a directory: '%@'\n", configFilePath);
+					configFilePath = nil;
+				}
+			}
+		}
+		else if (((strcmp(argv[i], "-lf") == 0) || (strcmp(argv[i], "--localizationFile") == 0)) && (i+1 < argc))
+		{
+			L10nFilePath = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath];
+			if ([L10nFilePath length] > 0)
+			{
+				BOOL userSpecifiedL10nFileIsDir;
+				BOOL userSpecifiedL10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:L10nFilePath isDirectory:&userSpecifiedL10nFileIsDir];
+				if (!userSpecifiedL10nFileExists)
+				{
+					NSPrintErr(@"Error: specified localization file doesn't exist: '%@'\n", L10nFilePath);
+					L10nFilePath = nil;
+				}
+				else if (userSpecifiedL10nFileIsDir)
+				{
+					NSPrintErr(@"Error: specified localization file is a directory: '%@'\n", L10nFilePath);
+					L10nFilePath = nil;
+				}
+			}
+		}
+	}
+	
+	
+	
 	// read and validate general configuration file
 	
 	configDict = nil;
-	NSString *configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
-	BOOL configFileIsDir;
-	BOOL configFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&configFileIsDir];
-	if (configFileExists && !configFileIsDir)
+	if (configFilePath == nil)
+		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
+	if (configFilePath != nil && [configFilePath length] > 0)
 	{
-		BOOL configFileIsValid = YES;
-		
-		configDict = [NSDictionary dictionaryWithContentsOfFile:configFilePath];
-		
-		if (configDict == nil)
+		BOOL configFileIsDir;
+		BOOL configFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&configFileIsDir];
+		if (configFileExists && !configFileIsDir)
 		{
-			NSPrintErr(@"* Error in configuration file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyConfig man page.\n", configFilePath);
-			configFileIsValid = NO;
+			BOOL configFileIsValid = YES;
+			
+			configDict = [NSDictionary dictionaryWithContentsOfFile:configFilePath];
+			
+			if (configDict == nil)
+			{
+				NSPrintErr(@"* Error in configuration file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyConfig man page.\n", configFilePath);
+				configFileIsValid = NO;
+			}
+			
+			if (!configFileIsValid)
+				NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
 		}
-		
-		if (!configFileIsValid)
-			NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
 	}
 	
 	
 	
 	// read and validate localization configuration file
 	
-	l10nStringsDict = nil;
-	NSString *l10nFilePath = [kL10nFilePath stringByExpandingTildeInPath];
-	BOOL l10nFileIsDir;
-	BOOL l10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:l10nFilePath isDirectory:&l10nFileIsDir];
-	if (l10nFileExists && !l10nFileIsDir)
+	L10nStringsDict = nil;
+	if (L10nFilePath == nil)
+		L10nFilePath = [kL10nFilePath stringByExpandingTildeInPath];
+	if (L10nFilePath != nil && [L10nFilePath length] > 0)
 	{
-		BOOL l10nFileIsValid = YES;
-		
-		l10nStringsDict = [NSDictionary dictionaryWithContentsOfFile:l10nFilePath];
-		
-		if (l10nStringsDict == nil)
+		BOOL L10nFileIsDir;
+		BOOL L10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:L10nFilePath isDirectory:&L10nFileIsDir];
+		if (L10nFileExists && !L10nFileIsDir)
 		{
-			NSPrintErr(@"* Error in localization file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyLocalization man page.\n", l10nFilePath);
-			l10nFileIsValid = NO;
-		}
-		
-		if (l10nFileIsValid)
-		{
-			// validate some specific keys in localization config
-			NSDictionary *l10nKeysRequiringSubstrings = [NSDictionary dictionaryWithObjectsAndKeys:
-				@"%d", @"xWeeksFromNow",
-				@"%d", @"xWeeksAgo",
-				@"%d", @"xDaysAgo",
-				@"%d", @"xDaysFromNow",
-				@"%@", @"someonesBirthday",
-				nil
-			];
-			NSString *thisKey;
-			NSString *thisVal;
-			NSString *requiredSubstring;
-			for (thisKey in [l10nKeysRequiringSubstrings allKeys])
+			BOOL L10nFileIsValid = YES;
+			
+			L10nStringsDict = [NSDictionary dictionaryWithContentsOfFile:L10nFilePath];
+			
+			if (L10nStringsDict == nil)
 			{
-				requiredSubstring = [l10nKeysRequiringSubstrings objectForKey:thisKey];
-				thisVal = [l10nStringsDict objectForKey:thisKey];
-				if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
+				NSPrintErr(@"* Error in localization file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyLocalization man page.\n", L10nFilePath);
+				L10nFileIsValid = NO;
+			}
+			
+			if (L10nFileIsValid)
+			{
+				// validate some specific keys in localization config
+				NSDictionary *L10nKeysRequiringSubstrings = [NSDictionary dictionaryWithObjectsAndKeys:
+					@"%d", @"xWeeksFromNow",
+					@"%d", @"xWeeksAgo",
+					@"%d", @"xDaysAgo",
+					@"%d", @"xDaysFromNow",
+					@"%@", @"someonesBirthday",
+					nil
+				];
+				NSString *thisKey;
+				NSString *thisVal;
+				NSString *requiredSubstring;
+				for (thisKey in [L10nKeysRequiringSubstrings allKeys])
 				{
-					NSPrintErr(@"* Error in localization file \"%@\"\n  (key: \"%@\", value: \"%@\"):\n  value must include %@ to indicate position for a variable.\n", l10nFilePath, thisKey, thisVal, requiredSubstring);
-					l10nFileIsValid = NO;
+					requiredSubstring = [L10nKeysRequiringSubstrings objectForKey:thisKey];
+					thisVal = [L10nStringsDict objectForKey:thisKey];
+					if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
+					{
+						NSPrintErr(@"* Error in localization file \"%@\"\n  (key: \"%@\", value: \"%@\"):\n  value must include %@ to indicate position for a variable.\n", L10nFilePath, thisKey, thisVal, requiredSubstring);
+						L10nFileIsValid = NO;
+					}
 				}
 			}
+			
+			if (!L10nFileIsValid)
+				NSPrintErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", L10nFilePath);
 		}
-		
-		if (!l10nFileIsValid)
-			NSPrintErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", l10nFilePath);
 	}
 	
 	
@@ -1538,7 +1602,7 @@ int main(int argc, char *argv[])
 	}
 	
 	
-	int i;
+	
 	for (i = 0; i < argc; i++)
 	{
 		if ((strcmp(argv[i], "-sc") == 0) || (strcmp(argv[i], "--separateByCalendar") == 0))
@@ -1744,6 +1808,10 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if ([arg_output hasPrefix:@"editConfig"])
 	{
+		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
+		BOOL configFileIsDir;
+		BOOL configFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&configFileIsDir];
+		
 		if (!configFileExists)
 		{
 			[kConfigFileStub writeToFile:configFilePath atomically:YES];
