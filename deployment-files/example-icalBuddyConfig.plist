@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>formatting</key>
+	<dict>
+		<key>datetimeName</key>
+		<string>cyan</string>
+		<key>datetimeValue</key>
+		<string>yellow</string>
+		<key>titleValue</key>
+		<string>magenta,bg:black</string>
+		<key>notesName</key>
+		<string>cyan</string>
+		<key>notesValue</key>
+		<string>white</string>
+		<key>urlName</key>
+		<string>cyan</string>
+		<key>urlValue</key>
+		<string>white</string>
+		<key>locationName</key>
+		<string>cyan</string>
+		<key>locationValue</key>
+		<string>white</string>
+		<key>dueDateName</key>
+		<string>cyan</string>
+		<key>dueDateValue</key>
+		<string>yellow</string>
+		<key>priorityName</key>
+		<string>cyan</string>
+		<key>priorityValue</key>
+		<string>black,bg:white</string>
+		<key>priorityValueHigh</key>
+		<string>red,bg:white</string>
+		<key>priorityValueMedium</key>
+		<string>yellow,bg:white</string>
+		<key>priorityValueLow</key>
+		<string>green,bg:white</string>
+		<key>sectionTitle</key>
+		<string>blue,underlined</string>
+		<key>bullet</key>
+		<string>white</string>
+		<key>alertBullet</key>
+		<string>red</string>
+		<key>firstItemLine</key>
+		<string>bold</string>
+	</dict>
+	<key>formattedKeywords</key>
+	<dict>
+		<key>today</key>
+		<string>red,bold</string>
+	</dict>
+</dict>
+</plist>

@@ -13,15 +13,10 @@ user requests:
 other (my own ideas):
 -------------------------
 
-- Add argument for specifying the number of extra indenting whitespace characters to use when indenting additional lines in the "notes" property values
-- Write man page for the config file
-	- Formatting section keys and value syntax
-- Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
-- Write documentation for:
-	- the editConfig and editConfigCLI arguments
-	- the -cf (--configFile) and -lf (--localizationFile) arguments
-- Add concise list of arguments to the "usage" output.
 - Add possibility to specify any arguments in a static manner in the config file
+- Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
+- Implement wrapping to a specified number of maximum characters on each line (problem: will look off with non-fixed-width fonts if we try to match indenting levels and fixing those problems with arguments might become really complex (i.e. you would need too many different kinds of arguments for all the different cases))
+
 - Add timezone support (how to handle these?)
 
 

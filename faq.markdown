@@ -11,7 +11,11 @@ Yes indeed: icalBuddy, like most other Unix-type command line applications, has 
 
 ### Q: The output of my calendar items is garbled! What gives?
 
-icalBuddy uses unicode (UTF-8) string encoding by default in its output, so make sure that the application you're using to invoke it understands UTF-8. If there's a mismatch between the string encoding icalBuddy uses for its output and the string encoding an application uses to read that output, some special characters (like umlauts, chinese or arabic) might not display correctly. [GeekTool][geektool] doesn't understand UTF-8 by default, but you can get a custom build that does from [Xu Lian's page here][xulian]. You can also use the `--strEncoding` argument to make icalBuddy output using some other string encoding. Run `icalBuddy strEncodings` to see all the possible values you can use for that argument.
+icalBuddy uses unicode (UTF-8) string encoding by default in its output, so make sure that the application you're using to invoke it understands UTF-8. If there's a mismatch between the string encoding icalBuddy uses for its output and the string encoding an application uses to read that output, some special characters (like umlauts, chinese or arabic) might not display correctly.
+
+You can turn on UTF-8 encoding in **Apple's Terminal.app** from *preferences > settings > (whichever style you're using) > advanced > international > character encoding*. In **iTerm** this can be done from *"Bookmarks" menu > manage profiles... > terminal profiles > (whichever profile you're using, probably "default") > encoding*. **[GeekTool][geektool]** doesn't understand UTF-8 by default, but you can get a custom build that does from [Xu Lian's page here][xulian].
+
+You can also use the `--strEncoding` argument to make icalBuddy output using some other string encoding. Run `icalBuddy strEncodings` to see all the possible values you can use for that argument.
 
 
 ### Q: How can I get icalBuddy to display times according to a 12-hour clock?

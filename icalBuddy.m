@@ -102,8 +102,7 @@ enum calItemPrintOption
 {
 	PRINT_OPTION_NONE = 				0,
 	PRINT_OPTION_SINGLE_DAY = 			(1 << 0),	// in the contex of a single day (for events) (i.e. don't print out full dates)
-	PRINT_OPTION_CALENDAR_AGNOSTIC = 	(1 << 1),	// calendar-agnostic (i.e. don't print out the calendar name)
-	PRINT_OPTION_FORMAT_OUTPUT = 		(1 << 2)	// whether to use formatting in the output via ANSI escape sequences
+	PRINT_OPTION_CALENDAR_AGNOSTIC = 	(1 << 1)	// calendar-agnostic (i.e. don't print out the calendar name)
 } CalItemPrintOption;
 
 
@@ -121,18 +120,19 @@ NSStringEncoding outputStrEncoding = NSUTF8StringEncoding; // default
 NSArray *propertyOrder;
 
 // the prefix strings
-NSString *prefixStrBullet = 		@"* ";
-NSString *prefixStrBulletAlert = 	@"! ";
-NSString *prefixStrIndent = 		@"    ";
-NSString *sectionSeparatorStr = 	@"\n------------------------";
+NSString *prefixStrBullet = 			@"* ";
+NSString *prefixStrBulletAlert = 		@"! ";
+NSString *prefixStrIndent = 			@"    ";
+NSString *sectionSeparatorStr = 		@"\n------------------------";
 
-NSString *timeFormatStr = 			@"%H:%M";
-NSString *dateFormatStr = 			@"%Y-%m-%d";
-NSString *dateTimeSeparatorStr = 	@" at ";
-NSSet *includedEventProperties = 	nil;
-NSSet *excludedEventProperties = 	nil;
-NSSet *includedTaskProperties = 	nil;
-NSSet *excludedTaskProperties = 	nil;
+NSString *timeFormatStr = 				@"%H:%M";
+NSString *dateFormatStr = 				@"%Y-%m-%d";
+NSString *dateTimeSeparatorStr = 		@" at ";
+NSSet *includedEventProperties = 		nil;
+NSSet *excludedEventProperties = 		nil;
+NSSet *includedTaskProperties = 		nil;
+NSSet *excludedTaskProperties = 		nil;
+NSInteger notesNewlinesIndentModifier =	0;
 
 BOOL displayRelativeDates = YES;
 
@@ -896,7 +896,6 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 {
 	if (event != nil)
 	{
-		BOOL formatOutput = (printOptions & PRINT_OPTION_FORMAT_OUTPUT);
 		NSString *thisPropOutputName = nil;
 		NSString *thisPropOutputValue = nil;
 		
@@ -957,7 +956,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			if ([event notes] != nil && ![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 				thisPropOutputValue = [[event notes]
 					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[NSString stringWithFormat:@"\n%@ %@",prefixStrIndent,[@"" stringByPaddingToLength:[thisPropOutputName length] withString:@" " startingAtIndex:0]]
+					withString:[NSString
+						stringWithFormat:@"\n%@%@",
+							prefixStrIndent,
+							[@"" stringByPaddingToLength:([thisPropOutputName length]+1+notesNewlinesIndentModifier) withString:@" " startingAtIndex:0]
+					]
 				];
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -1047,14 +1050,13 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			NSMutableAttributedString *thisPropOutputNameAttrStr = nil;
 			NSMutableAttributedString *thisPropOutputValueAttrStr = nil;
 			
-			if (thisPropOutputName != nil && formatOutput)
+			if (thisPropOutputName != nil)
 				thisPropOutputNameAttrStr = mutableAttrStrWithAttrs(thisPropOutputName, getPropNameStringAttributes(propName));
 			
 			if (thisPropOutputValue != nil)
 			{
 				thisPropOutputValue = [thisPropOutputValue stringByReplacingOccurrencesOfString:@"%" withString:@"%%"];
-				if (formatOutput)
-					thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
+				thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
 			}
 			
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
@@ -1084,8 +1086,6 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 {
 	if (event != nil)
 	{
-		BOOL formatOutput = (printOptions & PRINT_OPTION_FORMAT_OUTPUT);
-		
 		BOOL firstPrintedProperty = YES;
 		
 		for (NSString *thisProp in propertyOrder)
@@ -1097,12 +1097,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 				{
 					NSMutableAttributedString *prefixStr;
 					if (firstPrintedProperty)
-					{
-						if (formatOutput)
-							prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
-						else
-							prefixStr = kMutableAttributedStringWithString(prefixStrBullet);
-					}
+						prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
 					else
 						prefixStr = kMutableAttributedStringWithString(prefixStrIndent);
 					
@@ -1110,7 +1105,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
-					if (formatOutput && firstPrintedProperty)
+					if (firstPrintedProperty)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
 					addToOutputBuffer(thisOutput);
@@ -1136,7 +1131,6 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 {
 	if (task != nil)
 	{
-		BOOL formatOutput = (printOptions & PRINT_OPTION_FORMAT_OUTPUT);
 		NSString *thisPropOutputName = nil;
 		NSString *thisPropOutputValue = nil;
 		
@@ -1154,7 +1148,11 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			if ([task notes] != nil && ![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 				thisPropOutputValue = [[task notes]
 					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[NSString stringWithFormat:@"\n%@ %@",prefixStrIndent,[@"" stringByPaddingToLength:[thisPropOutputName length] withString:@" " startingAtIndex:0]]
+					withString:[NSString
+						stringWithFormat:@"\n%@%@",
+							prefixStrIndent,
+							[@"" stringByPaddingToLength:([thisPropOutputName length]+1+notesNewlinesIndentModifier) withString:@" " startingAtIndex:0]
+					]
 				];
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -1200,14 +1198,13 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			NSMutableAttributedString *thisPropOutputNameAttrStr = nil;
 			NSMutableAttributedString *thisPropOutputValueAttrStr = nil;
 			
-			if (thisPropOutputName != nil && formatOutput)
+			if (thisPropOutputName != nil)
 				thisPropOutputNameAttrStr = mutableAttrStrWithAttrs(thisPropOutputName, getPropNameStringAttributes(propName));
 			
 			if (thisPropOutputValue != nil)
 			{
 				thisPropOutputValue = [thisPropOutputValue stringByReplacingOccurrencesOfString:@"%" withString:@"%%"];
-				if (formatOutput)
-					thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
+				thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
 			}
 			
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
@@ -1237,8 +1234,6 @@ void printCalTask(CalTask *task, int printOptions)
 {
 	if (task != nil)
 	{
-		BOOL formatOutput = (printOptions & PRINT_OPTION_FORMAT_OUTPUT);
-		
 		BOOL firstPrintedProperty = YES;
 		
 		for (NSString *thisProp in propertyOrder)
@@ -1254,10 +1249,7 @@ void printCalTask(CalTask *task, int printOptions)
 					{
 						BOOL useAlertBullet = 	(firstPrintedProperty && [task dueDate] != nil &&
 												 [now compare:[task dueDate]] == NSOrderedDescending);
-						if (formatOutput)
-							prefixStr = mutableAttrStrWithAttrs(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), getBulletStringAttributes(useAlertBullet));
-						else
-							prefixStr = kMutableAttributedStringWithString(prefixStrBullet);
+						prefixStr = mutableAttrStrWithAttrs(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), getBulletStringAttributes(useAlertBullet));
 					}
 					else
 						prefixStr = kMutableAttributedStringWithString(prefixStrIndent);
@@ -1266,7 +1258,7 @@ void printCalTask(CalTask *task, int printOptions)
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
-					if (formatOutput && firstPrintedProperty)
+					if (firstPrintedProperty)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
 					addToOutputBuffer(thisOutput);
@@ -1288,7 +1280,6 @@ void printCalTask(CalTask *task, int printOptions)
 // sectionTitle (NSString) and sectionItems (NSArray of CalCalendarItems.)
 void printItemSections(NSArray *sections, int printOptions)
 {
-	BOOL formatOutput = (printOptions & PRINT_OPTION_FORMAT_OUTPUT);
 	BOOL titlePrintedForCurrentSection;
 	BOOL currentIsFirstPrintedSection = YES;
 	
@@ -1310,8 +1301,7 @@ void printItemSections(NSArray *sections, int printOptions)
 				
 				NSMutableAttributedString *thisOutput = kMutableAttributedStringWithString(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
 				
-				if (formatOutput)
-					[thisOutput addAttributes:getSectionTitleStringAttributes(sectionTitle) range:NSMakeRange(0,[[thisOutput string] length])];
+				[thisOutput addAttributes:getSectionTitleStringAttributes(sectionTitle) range:NSMakeRange(0,[[thisOutput string] length])];
 				
 				addToOutputBuffer(thisOutput);
 				
@@ -1519,6 +1509,28 @@ int main(int argc, char *argv[])
 			
 			if (!configFileIsValid)
 				NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
+			else
+			{
+				NSDictionary *constArgsDict = [configDict objectForKey:@"constantArguments"];
+				if (constArgsDict != nil)
+				{
+					NSArray *allArgKeys = [constArgsDict allKeys];
+					if ([allArgKeys containsObject:@"bullet"])
+						prefixStrBullet = [constArgsDict objectForKey:@"bullet"];
+					if ([allArgKeys containsObject:@"alertBullet"])
+						prefixStrBulletAlert = [constArgsDict objectForKey:@"alertBullet"];
+					if ([allArgKeys containsObject:@"indent"])
+						prefixStrIndent = [constArgsDict objectForKey:@"indent"];
+					if ([allArgKeys containsObject:@"sectionSeparator"])
+						sectionSeparatorStr = [constArgsDict objectForKey:@"sectionSeparator"];
+					if ([allArgKeys containsObject:@"timeFormat"])
+						timeFormatStr = [constArgsDict objectForKey:@"timeFormat"];
+					if ([allArgKeys containsObject:@"dateFormat"])
+						dateFormatStr = [constArgsDict objectForKey:@"dateFormat"];
+					if ([allArgKeys containsObject:@"dateTimeSeparator"])
+						dateTimeSeparatorStr = [constArgsDict objectForKey:@"dateTimeSeparator"];
+				}
+			}
 		}
 	}
 	
@@ -1643,6 +1655,8 @@ int main(int argc, char *argv[])
 			includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-etp") == 0) || (strcmp(argv[i], "--excludeTaskProps") == 0)) && (i+1 < argc))
 			excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+		else if (((strcmp(argv[i], "-nni") == 0) || (strcmp(argv[i], "--notesNewlinesIndent") == 0)) && (i+1 < argc))
+			notesNewlinesIndentModifier = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue];
 	}
 	
 	NSString *includeCalsStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"ic"];
@@ -1920,7 +1934,6 @@ int main(int argc, char *argv[])
 			// default print options
 			events_printOptions = 
 				PRINT_OPTION_SINGLE_DAY | 
-				(arg_useFormatting ? PRINT_OPTION_FORMAT_OUTPUT : PRINT_OPTION_NONE) |
 				(arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
 			
 			// get start and end dates for predicate
@@ -1995,9 +2008,7 @@ int main(int argc, char *argv[])
 			uncompletedTasks = [uncompletedTasks sortedArrayUsingFunction:prioritySort context:NULL];
 			
 			// default print options
-			tasks_printOptions = 
-				(arg_useFormatting ? PRINT_OPTION_FORMAT_OUTPUT : PRINT_OPTION_NONE) |
-				(arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+			tasks_printOptions = (arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
 		}
 		
 		
@@ -2181,29 +2192,55 @@ int main(int argc, char *argv[])
 	else
 	{
 		NSPrint(@"\n");
-		NSPrint(@"USAGE: %s <options> <output_type>\n", argv[0]);
+		NSPrint(@"USAGE: %@ <options> <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
 		NSPrint(@"\n");
-		NSPrint(@"<output_type> specifies what to output.\n");
-		NSPrint(@"Possible values for it are:\n");
-		NSPrint(@"  'eventsToday'      (events occurring today)\n");
-		NSPrint(@"  'eventsToday+NUM'  (events occurring between today\n");
-		NSPrint(@"                      and NUM days into the future (where\n");
-		NSPrint(@"                      NUM is an integer value))\n");
+		NSPrint(@"<command> specifies the general action icalBuddy should\n");
+		NSPrint(@"take. Possible values for it are:\n");
+		NSPrint(@"\n");
+		NSPrint(@"  'eventsToday'      (print events occurring today)\n");
+		NSPrint(@"  'eventsToday+NUM'  (print events occurring between today\n");
+		NSPrint(@"                      and NUM days into the future)\n");
 		NSPrint(@"  'eventsNow'        (events occurring at present time)\n");
 		NSPrint(@"  'eventsFrom:START to:END'\n");
-		NSPrint(@"                     (events occurring between the two\n");
+		NSPrint(@"                     (print events occurring between the two\n");
 		NSPrint(@"                      specified dates (START and END), where\n");
 		NSPrint(@"                      both are specified in the format:\n");
 		NSPrint(@"                      YYYY-MM-DD HH:MM:SS ±HHMM)\n");
-		NSPrint(@"  'uncompletedTasks' (uncompleted tasks)\n");
-		NSPrint(@"  'calendars'        (all calendars)\n");
-		NSPrint(@"  'strEncodings'     (all the possible string encodings)\n");
+		NSPrint(@"  'uncompletedTasks' (print uncompleted tasks)\n");
+		NSPrint(@"  'calendars'        (print all calendars)\n");
+		NSPrint(@"  'strEncodings'     (print all the possible string encodings)\n");
+		NSPrint(@"  'editConfig'       (open the configuration file for editing\n");
+		NSPrint(@"                      in a GUI editor application)\n");
+		NSPrint(@"  'editConfigCLI'    (open the configuration file for editing\n");
+		NSPrint(@"                      in a command-line editor)\n");
 		NSPrint(@"\n");
-		NSPrint(@"See the icalBuddy manual page for a list of the possible\n");
-		NSPrint(@"options (just type 'man icalBuddy' into the terminal.)\n");
+		NSPrint(@"Some of the <options> you can use are:\n");
+		NSPrint(@"\n");
+		NSPrint(@"-V        Print version number and exit\n");
+		NSPrint(@"-sc,-sd   Separate by calendar or date\n");
+		NSPrint(@"-f        Format output\n");
+		NSPrint(@"-nc       No calendar names\n");
+		NSPrint(@"-nrd      No relative dates\n");
+		NSPrint(@"-n        Include only events from now on\n");
+		NSPrint(@"-tf,-df   Set time or date format (value required)\n");
+		NSPrint(@"-dts      Set date-time separator (value required)\n");
+		NSPrint(@"-po       Set property order (value required)\n");
+		NSPrint(@"-b        Set bullet point (value required)\n");
+		NSPrint(@"-ab       Set alert bullet point (value required)\n");
+		NSPrint(@"-i        Set indenting (value required)\n");
+		NSPrint(@"-ss       Set section separator (value required)\n");
+		NSPrint(@"-ic,-ec   Include or exclude calendars (value required)\n");
+		NSPrint(@"-iep,-eep Include or exclude event properties (value required)\n");
+		NSPrint(@"-itp,-etp Include or exclude task properties (value required)\n");
+		NSPrint(@"-cf,-lf   Set config or localization file path (value required)\n");
+		NSPrint(@"-nni      Set indentation for new lines in notes (value required)\n");
+		NSPrint(@"\n");
+		NSPrint(@"See the icalBuddy manual page for a more complete list of\n");
+		NSPrint(@"all the possible arguments and their descriptions (just type\n");
+		NSPrint(@"'man icalBuddy' into the terminal.)\n");
 		NSPrint(@"\n");
 		NSPrint(@"Version %@\n", versionNumber());
-		NSPrint(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org\n");
+		NSPrint(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org/icalBuddy\n");
 		NSPrint(@"\n");
 	}
 	
@@ -2244,9 +2281,14 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	NSString *ansiEscapedOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:stdoutBuffer];
+	NSString *finalOutput;
 	
-	NSPrint([ansiEscapedOutput stringByReplacingOccurrencesOfString:@"%" withString:@"%%"]);
+	if (arg_useFormatting)
+		finalOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:stdoutBuffer];
+	else
+		finalOutput = [stdoutBuffer string];
+	
+	NSPrint(finalOutput);
 	
 	
 	[autoReleasePool release];

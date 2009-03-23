@@ -26,30 +26,37 @@
 .Op Fl eep Ar value
 .Op Fl itp Ar value
 .Op Fl etp Ar value
-.Op Ar output_type
+.Op Fl cf Ar path
+.Op Fl lf Ar path
+.Op Fl nni Ar num
+.Ar command
 .Sh DESCRIPTION          \" Section Header - required - don't modify
 .Nm
 queries the OS X calendar database for items and outputs them.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
-.It Ar output_type
-Specifies what to output. Possible values are:
+.It Ar command
+Specifies the general action to take. Possible values are:
 .Pp
-\'eventsToday'        (events occurring today)
+\'eventsToday'        (print events occurring today)
 .Pp
-\'eventsToday+NUM'    (events occurring between today and NUM days into the future, where NUM is an integer)
+\'eventsToday+NUM'    (print events occurring between today and NUM days into the future, where NUM is an integer)
 .Pp
-\'eventsNow'          (events occurring at present time)
+\'eventsNow'          (print events occurring at present time)
 .Pp
 \'eventsFrom:START to:END'
-                     (events occurring between the two specified dates (START and END), where both are specified in the format "YYYY-MM-DD HH:MM:SS +HHMM" (the +HHMM part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix))
+                     (print events occurring between the two specified dates (START and END), where both are specified in the format "YYYY-MM-DD HH:MM:SS +HHMM" (the +HHMM part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix))
 .Pp
-\'uncompletedTasks'   (uncompleted tasks)
+\'uncompletedTasks'   (print uncompleted tasks)
 .Pp
-\'calendars'          (all calendars)
+\'calendars'          (print all calendars)
 .Pp
-\'strEncodings'       (all the possible string encodings)
+\'strEncodings'       (print all the possible string encodings)
+.Pp
+\'editConfig'         (open the configuration file for editing in a GUI editor application)
+.Pp
+\'editConfigCLI'      (open the configuration file for editing in a command-line editor)
 .It Fl V , Fl -version
 Print version number and exit.
 .It Fl u , Fl -checkForUpdates
@@ -68,11 +75,11 @@ argument is used.
 Do not use "natural language relative dates" when displaying dates (e.g. "today", "yesterday" or "day after tomorrow".)
 .It Fl n , Fl -includeOnlyEventsFromNowOn
 If the
-.Ar output_type
+.Ar command
 value 'eventsToday' is used, only output events that occur between the current time and the end of the day (as opposed to events that occur between the start and end of the day, as by default.)
 .It Fl -strEncoding Ar encoding
 Use the specified string encoding for the output. Run the app once with the 'strEncodings'
-.Ar output_type
+.Ar command
 value to see all the possible values you can use here.
 .It Fl tf , Fl -timeFormat Ar format
 Format times included in the output based on the
@@ -112,7 +119,7 @@ Includes only items in calendars specified by
 into the output.
 .Ar value
 must be a comma-separated list of calendar UIDs (which you can find out by using the 'calendars'
-.Ar output_type
+.Ar command
 parameter.) You can also use titles, but remember that they may not be unique (as opposed to UIDs.) The
 .Fl ic
 and
@@ -124,7 +131,7 @@ Excludes items in calendars specified by
 from the output. 
 .Ar value
 must be a comma-separated list of calendar UIDs (which you can find out by using the 'calendars'
-.Ar output_type
+.Ar command
 parameter.) You can also use titles, but remember that they may not be unique (as opposed to UIDs.) The
 .Fl ic
 and
@@ -158,6 +165,18 @@ from the output.
 must be a comma-separated list of property names. See
 .Fl itp
 for a list of possible property names. A value of "*" will exclude all properties and make sure just the title is printed.
+.It Fl cf , -configFile Ar path
+Use the configuration file located at
+.Ar path
+instead of the default one (~/.icalBuddyConfig.plist).
+.It Fl lf , -localizationFile Ar path
+Use the localization file located at
+.Ar path
+instead of the default one (~/.icalBuddyLocalization.plist).
+.It Fl nni , -notesNewlinesIndent Ar num
+Modifies the indentation level for new lines in values for the notes property by
+.Ar num
+number of whitespace characters. The default indentation level (number of whitespace characters) is the number of characters in the localized version of the string "notes: " (the name of the "notes" property + 2). So in order to indent two characters further, you would use this argument with the value 2.
 .El
 .Pp                      \" new paragraph
 .Sh EXAMPLES

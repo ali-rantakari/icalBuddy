@@ -1,0 +1,49 @@
+=head1 NAME
+
+B<icalBuddy> -- query the OS X calendar database for items
+
+
+=head1 SYNOPSIS
+
+=over 10
+
+=item B<icalBuddy>
+
+[B<-Vufn>] [B<--strEncoding> U<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-tf> U<format>] [B<-df> U<format>] [B<-dts> U<separator>] [B<-po> U<value>] [B<-b> U<value>] [B<-ab> U<value>] [B<-i> U<value>] [B<-ss> U<value>] [B<-ic> U<value>] [B<-ec> U<value>] [B<-iep> U<value>] [B<-eep> U<value>] [B<-itp> U<value>] [B<-etp> U<value>] U<command>
+
+
+=head1 DESCRIPTION
+
+B<icalBuddy> queries the OS X calendar database for items and outputs them.
+
+The options are as follows:
+
+=over 12
+
+=item U<command>
+
+Specifies what to output. Possible values are:
+
+=over 24
+
+=item B<>
+
+=back
+
+
+=back
+
+
+=head1 EXAMPLES
+
+
+
+
+=head1 SEE ALSO
+
+icalBuddy(1), plist(5), plutil(1), icalBuddyLocalization(1)
+
+=head1 AUTHORS
+
+This man page has been written by Ali Rantakari (http://hasseg.org)
+

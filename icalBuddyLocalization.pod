@@ -177,7 +177,7 @@ The translation of "%d weeks from now", where %d is a number of weeks (the %d mu
 
 =head1 SEE ALSO
 
-plist(5), plutil(1)
+icalBuddy(1), plist(5), plutil(1), icalBuddyConfig(1)
 
 =head1 AUTHORS
 

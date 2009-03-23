@@ -10,6 +10,7 @@ TEMP_DEPLOYMENT_DIR=deployment/$(APP_VERSION)
 TEMP_DEPLOYMENT_ZIPFILE=$(TEMP_DEPLOYMENT_DIR)/icalBuddy-v$(APP_VERSION).zip
 TEMP_DEPLOYMENT_MANFILE="deployment/man.html"
 TEMP_DEPLOYMENT_L10NMANFILE="deployment/localization-man.html"
+TEMP_DEPLOYMENT_CONFIGMANFILE="deployment/config-man.html"
 TEMP_DEPLOYMENT_FAQFILE="deployment/faq.html"
 VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
@@ -41,6 +42,19 @@ icalBuddy: icalBuddy.m
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+# generate configuration man page from POD syntax file
+#-------------------------------------------------------------------------
+icalBuddyConfig.1: icalBuddyConfig.pod
+	@echo
+	@echo ---- Generating configuration manpage
+	@echo      from pod file:
+	@echo ======================================
+	pod2man --section=1 --release=1.0 --center="icalBuddy configuration" --date="2009-03-23" icalBuddyConfig.pod > icalBuddyConfig.1
+
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
 # generate localization man page from POD syntax file
 #-------------------------------------------------------------------------
 icalBuddyLocalization.1: icalBuddyLocalization.pod
@@ -56,12 +70,13 @@ icalBuddyLocalization.1: icalBuddyLocalization.pod
 #-------------------------------------------------------------------------
 # generate HTML from manpages and faq
 #-------------------------------------------------------------------------
-docs: icalBuddy.1 faq.markdown icalBuddyLocalization.1
+docs: icalBuddy.1 faq.markdown icalBuddyLocalization.1 icalBuddyConfig.1
 	@echo
 	@echo ---- Generating HTML from manpages:
 	@echo ======================================
 	utils/manserver.pl icalBuddy.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_MANFILE)
 	utils/manserver.pl icalBuddyLocalization.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_L10NMANFILE)
+	utils/manserver.pl icalBuddyConfig.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_CONFIGMANFILE)
 	
 	@echo
 	@echo ---- Generating HTML from FAQ:

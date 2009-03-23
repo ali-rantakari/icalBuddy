@@ -13,6 +13,7 @@ MANDIR=/usr/local/share/man/man1
 BINFILE="${THISDIR}/icalBuddy"
 MANFILE="${THISDIR}/icalBuddy.1"
 L10NMANFILE="${THISDIR}/icalBuddyLocalization.1"
+CONFIGMANFILE="${THISDIR}/icalBuddyConfig.1"
 
 
 
@@ -28,11 +29,16 @@ if [ ! -e "${L10NMANFILE}" ];then
 	echo "Error: can not find \"${L10NMANFILE}\" (the localization man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
 	exit 1
 fi
+if [ ! -e "${L10NMANFILE}" ];then
+	echo "Error: can not find \"${CONFIGMANFILE}\" (the configuration man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
+	exit 1
+fi
 echo
 echo "This script will install:"
 echo
 echo "icalBuddy executable to: ${BINDIR}"
 echo "icalBuddy man page to: ${MANDIR}"
+echo "icalBuddyConfig man page to: ${MANDIR}"
 echo "icalBuddyLocalization man page to: ${MANDIR}"
 echo
 echo "We'll need administrator rights to install to these locations so please enter your admin password when asked."
@@ -58,6 +64,7 @@ echo "done."
 echo -n "Installing the man pages..."
 sudo cp -f "${MANFILE}" "${MANDIR}"
 sudo cp -f "${L10NMANFILE}" "${MANDIR}"
+sudo cp -f "${CONFIGMANFILE}" "${MANDIR}"
 if [ ! $? -eq 0 ];then echo "...error! aborting."; exit 10; fi
 echo "done."
 
