@@ -33,42 +33,41 @@ if [ ! -e "${L10NMANFILE}" ];then
 	echo "Error: can not find \"${CONFIGMANFILE}\" (the configuration man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
 	exit 1
 fi
+echo "================================="
 echo
 echo "This script will install:"
 echo
-echo "icalBuddy executable to: ${BINDIR}"
-echo "icalBuddy man page to: ${MANDIR}"
-echo "icalBuddyConfig man page to: ${MANDIR}"
-echo "icalBuddyLocalization man page to: ${MANDIR}"
+echo -e "icalBuddy executable to: \e[36m${BINDIR}\e[m"
+echo -e "man pages (icalBuddy, icalBuddyConfig, icalBuddyLocalization) to: \e[36m${MANDIR}\e[m"
 echo
-echo "We'll need administrator rights to install to these locations so please enter your admin password when asked."
-echo "Press any key to continue installing or Ctrl-C to cancel."
+echo -e "We'll need administrator rights to install to these locations so \e[33mplease enter your admin password when asked\e[m."
+echo -e "\e[1mPress any key to continue installing or Ctrl-C to cancel.\e[m"
 read
 echo
 sudo -v
-if [ ! $? -eq 0 ];then echo "error! aborting."; exit 10; fi
+if [ ! $? -eq 0 ];then echo "error! aborting." >&2; exit 10; fi
 echo
 
 echo -n "Creating directories..."
 sudo mkdir -p ${BINDIR}
-if [ ! $? -eq 0 ];then echo "...error! aborting."; exit 10; fi
+if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 sudo mkdir -p ${MANDIR}
-if [ ! $? -eq 0 ];then echo "...error! aborting."; exit 10; fi
+if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 echo "done."
 
 echo -n "Installing the binary executable..."
 sudo cp -f "${BINFILE}" "${BINDIR}"
-if [ ! $? -eq 0 ];then echo "...error! aborting."; exit 10; fi
+if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 echo "done."
 
 echo -n "Installing the man pages..."
 sudo cp -f "${MANFILE}" "${MANDIR}"
 sudo cp -f "${L10NMANFILE}" "${MANDIR}"
 sudo cp -f "${CONFIGMANFILE}" "${MANDIR}"
-if [ ! $? -eq 0 ];then echo "...error! aborting."; exit 10; fi
+if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 echo "done."
 
 echo 
-echo "icalBuddy has been successfully installed."
+echo -e "\e[32micalBuddy has been successfully installed.\e[m"
 echo
 
