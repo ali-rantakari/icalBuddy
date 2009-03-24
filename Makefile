@@ -138,7 +138,7 @@ deploy: package
 	@( if [ "`./icalBuddy -u | grep -c \"latest: $(APP_VERSION)\"`" == "0" ];then\
 		echo "Version number is $(APP_VERSION). Press enter to continue uploading to server or Ctrl-C to cancel.";\
 		read INPUTSTR;\
-		scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(TEMP_DEPLOYMENT_L10NMANFILE) $(TEMP_DEPLOYMENT_FAQFILE) $(SCP_TARGET);\
+		scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(TEMP_DEPLOYMENT_L10NMANFILE) $(TEMP_DEPLOYMENT_CONFIGMANFILE) $(TEMP_DEPLOYMENT_FAQFILE) $(SCP_TARGET);\
 	else\
 		echo "It looks like you haven't remembered to increment the version number ($(APP_VERSION)).";\
 		echo "Cancelling deployment.";\

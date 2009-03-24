@@ -133,7 +133,7 @@
 \&\fBicalBuddyConfig\fR \*(-- documentation for the icalBuddy configuration file
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-The icalBuddy configuration file should be saved in \f(CW\*(C`~/.icalBuddyConfig.plist\*(C'\fR and is thus per-user. The contents of this file are expected to be a valid property list, so it's recommended that you use the Property List Editor application distributed with the \s-1OS\s0 X Developer Tools to edit it. If you want to edit this file manually, please consult the \fIplist\fR\|(5) and \fIplutil\fR\|(1) man pages. The example at the end of this man page might also be of help.
+The icalBuddy configuration file should be saved in \fI~/.icalBuddyConfig.plist\fR and is thus per-user. The contents of this file are expected to be a valid property list, so it's recommended that you use the Property List Editor application distributed with the \s-1OS\s0 X Developer Tools to edit it. If you want to edit this file manually, please consult the \fIplist\fR\|(5) and \fIplutil\fR\|(1) man pages. The example at the end of this man page might also be of help.
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 .Sh "Opening the Configuration File for Editing Using icalBuddy"
@@ -154,6 +154,10 @@ to open it in a command-line editor (either the app that your \f(CW\*(C`EDITOR\*
 .Sh "Structure of the Configuration File"
 .IX Subsection "Structure of the Configuration File"
 The root object of the configuration file should be a dictionary. This dictionary may have the following keys:
+.ie n .IP "\fB\fB""constantArguments""\fB\fR" 16
+.el .IP "\fB\f(CBconstantArguments\fB\fR" 16
+.IX Item "constantArguments"
+This key can be used to set constant values for any of icalBuddy's arguments (see the \fIicalBuddy\fR\|(1) man page for documentation for the arguments,) i.e. argument values that will always be set when you run icalBuddy. Using this key will save you the trouble of always having to explicitly specify some arguments when running icalBuddy. The value for this key should be another dictionary, and the keys in this dictionary should be the long names of arguments (as specified in the \fIicalBuddy\fR\|(1) man page.) The types of the values set for each argument key depend on the kind of argument: for arguments that require a textual value to be specified the type should be a String, for arguments that require a numeric value the type should be a Number and for arguments that require no value at all (i.e. if on the command line you would simply set the argument but no value after it) the type should be a Boolean. So for example if you would like to set the \f(CW\*(C`\-f\*(C'\fR (or \f(CW\*(C`\-\-formatOutput\*(C'\fR) argument to always true, you would add the key \f(CW\*(C`formatOutput\*(C'\fR with the Boolean value \f(CW\*(C`true\*(C'\fR in the \f(CW\*(C`constantArguments\*(C'\fR dictionary.
 .ie n .IP "\fB\fB""formatting""\fB\fR" 16
 .el .IP "\fB\f(CBformatting\fB\fR" 16
 .IX Item "formatting"
@@ -332,6 +336,19 @@ Double underlined text (note that this is not supported by Apple's Terminal appl
 \&        <!DOCTYPE plist PUBLIC "\-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList\-1.0.dtd">
 \&        <plist version="1.0">
 \&        <dict>
+\&                <key>constantArguments</key>
+\&                <dict>
+\&                        <key>bullet</key>
+\&                        <string>\- </string>
+\&                        <key>alertBullet</key>
+\&                        <string>!! </string>
+\&                        <key>noCalendarNames</key>
+\&                        <true/>
+\&                        <key>formatOutput</key>
+\&                        <true/>
+\&                        <key>includeCals</key>
+\&                        <string>Home,Work</string>
+\&                </dict>
 \&                <key>formatting</key>
 \&                <dict>
 \&                        <key>datetimeName</key>

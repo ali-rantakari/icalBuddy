@@ -4,7 +4,7 @@ B<icalBuddyLocalization> -- documentation for the icalBuddy localization file
 
 =head1 SYNOPSIS
 
-The icalBuddy localization file should be saved in C<~/.icalBuddyLocalization.plist> and is thus per-user. The contents of this file are expected to be a valid property list, so it's recommended that you use the Property List Editor application distributed with the OS X Developer Tools to edit it. If you want to edit this file manually, please consult the plist(5) and plutil(1) man pages. The example at the end of this man page might also be of help.
+The icalBuddy localization file should be saved in F<~/.icalBuddyLocalization.plist> and is thus per-user. The contents of this file are expected to be a valid property list, so it's recommended that you use the Property List Editor application distributed with the OS X Developer Tools to edit it. If you want to edit this file manually, please consult the plist(5) and plutil(1) man pages. The example at the end of this man page might also be of help.
 
 =head1 DESCRIPTION
 
