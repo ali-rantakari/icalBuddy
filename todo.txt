@@ -13,7 +13,10 @@ user requests:
 other (my own ideas):
 -------------------------
 
-- Add possibility to specify any arguments in a static manner in the config file
+- Implement possibility to specify any arguments in a static manner in the config file
+- Document the possibility to specify any arguments in a static manner in the config file
+- Make getEventPropStr() and getTaskPropStr() use NSMutableAttributedStrings from the beginning so that formatting could occur even within property names and values
+	- Would this make the necessary string concatenation code too ugly? If so, how to deal with that? attrStrConcat() ?
 - Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
 - Implement wrapping to a specified number of maximum characters on each line (problem: will look off with non-fixed-width fonts if we try to match indenting levels and fixing those problems with arguments might become really complex (i.e. you would need too many different kinds of arguments for all the different cases))
 

@@ -35,7 +35,7 @@ You can use the `-b` (or `--bullet`) argument to change the normal bullet point 
 
 ### Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
-The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. The only workaround I've come up with so far is to try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. If you know how to fix this in a smarter way, please [let me know][hassegcontact].
+The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. The only workaround I've come up with so far is to try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped". If you know how to fix this in a smarter way, please [let me know][hassegcontact].
 
 
 ### Q: The question I had in mind is not answered here. What should I do?

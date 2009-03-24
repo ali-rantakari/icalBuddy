@@ -740,26 +740,36 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 
 
 
-
-// return string attributes for formatting a section title
-NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
+// return formatting string attributes for specified key
+NSDictionary* getStringAttributesForKey(NSString *key)
 {
+	if (key == nil)
+		return [NSDictionary dictionary];
+	
 	NSString *formattingConfig = nil;
-	NSString *formattingConfigKey = @"sectionTitle";
+	
 	if (configDict != nil)
 	{
 		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
 		if (formattingConfigDict != nil)
-			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
+			formattingConfig = [formattingConfigDict objectForKey:key];
 	}
 	
 	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
+		formattingConfig = [defaultFormattingConfigDict objectForKey:key];
 	
 	if (formattingConfig != nil)
 		return formattingConfigToStringAttributes(formattingConfig);
 	
 	return [NSDictionary dictionary];
+}
+
+
+
+// return string attributes for formatting a section title
+NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
+{
+	return getStringAttributesForKey(@"sectionTitle");
 }
 
 
@@ -767,22 +777,7 @@ NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
 // line for a calendar item
 NSDictionary* getFirstLineStringAttributes()
 {
-	NSString *formattingConfig = nil;
-	NSString *formattingConfigKey = @"firstItemLine";
-	if (configDict != nil)
-	{
-		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
-		if (formattingConfigDict != nil)
-			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
-	}
-	
-	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
-	
-	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig);
-	
-	return [NSDictionary dictionary];
+	return getStringAttributesForKey(@"firstItemLine");
 }
 
 
@@ -790,22 +785,7 @@ NSDictionary* getFirstLineStringAttributes()
 // return string attributes for formatting a bullet point
 NSDictionary* getBulletStringAttributes(BOOL isAlertBullet)
 {
-	NSString *formattingConfig = nil;
-	NSString *formattingConfigKey = ((isAlertBullet)?@"alertBullet":@"bullet");
-	if (configDict != nil)
-	{
-		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
-		if (formattingConfigDict != nil)
-			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
-	}
-	
-	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
-	
-	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig);
-	
-	return [NSDictionary dictionary];
+	return getStringAttributesForKey((isAlertBullet)?@"alertBullet":@"bullet");
 }
 
 
@@ -816,22 +796,8 @@ NSDictionary* getPropNameStringAttributes(NSString *propName)
 	if (propName == nil)
 		return [NSDictionary dictionary];
 	
-	NSString *formattingConfig = nil;
 	NSString *formattingConfigKey = [propName stringByAppendingString:@"Name"];
-	if (configDict != nil)
-	{
-		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
-		if (formattingConfigDict != nil)
-			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
-	}
-	
-	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
-	
-	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig);
-	
-	return [NSDictionary dictionary];
+	return getStringAttributesForKey(formattingConfigKey);
 }
 
 
@@ -841,40 +807,20 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 	if (propName == nil)
 		return [NSDictionary dictionary];
 	
-	NSString *formattingConfig = nil;
-	NSString *formattingConfigKey = nil;
-	if (configDict != nil)
+	NSString *formattingConfigKey = [propName stringByAppendingString:@"Value"];
+	if (propName == kPropName_priority)
 	{
-		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
-		if (formattingConfigDict != nil)
+		if (propValue != nil)
 		{
-			if (propName == kPropName_priority)
-			{
-				if (propValue != nil)
-				{
-					if ([propValue isEqual:localizedStr(kPriorityStr_high)])
-						formattingConfigKey = @"priorityValueHigh";
-					else if ([propValue isEqual:localizedStr(kPriorityStr_medium)])
-						formattingConfigKey = @"priorityValueMedium";
-					else if ([propValue isEqual:localizedStr(kPriorityStr_low)])
-						formattingConfigKey = @"priorityValueLow";
-				}
-			}
-			
-			if (formattingConfigKey == nil)
-				formattingConfigKey = [propName stringByAppendingString:@"Value"];
-			
-			formattingConfig = [formattingConfigDict objectForKey:formattingConfigKey];
+			if ([propValue isEqual:localizedStr(kPriorityStr_high)])
+				formattingConfigKey = @"priorityValueHigh";
+			else if ([propValue isEqual:localizedStr(kPriorityStr_medium)])
+				formattingConfigKey = @"priorityValueMedium";
+			else if ([propValue isEqual:localizedStr(kPriorityStr_low)])
+				formattingConfigKey = @"priorityValueLow";
 		}
 	}
-	
-	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:formattingConfigKey];
-	
-	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig);
-	
-	return [NSDictionary dictionary];
+	return getStringAttributesForKey(formattingConfigKey);
 }
 
 
