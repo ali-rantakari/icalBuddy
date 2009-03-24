@@ -900,14 +900,21 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
 			
 			if ([event notes] != nil && ![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
+			{
+				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
 				thisPropOutputValue = [[event notes]
 					stringByReplacingOccurrencesOfString:@"\n"
 					withString:[NSString
 						stringWithFormat:@"\n%@%@",
 							prefixStrIndent,
-							[@"" stringByPaddingToLength:([thisPropOutputName length]+1+notesNewlinesIndentModifier) withString:@" " startingAtIndex:0]
+							[@""
+								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
+								withString:@" "
+								startingAtIndex:0
+							]
 					]
 				];
+			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
@@ -1092,14 +1099,21 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
 			
 			if ([task notes] != nil && ![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
+			{
+				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
 				thisPropOutputValue = [[task notes]
 					stringByReplacingOccurrencesOfString:@"\n"
 					withString:[NSString
 						stringWithFormat:@"\n%@%@",
 							prefixStrIndent,
-							[@"" stringByPaddingToLength:([thisPropOutputName length]+1+notesNewlinesIndentModifier) withString:@" " startingAtIndex:0]
+							[@""
+								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
+								withString:@" "
+								startingAtIndex:0
+							]
 					]
 				];
+			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
@@ -1367,6 +1381,7 @@ int main(int argc, char *argv[])
 	BOOL arg_useFormatting = NO;
 	BOOL arg_noCalendarNames = NO;
 	NSString *arg_strEncoding = nil;
+	NSString *arg_propertyOrderStr = nil;
 	
 	BOOL arg_output_is_uncompletedTasks = NO;
 	BOOL arg_output_is_eventsToday = NO;
@@ -1475,6 +1490,36 @@ int main(int argc, char *argv[])
 						dateFormatStr = [constArgsDict objectForKey:@"dateFormat"];
 					if ([allArgKeys containsObject:@"dateTimeSeparator"])
 						dateTimeSeparatorStr = [constArgsDict objectForKey:@"dateTimeSeparator"];
+					if ([allArgKeys containsObject:@"includeEventProps"])
+						includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeEventProps"]);
+					if ([allArgKeys containsObject:@"excludeEventProps"])
+						excludedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeEventProps"]);
+					if ([allArgKeys containsObject:@"includeTaskProps"])
+						includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeTaskProps"]);
+					if ([allArgKeys containsObject:@"excludeTaskProps"])
+						excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeTaskProps"]);
+					if ([allArgKeys containsObject:@"includeCals"])
+						arg_includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
+					if ([allArgKeys containsObject:@"excludeCals"])
+						arg_excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
+					if ([allArgKeys containsObject:@"propertyOrder"])
+						arg_propertyOrderStr = [constArgsDict objectForKey:@"propertyOrder"];
+					if ([allArgKeys containsObject:@"strEncoding"])
+						arg_strEncoding = [constArgsDict objectForKey:@"strEncoding"];
+					if ([allArgKeys containsObject:@"separateByCalendar"])
+						arg_separateByCalendar = [[constArgsDict objectForKey:@"separateByCalendar"] boolValue];
+					if ([allArgKeys containsObject:@"separateByDate"])
+						arg_separateByDate = [[constArgsDict objectForKey:@"separateByDate"] boolValue];
+					if ([allArgKeys containsObject:@"includeOnlyEventsFromNowOn"])
+						arg_includeOnlyEventsFromNowOn = [[constArgsDict objectForKey:@"includeOnlyEventsFromNowOn"] boolValue];
+					if ([allArgKeys containsObject:@"formatOutput"])
+						arg_useFormatting = [[constArgsDict objectForKey:@"formatOutput"] boolValue];
+					if ([allArgKeys containsObject:@"noCalendarNames"])
+						arg_noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
+					if ([allArgKeys containsObject:@"noRelativeDates"])
+						displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
+					if ([allArgKeys containsObject:@"notesNewlinesIndent"])
+						notesNewlinesIndentModifier = [[constArgsDict objectForKey:@"notesNewlinesIndent"] integerValue];
 				}
 			}
 		}
@@ -1603,29 +1648,23 @@ int main(int argc, char *argv[])
 			excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-nni") == 0) || (strcmp(argv[i], "--notesNewlinesIndent") == 0)) && (i+1 < argc))
 			notesNewlinesIndentModifier = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue];
+		else if (((strcmp(argv[i], "-ic") == 0) || (strcmp(argv[i], "--includeCals") == 0)) && (i+1 < argc))
+			arg_includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+		else if (((strcmp(argv[i], "-ec") == 0) || (strcmp(argv[i], "--excludeCals") == 0)) && (i+1 < argc))
+			arg_excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+		else if (((strcmp(argv[i], "-po") == 0) || (strcmp(argv[i], "--propertyOrder") == 0)) && (i+1 < argc))
+			arg_propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
+			arg_strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 	}
 	
-	NSString *includeCalsStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"ic"];
-	if (includeCalsStr == nil)
-		includeCalsStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"-includeCals"];
-	if (includeCalsStr != nil)
-		arg_includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace(includeCalsStr);
 	
-	NSString *excludeCalsStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"ec"];
-	if (excludeCalsStr == nil)
-		excludeCalsStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"-excludeCals"];
-	if (excludeCalsStr != nil)
-		arg_excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace(excludeCalsStr);
-	
-	NSString *propertyOrderStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"po"];
-	if (propertyOrderStr == nil)
-		propertyOrderStr = [[NSUserDefaults standardUserDefaults] stringForKey:@"-propertyOrder"];
-	if (propertyOrderStr != nil)
+	if (arg_propertyOrderStr != nil)
 	{
 		// if property order is specified, filter out property names that are not allowed (the allowed
 		// ones are all included in the NSArray specified by the kDefaultPropertyOrder macro definition)
 		// and then add to the list the omitted property names in the default order
-		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(propertyOrderStr);
+		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(arg_propertyOrderStr);
 		NSMutableArray *tempPropertyOrder = [NSMutableArray arrayWithCapacity:10];
 		[tempPropertyOrder addObjectsFromArray:[specifiedPropertyOrder filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF IN %@", kDefaultPropertyOrder]]];
 		for (NSString *thisPropertyInDefaultOrder in kDefaultPropertyOrder)
@@ -1639,7 +1678,6 @@ int main(int argc, char *argv[])
 		propertyOrder = kDefaultPropertyOrder;
 	
 	
-	arg_strEncoding = [[NSUserDefaults standardUserDefaults] stringForKey:@"-strEncoding"];
 	if (arg_strEncoding != nil)
 	{
 		// process provided output string encoding argument
