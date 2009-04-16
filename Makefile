@@ -156,6 +156,7 @@ clean:
 	@echo ======================================
 	-rm -Rf icalBuddy
 	-rm -Rf icalBuddyLocalization.1
+	-rm -Rf icalBuddyConfig.1
 	-rm -Rf deployment/*
 
 
