@@ -89,7 +89,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
-const int VERSION_BUILD = 0;
+const int VERSION_BUILD = 1;
 
 
 
@@ -1912,6 +1912,10 @@ int main(int argc, char *argv[])
 		NSArray *uncompletedTasks = nil;
 		NSArray *eventsArr = nil;
 		
+		NSCalendarDate *eventsDateRangeStart = nil;
+		NSCalendarDate *eventsDateRangeEnd = nil;
+		NSUInteger eventsDateRangeDaysSpan = 0;
+		
 		// prepare to print events
 		if (printingEvents)
 		{
@@ -1921,8 +1925,6 @@ int main(int argc, char *argv[])
 				(arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
 			
 			// get start and end dates for predicate
-			NSCalendarDate *eventsDateRangeStart = nil;
-			NSCalendarDate *eventsDateRangeEnd = nil;
 			if (arg_output_is_eventsToday)
 			{
 				eventsDateRangeStart = [NSCalendarDate dateWithYear:[now yearOfCommonEra] month:[now monthOfYear] day:[now dayOfMonth] hour:0 minute:0 second:0 timeZone:[now timeZone]];
@@ -1972,6 +1974,15 @@ int main(int argc, char *argv[])
 					events_printOptions &= ~PRINT_OPTION_SINGLE_DAY;
 				}
 			}
+			
+			
+			eventsDateRangeDaysSpan = [[[NSCalendar currentCalendar]
+				components:NSDayCalendarUnit
+				fromDate:eventsDateRangeStart
+				toDate:eventsDateRangeEnd
+				options:0
+			] day];
+			
 			
 			// make predicate for getting all events between start and end dates + use it to get the events
 			NSPredicate *eventsPredicate = [CalCalendarStore
@@ -2039,21 +2050,36 @@ int main(int argc, char *argv[])
 				CalEvent *anEvent;
 				for (anEvent in eventsArr)
 				{
-					NSUInteger daysSpan = [[[NSCalendar currentCalendar]
+					// calculate anEvent's days span and limit it to the range of days we
+					// want displayed
+					
+					NSUInteger anEventDaysSpan = [[[NSCalendar currentCalendar]
 						components:NSDayCalendarUnit
 						fromDate:[anEvent startDate]
 						toDate:[anEvent endDate]
 						options:0
 					] day];
 					
-					// the previous method call returns day spans that are one day too long for all-day events
-					if ([anEvent isAllDay] && daysSpan > 0)
-						daysSpan--;
+					// the previous method call returns day spans that are one day too long for
+					// all-day events so in those cases we'll subtract one
+					if ([anEvent isAllDay] && anEventDaysSpan > 0)
+						anEventDaysSpan--;
+					
+					NSUInteger rangeStartToAnEventStartDaysSpan = [[[NSCalendar currentCalendar]
+						components:NSDayCalendarUnit
+						fromDate:eventsDateRangeStart
+						toDate:[anEvent startDate]
+						options:0
+					] day];
+					
+					NSUInteger daySpanLeftInRange = eventsDateRangeDaysSpan - rangeStartToAnEventStartDaysSpan;
+					anEventDaysSpan = MIN(daySpanLeftInRange, anEventDaysSpan);
+					
 					
 					NSCalendarDate *thisEventStartDate = [[anEvent startDate] dateWithCalendarFormat:nil timeZone:nil];
 					
 					NSUInteger i;
-					for (i = 0; i <= daysSpan; i++)
+					for (i = 0; i <= anEventDaysSpan; i++)
 					{
 						NSCalendarDate *thisEventStartDatePlusi = [thisEventStartDate
 							dateByAddingYears:0 months:0 days:i hours:0 minutes:0 seconds:0
