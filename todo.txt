@@ -4,12 +4,10 @@ TODO:
 user requests:
 -------------------------
 
-- Add -li (--limitItems) argument
+- Different properties on the same lines
 - Display also attachments
 - Display also attendees
-
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
-- Different properties on the same lines
 
 
 other (my own ideas):

@@ -135,6 +135,8 @@ NSSet *excludedTaskProperties = 		nil;
 NSInteger notesNewlinesIndentModifier =	0;
 
 BOOL displayRelativeDates = YES;
+NSUInteger maxPrintedItems = 0; // 0 = no limit
+NSUInteger printedItems = 0;
 
 
 NSCalendarDate *now;
@@ -1037,6 +1039,9 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 // pretty-prints out the specified event
 void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay)
 {
+	if (maxPrintedItems > 0 && maxPrintedItems <= printedItems)
+		return;
+	
 	if (event != nil)
 	{
 		BOOL firstPrintedProperty = YES;
@@ -1067,6 +1072,8 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 				}
 			}
 		}
+		
+		printedItems++;
 	}
 }
 
@@ -1192,6 +1199,9 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 // pretty-prints out the specified task
 void printCalTask(CalTask *task, int printOptions)
 {
+	if (maxPrintedItems > 0 && maxPrintedItems <= printedItems)
+		return;
+	
 	if (task != nil)
 	{
 		BOOL firstPrintedProperty = YES;
@@ -1227,6 +1237,8 @@ void printCalTask(CalTask *task, int printOptions)
 				}
 			}
 		}
+		
+		printedItems++;
 	}
 }
 
@@ -1246,6 +1258,9 @@ void printItemSections(NSArray *sections, int printOptions)
 	NSDictionary *sectionDict;
 	for (sectionDict in sections)
 	{
+		if (maxPrintedItems > 0 && maxPrintedItems <= printedItems)
+			continue;
+		
 		titlePrintedForCurrentSection = NO;
 		
 		NSString *sectionTitle = [sectionDict objectForKey:kSectionDictKey_title];
@@ -1520,6 +1535,8 @@ int main(int argc, char *argv[])
 						displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
 					if ([allArgKeys containsObject:@"notesNewlinesIndent"])
 						notesNewlinesIndentModifier = [[constArgsDict objectForKey:@"notesNewlinesIndent"] integerValue];
+					if ([allArgKeys containsObject:@"limitItems"])
+						maxPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 				}
 			}
 		}
@@ -1656,6 +1673,8 @@ int main(int argc, char *argv[])
 			arg_propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
 			arg_strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+		else if (((strcmp(argv[i], "-li") == 0) || (strcmp(argv[i], "--limitItems") == 0)) && (i+1 < argc))
+			maxPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
 	}
 	
 	
@@ -2232,6 +2251,7 @@ int main(int argc, char *argv[])
 		NSPrint(@"-nc       No calendar names\n");
 		NSPrint(@"-nrd      No relative dates\n");
 		NSPrint(@"-n        Include only events from now on\n");
+		NSPrint(@"-li       Limit items (value required)\n");
 		NSPrint(@"-tf,-df   Set time or date format (value required)\n");
 		NSPrint(@"-dts      Set date-time separator (value required)\n");
 		NSPrint(@"-po       Set property order (value required)\n");

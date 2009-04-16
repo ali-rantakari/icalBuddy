@@ -12,6 +12,7 @@
 .Op Fl sd
 .Op Fl nc
 .Op Fl nrd
+.Op Fl li
 .Op Fl tf Ar format
 .Op Fl df Ar format
 .Op Fl dts Ar separator
@@ -77,6 +78,10 @@ Do not use "natural language relative dates" when displaying dates (e.g. "today"
 If the
 .Ar command
 value 'eventsToday' is used, only output events that occur between the current time and the end of the day (as opposed to events that occur between the start and end of the day, as by default.)
+.It Fl li , Fl -limitItems Ar num
+Limit the number of printed items (events/tasks) in the output to a maximum of
+.Ar num
+items.
 .It Fl -strEncoding Ar encoding
 Use the specified string encoding for the output. Run the app once with the 'strEncodings'
 .Ar command
