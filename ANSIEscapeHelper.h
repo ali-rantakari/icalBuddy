@@ -110,7 +110,7 @@ enum sgrCode
  @param aString			A String containing ANSI escape sequences
  
  @result		An attributed string that mimics as closely as possible
-				the formatting of the given attributed string.
+				the formatting of the given ANSI-escaped string.
  */
 - (NSAttributedString*) attributedStringWithANSIEscapedString:(NSString*)aString;
 
@@ -164,7 +164,7 @@ enum sgrCode
  @param aCleanString	The string to which to insert the ANSI escape codes
 						described in aCodesArray.
  
- @result		A string containing ANSI escape codes.
+ @result		A string containing ANSI escape sequences.
  */
 - (NSString*) ansiEscapedStringWithCodesAndLocations:(NSArray*)aCodesArray cleanString:(NSString*)aCleanString;
 
