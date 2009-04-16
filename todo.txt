@@ -5,9 +5,12 @@ user requests:
 -------------------------
 
 - Different properties on the same lines
+- Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
+	- these two features above here will need similar architectural changes, i.e.
+	  abstracting the methods for determining the output presentation and writing
+	  multiple implementations
 - Display also attachments
 - Display also attendees
-- Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
 
 
 other (my own ideas):
