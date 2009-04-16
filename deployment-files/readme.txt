@@ -32,6 +32,11 @@ After installation you can:
   Here you'll find documentation for all of the arguments you can use
   when calling icalBuddy.
 
+* Run "man icalBuddyConfig" in the terminal to read the manual page
+  for the configuration file format. Here you'll find documentation
+  for everything you can do with the configuration file in order
+  to make icalBuddy always behave in the way you want.
+
 * Copy one of the included example localization files to
   ~/.icalBuddyLocalization.plist in order to start using them. This
   is only if you're interested in making icalBuddy output in a

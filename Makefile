@@ -100,7 +100,7 @@ package: icalBuddy docs
 	
 # create zip archive
 	mkdir -p $(TEMP_DEPLOYMENT_DIR)
-	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddy.m" | xargs zip
+	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1 icalBuddy.m" | xargs zip
 	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
 	
 # if changelog doesn't already exist in the deployment dir

@@ -46,12 +46,12 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 
 
 
-[wikipediamanpages]: http://en.wikipedia.org/wiki/Manual_page_(Unix)
-[manpageonline]: http://hasseg.org/icalBuddy/man.html
-[tuawmanviewers]: http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
-[l10nmanpageonline]: http://hasseg.org/icalBuddy/localization-man.html
-[geektool]: http://projects.tynsoe.org/en/geektool
-[xulian]: http://sites.google.com/site/lianxukeefo/Home/research/geektool-utf8
-[datetimeformats]: http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
-[hassegcontact]: http://hasseg.org/blog/?page_id=2
+[wikipediamanpages]: 	http://en.wikipedia.org/wiki/Manual_page_(Unix)
+[manpageonline]: 		http://hasseg.org/icalBuddy/man.html
+[tuawmanviewers]: 		http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
+[l10nmanpageonline]: 	http://hasseg.org/icalBuddy/localization-man.html
+[geektool]: 			http://projects.tynsoe.org/en/geektool
+[xulian]: 				http://sites.google.com/site/lianxukeefo/Home/research/geektool-utf8
+[datetimeformats]: 		http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
+[hassegcontact]: 		http://hasseg.org/blog/?page_id=2
 
