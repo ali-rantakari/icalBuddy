@@ -11,8 +11,6 @@
  
  - don't add useless "reset" escape codes to the string in
    -ansiEscapedStringWithAttributedString:
- - use NSMaxRange() instead of range.location+range.length
- - use NSMutableString in -ansiEscapedStringWithCodesAndLocations:cleanString: (?) 
  
  */
 
@@ -227,7 +225,7 @@
 			NSUInteger thisIndex;
 			for (;;)
 			{
-				thisIndex = (thisEscapeSequenceRange.location+thisEscapeSequenceRange.length+lengthAddition-1);
+				thisIndex = (NSMaxRange(thisEscapeSequenceRange)+lengthAddition-1);
 				if (thisIndex >= aStringLength)
 					break;
 				
@@ -281,7 +279,7 @@
 				cleanString = [cleanString stringByAppendingString:[aString substringWithRange:NSMakeRange(searchRange.location, thisCoveredLength)]];
 			
 			coveredLength += thisCoveredLength;
-			searchRange.location = thisEscapeSequenceRange.location+thisEscapeSequenceRange.length;
+			searchRange.location = NSMaxRange(thisEscapeSequenceRange);
 			searchRange.length = aStringLength-searchRange.location;
 		}
 	}
@@ -300,7 +298,7 @@
 
 - (NSString*) ansiEscapedStringWithCodesAndLocations:(NSArray*)aCodesArray cleanString:(NSString*)aCleanString
 {
-	NSString* retStr = @"";
+	NSMutableString* retStr = [NSMutableString stringWithCapacity:[aCleanString length]];
 	
 	NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:kCodeDictKey_location ascending:YES] autorelease];
 	NSArray *codesArray = [aCodesArray sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
@@ -322,16 +320,16 @@
 			continue;
 		
 		if (aCleanStringIndex < formattingRunStartLocation)
-			retStr = [retStr stringByAppendingString:[aCleanString substringWithRange:NSMakeRange(aCleanStringIndex, formattingRunStartLocation-aCleanStringIndex)]];
-		retStr = [retStr stringByAppendingString:kANSIEscapeCSI];
-		retStr = [retStr stringByAppendingString:[NSString stringWithFormat:@"%d", thisCode]];
-		retStr = [retStr stringByAppendingString:kANSIEscapeSGREnd];
+			[retStr appendString:[aCleanString substringWithRange:NSMakeRange(aCleanStringIndex, formattingRunStartLocation-aCleanStringIndex)]];
+		[retStr appendString:kANSIEscapeCSI];
+		[retStr appendString:[NSString stringWithFormat:@"%d", thisCode]];
+		[retStr appendString:kANSIEscapeSGREnd];
 		
 		aCleanStringIndex = formattingRunStartLocation;
 	}
 	
 	if (aCleanStringIndex < aCleanStringLength)
-		retStr = [retStr stringByAppendingString:[aCleanString substringFromIndex:aCleanStringIndex]];
+		[retStr appendString:[aCleanString substringFromIndex:aCleanStringIndex]];
 	
 	return retStr;
 }
