@@ -207,7 +207,7 @@ void NSPrint(NSString *aStr, ...)
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
 			arguments:argList
 		] autorelease
-	];
+		];
 	va_end(argList);
 	
 	[str writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
@@ -223,7 +223,7 @@ void NSPrintErr(NSString *aStr, ...)
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
 			arguments:argList
 		] autorelease
-	];
+		];
 	va_end(argList);
 	
 	[str writeToFile:@"/dev/stderr" atomically:NO encoding:outputStrEncoding error:NULL];
@@ -437,7 +437,7 @@ NSInteger getNumWeeksInYear(NSInteger year)
 	NSInteger lastDayWeek = [[[NSCalendar currentCalendar]
 		components:NSWeekCalendarUnit
 		fromDate:lastDayOfYear
-	] week];
+		] week];
 	
 	NSDateComponents *weekBeforeLastDayOfYearComponents = [[[NSDateComponents alloc] init] autorelease];
 	[weekBeforeLastDayOfYearComponents setYear:year];
@@ -448,7 +448,7 @@ NSInteger getNumWeeksInYear(NSInteger year)
 	NSInteger weekBeforeLastDayWeek = [[[NSCalendar currentCalendar]
 		components:NSWeekCalendarUnit
 		fromDate:weekBeforeLastDayOfYear
-	] week];
+		] week];
 	
 	return (lastDayWeek > weekBeforeLastDayWeek) ? lastDayWeek : weekBeforeLastDayWeek;
 }
@@ -467,11 +467,11 @@ NSInteger getWeekDiff(NSDate *date1, NSDate *date2)
 	NSDateComponents *components1 = [[NSCalendar currentCalendar]
 		components:NSWeekCalendarUnit|NSYearCalendarUnit
 		fromDate:date1
-	];
+		];
 	NSDateComponents *components2 = [[NSCalendar currentCalendar]
 		components:NSWeekCalendarUnit|NSYearCalendarUnit
 		fromDate:date2
-	];
+		];
 	
 	NSInteger week1 = [components1 week];
 	NSInteger week2 = [components2 week];
@@ -611,14 +611,14 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 					useDateFormatStr = [useDateFormatStr
 						stringByReplacingCharactersInRange:relativeWeekFormatSpecifierRange
 						withString:weekDiffStr
-					];
+						];
 			}
 			
 			outputDate = [date
 				descriptionWithCalendarFormat:useDateFormatStr
 				timeZone:nil
 				locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			];
+				];
 		}
 	}
 	
@@ -627,7 +627,7 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 			descriptionWithCalendarFormat:timeFormatStr
 			timeZone:nil
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-		];
+			];
 	
 	if (outputDate != nil && outputTime == nil)
 		return outputDate;
@@ -873,7 +873,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 								@" ",
 								[person valueForProperty:kABLastNameProperty],
 								nil
-							);
+								);
 							thisTitle = [NSString stringWithFormat:localizedStr(@"someonesBirthday"), contactFullName];
 						}
 						if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
@@ -905,9 +905,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			if ([event notes] != nil && ![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
 			{
 				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
-				thisPropOutputValue = [[event notes]
+				thisPropOutputValue = [
+					[event notes]
 					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[NSString
+					withString:[
+						NSString
 						stringWithFormat:@"\n%@%@",
 							prefixStrIndent,
 							[@""
@@ -916,7 +918,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 								startingAtIndex:0
 							]
 					]
-				];
+					];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -949,18 +951,21 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							BOOL startsOnContextDay = datesRepresentSameDay(contextDay, [[event startDate] dateWithCalendarFormat:nil timeZone:nil]);
 							BOOL endsOnContextDay = datesRepresentSameDay(contextDay, [[event endDate] dateWithCalendarFormat:nil timeZone:nil]);
 							if (startsOnContextDay && endsOnContextDay)
-								thisPropOutputValue = [NSString stringWithFormat: @"%@ - %@",
+								thisPropOutputValue = [NSString
+									stringWithFormat: @"%@ - %@",
 										dateStr([event startDate], false, true),
 										dateStr([event endDate], false, true)
-										];
+									];
 							else if (startsOnContextDay)
-								thisPropOutputValue = [NSString stringWithFormat: @"%@ - ...",
+								thisPropOutputValue = [NSString
+									stringWithFormat: @"%@ - ...",
 										dateStr([event startDate], false, true)
-										];
+									];
 							else if (endsOnContextDay)
-								thisPropOutputValue = [NSString stringWithFormat: @"... - %@",
+								thisPropOutputValue = [NSString
+									stringWithFormat: @"... - %@",
 										dateStr([event endDate], false, true)
-										];
+									];
 						}
 						else
 						{
@@ -970,17 +975,18 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 								[[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
 									years:NULL months:NULL days:&daysDiff hours:NULL minutes:NULL seconds:NULL
 									sinceDate:[[event startDate] dateWithCalendarFormat:nil timeZone:nil]
-								];
+									];
 								
 								if (daysDiff > 1)
 								{
 									// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
 									// we want them displayed as only spanning from <start day> to <end day>
 									NSCalendarDate *endDateMinusOneDay = [[[event endDate] dateWithCalendarFormat:nil timeZone:nil] dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0];
-									thisPropOutputValue = [NSString stringWithFormat: @"%@ - %@",
+									thisPropOutputValue = [NSString
+										stringWithFormat: @"%@ - %@",
 											dateStr([event startDate], true, false),
 											dateStr(endDateMinusOneDay, true, false)
-											];
+										];
 								}
 								else
 									thisPropOutputValue = dateStr([event startDate], true, false);
@@ -1120,7 +1126,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 								startingAtIndex:0
 							]
 					]
-				];
+					];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -1395,7 +1401,7 @@ int main(int argc, char *argv[])
 		day:[now dayOfMonth]
 		hour:0 minute:0 second:0
 		timeZone:[now timeZone]
-	];
+		];
 	
 	
 	ansiEscapeHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
@@ -1428,7 +1434,7 @@ int main(int argc, char *argv[])
 		@"medium",		@"medium",
 		@"low",			@"low",
 		nil
-	];
+		];
 	
 	// default formatting for different output elements
 	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1453,7 +1459,7 @@ int main(int argc, char *argv[])
 		@"", 					@"bullet",
 		@"red,bold",			@"alertBullet",
 		nil
-	];
+		];
 	
 	
 	// variables for arguments
@@ -1647,7 +1653,7 @@ int main(int argc, char *argv[])
 					@"%d", @"xDaysFromNow",
 					@"%@", @"someonesBirthday",
 					nil
-				];
+					];
 				NSString *thisKey;
 				NSString *thisVal;
 				NSString *requiredSubstring;
@@ -1791,7 +1797,7 @@ int main(int argc, char *argv[])
 				@"\nError: Invalid string encoding argument: \"%@\". Run \"icalBuddy strEncodings\" to see all the possible values. Using default encoding \"%@\".\n\n",
 				arg_strEncoding,
 				[NSString localizedNameOfStringEncoding: outputStrEncoding]
-			);
+				);
 	}
 	
 	
@@ -1898,7 +1904,12 @@ int main(int argc, char *argv[])
 		}
 		
 		if (configFileIsDir)
-			NSPrintErr(@"There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n", configFilePath);
+		{
+			NSPrintErr(
+				@"There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n",
+				configFilePath
+				);
+		}
 		else
 		{
 			if ([arg_output hasSuffix:@"CLI"])
@@ -1944,12 +1955,20 @@ int main(int argc, char *argv[])
 				
 				if (foundEditorPath != nil)
 				{
-					NSPrint(@"Opening config file for editing with %@ -- press\nany key to continue or Ctrl-C to cancel.\n", foundEditorPath);
+					NSPrint(
+						@"Opening config file for editing with %@ -- press\nany key to continue or Ctrl-C to cancel.\n",
+						foundEditorPath
+						);
 					if (system("read") == 0)
 						system([strConcat(@"'", foundEditorPath, @"' '", configFilePath, @"'", nil) UTF8String]);
 				}
 				else
-					NSPrintErr(@"Error: Can not find or execute any of the following\neditors in your $PATH: %@\n", [preferredEditors componentsJoinedByString:@", "]);
+				{
+					NSPrintErr(
+						@"Error: Can not find or execute any of the following\neditors in your $PATH: %@\n",
+						[preferredEditors componentsJoinedByString:@", "]
+						);
+				}
 			}
 			else
 			{
@@ -2062,7 +2081,7 @@ int main(int argc, char *argv[])
 				fromDate:eventsDateRangeStart
 				toDate:eventsDateRangeEnd
 				options:0
-			] day];
+				] day];
 			
 			
 			// make predicate for getting all events between start and end dates + use it to get the events
@@ -2070,7 +2089,7 @@ int main(int argc, char *argv[])
 				eventPredicateWithStartDate:((arg_includeOnlyEventsFromNowOn)?now:eventsDateRangeStart)
 				endDate:eventsDateRangeEnd
 				calendars:allCalendars
-			];
+				];
 			eventsArr = [[CalCalendarStore defaultCalendarStore] eventsWithPredicate:eventsPredicate];
 		}
 		// prepare to print tasks
@@ -2139,7 +2158,7 @@ int main(int argc, char *argv[])
 						fromDate:[anEvent startDate]
 						toDate:[anEvent endDate]
 						options:0
-					] day];
+						] day];
 					
 					// the previous method call returns day spans that are one day too long for
 					// all-day events so in those cases we'll subtract one
@@ -2151,7 +2170,7 @@ int main(int argc, char *argv[])
 						fromDate:eventsDateRangeStart
 						toDate:[anEvent startDate]
 						options:0
-					] day];
+						] day];
 					
 					NSUInteger daySpanLeftInRange = eventsDateRangeDaysSpan - rangeStartToAnEventStartDaysSpan;
 					anEventDaysSpan = MIN(daySpanLeftInRange, anEventDaysSpan);
@@ -2164,7 +2183,7 @@ int main(int argc, char *argv[])
 					{
 						NSCalendarDate *thisEventStartDatePlusi = [thisEventStartDate
 							dateByAddingYears:0 months:0 days:i hours:0 minutes:0 seconds:0
-						];
+							];
 						
 						NSCalendarDate *dayToAdd = [NSCalendarDate
 							dateWithYear:[thisEventStartDatePlusi yearOfCommonEra]
@@ -2172,7 +2191,7 @@ int main(int argc, char *argv[])
 							day:[thisEventStartDatePlusi dayOfMonth]
 							hour:0 minute:0 second:0
 							timeZone:[thisEventStartDatePlusi timeZone]
-						];
+							];
 						
 						NSComparisonResult dayToAddToNowComparisonResult = [dayToAdd compare:today];
 						
@@ -2208,7 +2227,7 @@ int main(int argc, char *argv[])
 							day:[thisTaskDueDate dayOfMonth]
 							hour:0 minute:0 second:0
 							timeZone:[thisTaskDueDate timeZone]
-						];
+							];
 						thisDayKey = thisDueDay;
 					}
 					else
@@ -2240,7 +2259,7 @@ int main(int argc, char *argv[])
 				NSMutableDictionary *thisSectionDict = [NSMutableDictionary
 					dictionaryWithObject:thisSectionItems
 					forKey:kSectionDictKey_items
-				];
+					];
 				
 				if (printingEvents && [aDayKey isKindOfClass:[NSCalendarDate class]])
 					[thisSectionDict setObject:aDayKey forKey:kSectionDictKey_eventsContextDay];
