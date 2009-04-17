@@ -9,6 +9,7 @@ deployment
 changelog.*
 icalBuddy
 icalBuddyLocalization.1
+icalBuddyConfig.1
 
 # temp files
 test.m
