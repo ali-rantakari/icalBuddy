@@ -36,9 +36,10 @@ THE SOFTWARE.
 #import "ANSIEscapeHelper.h"
 
 
-#define kAppSiteURLPrefix @"http://hasseg.org/icalBuddy/"
-#define kVersionCheckURL [NSURL URLWithString:@"http://hasseg.org/icalBuddy/?versioncheck=y"]
-
+#define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
+#define kVersionCheckURL 		[NSURL URLWithString:@"http://hasseg.org/icalBuddy/?versioncheck=y"]
+#define kVersionCheckTimeout 	10.0
+#define kVersionCheckHeaderName	@"Orghassegsoftwarelatestversion"
 
 
 
@@ -1304,6 +1305,77 @@ void printItemSections(NSArray *sections, int printOptions)
 
 
 
+// returns latest version number (as string) if an update is found online,
+// or nil if no update was found. on error, errorStr will be != NULL and
+// contain an error message.
+NSString* latestUpdateVersionOnServer(NSString** errorStr)
+{
+	NSURL *url = kVersionCheckURL;
+	NSURLRequest *request = [NSURLRequest
+		requestWithURL:url
+		cachePolicy:NSURLRequestReloadIgnoringCacheData
+		timeoutInterval:kVersionCheckTimeout
+		];
+	
+	NSHTTPURLResponse *response;
+	NSError *error;
+	[NSURLConnection
+		sendSynchronousRequest:request
+		returningResponse:&response
+		error:&error
+		];
+	
+	if (error == nil && response != nil)
+	{
+		NSInteger statusCode = [response statusCode];
+		if (statusCode >= 400)
+		{
+			if (errorStr != NULL)
+				*errorStr = [
+					NSString
+					stringWithFormat:@"HTTP connection failed. Status code %d: \"%@\"",
+						statusCode,
+						[NSHTTPURLResponse localizedStringForStatusCode:statusCode]
+					];
+			return nil;
+		}
+		else
+		{
+			NSString *latestVersionString = [[response allHeaderFields] valueForKey:kVersionCheckHeaderName];
+			NSString *currentVersionString = versionNumber();
+			
+			if (latestVersionString == nil)
+			{
+				if (errorStr != NULL)
+					*errorStr = @"Error reading latest version number from HTTP header field.";
+				return nil;
+			}
+			else
+			{
+				if (versionNumberCompare(currentVersionString, latestVersionString) == NSOrderedAscending)
+					return latestVersionString;
+			}
+		}
+	}
+	else
+	{
+		if (errorStr != NULL)
+			*errorStr = [
+				NSString
+				stringWithFormat:@"Connection failed. Error: - %@ %@",
+					[error localizedDescription],
+					[[error userInfo] objectForKey:NSErrorFailingURLStringKey]
+				];
+		return nil;
+	}
+	
+	return nil;
+}
+
+
+
+
+
 
 
 
@@ -1740,54 +1812,44 @@ int main(int argc, char *argv[])
 	{
 		NSPrint(@"Checking for updates... ");
 		
-		NSURL *url = kVersionCheckURL;
-		NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:10.0];
+		NSString *versionCheckErrorStr = nil;
+		NSString *latestVersionStr = latestUpdateVersionOnServer(&versionCheckErrorStr);
+		NSString *currentVersionStr = versionNumber();
 		
-		NSHTTPURLResponse *response;
-		NSError *error;
-		[NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-		
-		if (error == nil && response != nil)
-		{
-			NSInteger statusCode = [response statusCode];
-			if (statusCode >= 400)
-			{
-				NSPrint(@"...HTTP connection failed.\n\nStatus code %d: \"%@\"\n\n",
-						statusCode, [NSHTTPURLResponse localizedStringForStatusCode:statusCode]);
-			}
-			else
-			{
-				NSString *latestVersionString = [[response allHeaderFields] valueForKey:@"Orghassegsoftwarelatestversion"];
-				NSString *currentVersionString = versionNumber();
-				
-				if (latestVersionString == nil)
-					NSPrintErr(@"...failed.\n\nError reading latest version number from HTTP header field.\n\n");
-				else
-				{
-					if (versionNumberCompare(currentVersionString, latestVersionString) == NSOrderedAscending)
-					{
-						NSPrint(@"...update found! (latest: %@  current: %@)\n\n", latestVersionString, currentVersionString);
-						NSPrint(@"Navigate to the following URL to see the release notes and download the latest version:\n\n%@?currentversion=%@\n\n", kAppSiteURLPrefix, currentVersionString);
-						char inputChar;
-						while(inputChar != 'y' && inputChar != 'n' && inputChar != 'Y' && inputChar != 'N' && inputChar != '\n')
-						{
-							NSPrint(@"Do you want to navigate to this URL now? [y/n] ");
-							scanf("%s&*c",&inputChar);
-						}
-						
-						if (inputChar == 'y' || inputChar == 'Y')
-							[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithFormat: @"%@?currentversion=%@", kAppSiteURLPrefix, currentVersionString]]];
-					}
-					else
-						NSPrint(@"...you're up to date! (latest: %@  current: %@)\n\n", latestVersionString, currentVersionString);
-				}
-			}
-		}
+		if (latestVersionStr == nil && versionCheckErrorStr != nil)
+			NSPrintErr(@"...%@", versionCheckErrorStr);
 		else
 		{
-			NSPrintErr(@"...connection failed.\n\nError: - %@ %@\n\n",
-				[error localizedDescription],
-				[[error userInfo] objectForKey:NSErrorFailingURLStringKey]);
+			if (latestVersionStr == nil)
+				NSPrint(@"...you're up to date! (current & latest: %@)\n\n", currentVersionStr);
+			else
+			{
+				NSPrint(@"...update found! (latest: %@  current: %@)\n\n", latestVersionStr, currentVersionStr);
+				NSPrint(
+					@"Navigate to the following URL to see the release notes and download the latest version:\n\n%@?currentversion=%@\n\n",
+					kAppSiteURLPrefix, currentVersionStr
+					);
+				char inputChar;
+				while(inputChar != 'y' && inputChar != 'n' && inputChar != 'Y' && inputChar != 'N' && inputChar != '\n')
+				{
+					NSPrint(@"Do you want to navigate to this URL now? [y/n] ");
+					scanf("%s&*c",&inputChar);
+				}
+				
+				if (inputChar == 'y' || inputChar == 'Y')
+				{
+					[[NSWorkspace sharedWorkspace]
+						openURL:[
+							NSURL
+							URLWithString:[
+								NSString
+								stringWithFormat: @"%@?currentversion=%@",
+									kAppSiteURLPrefix, currentVersionStr
+							]
+						]
+						];
+				}
+			}
 		}
 	}
 	// ------------------------------------------------------------------
@@ -2221,49 +2283,47 @@ int main(int argc, char *argv[])
 	else
 	{
 		NSPrint(@"\n");
-		NSPrint(@"USAGE: %@ <options> <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
+		NSPrint(@"USAGE: %@ [options] <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
 		NSPrint(@"\n");
-		NSPrint(@"<command> specifies the general action icalBuddy should\n");
-		NSPrint(@"take. Possible values for it are:\n");
+		NSPrint(@"<command> specifies the general action icalBuddy should take. Possible values\n");
+		NSPrint(@"for it are:\n");
 		NSPrint(@"\n");
 		NSPrint(@"  'eventsToday'      Print events occurring today\n");
-		NSPrint(@"  'eventsToday+NUM'  Print events occurring between today\n");
-		NSPrint(@"                     and NUM days into the future\n");
+		NSPrint(@"  'eventsToday+NUM'  Print events occurring between today and NUM days into\n");
+		NSPrint(@"                     the future\n");
 		NSPrint(@"  'eventsNow'        Print events occurring at present time\n");
 		NSPrint(@"  'eventsFrom:START to:END'\n");
-		NSPrint(@"                     Print events occurring between the two\n");
-		NSPrint(@"                     specified dates (START and END), where\n");
-		NSPrint(@"                     both are specified in the format:\n");
+		NSPrint(@"                     Print events occurring between the two specified dates\n");
+		NSPrint(@"                     (START and END), where both are specified in the format:\n");
 		NSPrint(@"                     \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
 		NSPrint(@"  'uncompletedTasks' Print uncompleted tasks\n");
 		NSPrint(@"  'calendars'        Print all calendars\n");
 		NSPrint(@"  'strEncodings'     Print all the possible string encodings\n");
-		NSPrint(@"  'editConfig'       Open the configuration file for editing\n");
-		NSPrint(@"                     in a GUI editor application\n");
-		NSPrint(@"  'editConfigCLI'    Open the configuration file for editing\n");
-		NSPrint(@"                     in a command-line editor\n");
+		NSPrint(@"  'editConfig'       Open the configuration file for editing in a GUI editor\n");
+		NSPrint(@"  'editConfigCLI'    Open the configuration file for editing in a CLI editor\n");
 		NSPrint(@"\n");
-		NSPrint(@"Some of the <options> you can use are:\n");
+		NSPrint(@"Some of the [options] you can use are:\n");
 		NSPrint(@"\n");
-		NSPrint(@"-V        Print version number and exit\n");
-		NSPrint(@"-sc,-sd   Separate by calendar or date\n");
-		NSPrint(@"-f        Format output\n");
-		NSPrint(@"-nc       No calendar names\n");
-		NSPrint(@"-nrd      No relative dates\n");
-		NSPrint(@"-n        Include only events from now on\n");
-		NSPrint(@"-li       Limit items (value required)\n");
-		NSPrint(@"-tf,-df   Set time or date format (value required)\n");
-		NSPrint(@"-dts      Set date-time separator (value required)\n");
-		NSPrint(@"-po       Set property order (value required)\n");
-		NSPrint(@"-b        Set bullet point (value required)\n");
-		NSPrint(@"-ab       Set alert bullet point (value required)\n");
-		NSPrint(@"-i        Set indenting (value required)\n");
-		NSPrint(@"-ss       Set section separator (value required)\n");
-		NSPrint(@"-ic,-ec   Include or exclude calendars (value required)\n");
-		NSPrint(@"-iep,-eep Include or exclude event properties (value required)\n");
-		NSPrint(@"-itp,-etp Include or exclude task properties (value required)\n");
-		NSPrint(@"-cf,-lf   Set config or localization file path (value required)\n");
-		NSPrint(@"-nni      Set indentation for new lines in notes (value required)\n");
+		NSPrint(@"-V         Print version number (no <command> needed)\n");
+		NSPrint(@"-u         Check for updates to self online (no <command> needed)\n");
+		NSPrint(@"-sc,-sd    Separate by calendar or date\n");
+		NSPrint(@"-f         Format output\n");
+		NSPrint(@"-nc        No calendar names\n");
+		NSPrint(@"-nrd       No relative dates\n");
+		NSPrint(@"-n         Include only events from now on\n");
+		NSPrint(@"-li        Limit items (value required)\n");
+		NSPrint(@"-tf,-df    Set time or date format (value required)\n");
+		NSPrint(@"-dts       Set date-time separator (value required)\n");
+		NSPrint(@"-po        Set property order (value required)\n");
+		NSPrint(@"-b         Set bullet point (value required)\n");
+		NSPrint(@"-ab        Set alert bullet point (value required)\n");
+		NSPrint(@"-i         Set indenting (value required)\n");
+		NSPrint(@"-ss        Set section separator (value required)\n");
+		NSPrint(@"-ic,-ec    Include or exclude calendars (value required)\n");
+		NSPrint(@"-iep,-eep  Include or exclude event properties (value required)\n");
+		NSPrint(@"-itp,-etp  Include or exclude task properties (value required)\n");
+		NSPrint(@"-cf,-lf    Set config or localization file path (value required)\n");
+		NSPrint(@"-nni       Set indentation for new lines in notes (value required)\n");
 		NSPrint(@"\n");
 		NSPrint(@"See the icalBuddy manual page for a more complete list of\n");
 		NSPrint(@"all the possible arguments and their descriptions (just type\n");
