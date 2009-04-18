@@ -5,6 +5,23 @@ user requests:
 -------------------------
 
 - Different properties on the same lines
+	- could be implemented by:
+		- making the leading newline part of the "indent" string so that it can be
+		  omitted -> voila, items on the same line with custom separator
+		- changing the indent argument to an "property separators" argument that can
+		  be followed by a list of separators to use for printed properties (in the
+		  same order as properties are printed) -- and if the number of specified
+		  values is lower than the gaps between printed props, use the last given
+		  value for all the rest of the gaps. this way users could specify different
+		  separators for all the different "property gaps".
+			- needs changes to the argument reading code: when iterating through
+			  the arguments and we find this "property separators" argument,
+			  read all the values after that until we come across the next
+			  arg that begins with "-" (excluding "\-" so that the users could
+			  specify a prop separator value that begins with a dash) and then
+			  continue reading args from that index (...okay, maybe I won't
+			  need to do this actually... should think this through. yeah,
+			  I don't think this is needed)
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
 	- these two features above here will need similar architectural changes, i.e.
 	  abstracting the methods for determining the output presentation and writing
