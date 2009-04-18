@@ -1363,8 +1363,8 @@ void printItemSections(NSArray *sections, int printOptions)
 
 
 // returns latest version number (as string) if an update is found online,
-// or nil if no update was found. on error, errorStr will be != NULL and
-// contain an error message.
+// or nil if no update was found. on error, errorStr will contain
+// an error message.
 NSString* latestUpdateVersionOnServer(NSString** errorStr)
 {
 	NSURL *url = kVersionCheckURL;
