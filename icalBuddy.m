@@ -141,8 +141,8 @@ NSSet *excludedTaskProperties = 		nil;
 NSInteger notesNewlinesIndentModifier =	0;
 
 BOOL displayRelativeDates = YES;
-NSUInteger maxPrintedItems = 0; // 0 = no limit
-NSUInteger printedItems = 0;
+NSUInteger maxNumPrintedItems = 0; // 0 = no limit
+NSUInteger numPrintedItems = 0;
 
 
 NSCalendarDate *now;
@@ -1106,12 +1106,12 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 // pretty-prints out the specified event
 void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay)
 {
-	if (maxPrintedItems > 0 && maxPrintedItems <= printedItems)
+	if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 		return;
 	
 	if (event != nil)
 	{
-		NSUInteger printedProps = 0;
+		NSUInteger numPrintedProps = 0;
 		
 		for (NSString *thisProp in propertyOrder)
 		{
@@ -1121,28 +1121,28 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 				if (thisPropStr != nil && [thisPropStr length] > 0)
 				{
 					NSMutableAttributedString *prefixStr;
-					if (printedProps == 0)
+					if (numPrintedProps == 0)
 						prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
 					else
-						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(printedProps+1));
+						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
-					if (printedProps == 0)
+					if (numPrintedProps == 0)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
 					addToOutputBuffer(thisOutput);
 					
-					printedProps++;
+					numPrintedProps++;
 				}
 			}
 		}
 		
 		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		
-		printedItems++;
+		numPrintedItems++;
 	}
 }
 
@@ -1255,12 +1255,12 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 // pretty-prints out the specified task
 void printCalTask(CalTask *task, int printOptions)
 {
-	if (maxPrintedItems > 0 && maxPrintedItems <= printedItems)
+	if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 		return;
 	
 	if (task != nil)
 	{
-		NSUInteger printedProps = 0;
+		NSUInteger numPrintedProps = 0;
 		
 		for (NSString *thisProp in propertyOrder)
 		{
@@ -1271,32 +1271,32 @@ void printCalTask(CalTask *task, int printOptions)
 				if (thisPropStr != nil && [thisPropStr length] > 0)
 				{
 					NSMutableAttributedString *prefixStr;
-					if (printedProps == 0)
+					if (numPrintedProps == 0)
 					{
 						BOOL useAlertBullet = 	([task dueDate] != nil &&
 												 [now compare:[task dueDate]] == NSOrderedDescending);
 						prefixStr = mutableAttrStrWithAttrs(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), getBulletStringAttributes(useAlertBullet));
 					}
 					else
-						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(printedProps+1));
+						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
-					if (printedProps == 0)
+					if (numPrintedProps == 0)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
 					addToOutputBuffer(thisOutput);
 					
-					printedProps++;
+					numPrintedProps++;
 				}
 			}
 		}
 		
 		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		
-		printedItems++;
+		numPrintedItems++;
 	}
 }
 
@@ -1316,7 +1316,7 @@ void printItemSections(NSArray *sections, int printOptions)
 	NSDictionary *sectionDict;
 	for (sectionDict in sections)
 	{
-		if (maxPrintedItems > 0 && maxPrintedItems <= printedItems)
+		if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 			continue;
 		
 		titlePrintedForCurrentSection = NO;
@@ -1664,7 +1664,7 @@ int main(int argc, char *argv[])
 					if ([allArgKeys containsObject:@"notesNewlinesIndent"])
 						notesNewlinesIndentModifier = [[constArgsDict objectForKey:@"notesNewlinesIndent"] integerValue];
 					if ([allArgKeys containsObject:@"limitItems"])
-						maxPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
+						maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 					if ([allArgKeys containsObject:@"propertySeparators"])
 						arg_propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
 				}
@@ -1802,7 +1802,7 @@ int main(int argc, char *argv[])
 		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
 			arg_strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-li") == 0) || (strcmp(argv[i], "--limitItems") == 0)) && (i+1 < argc))
-			maxPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
+			maxNumPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
 		else if (((strcmp(argv[i], "-ps") == 0) || (strcmp(argv[i], "--propertySeparators") == 0)) && (i+1 < argc))
 			arg_propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 	}
