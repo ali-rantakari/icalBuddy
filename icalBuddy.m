@@ -42,6 +42,7 @@ THE SOFTWARE.
 #define kVersionCheckHeaderName	@"Orghassegsoftwarelatestversion"
 
 
+#define kInternalErrorDomain @"org.hasseg.icalBuddy"
 
 #define kPropertyListEditorAppName @"Property List Editor"
 
@@ -71,6 +72,8 @@ THE SOFTWARE.
 // the default order and include all of the allowed property names)
 #define kDefaultPropertyOrder [NSArray arrayWithObjects:kPropName_title, kPropName_location, kPropName_notes, kPropName_url, kPropName_datetime, kPropName_priority, nil]
 
+#define kDefaultPropertySeparators [NSArray arrayWithObjects:@"\n    ", nil]
+
 // localization configuration file path
 #define kL10nFilePath @"~/.icalBuddyLocalization.plist"
 
@@ -84,8 +87,8 @@ THE SOFTWARE.
 						]
 
 // helper macros for dealing with NSMutableAttributedStrings
-#define kEmptyMutableAttributedString 			[[[NSMutableAttributedString alloc] init] autorelease]
-#define kMutableAttributedStringWithString(x) 	[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
+#define kEmptyMutableAttributedString 	[[[NSMutableAttributedString alloc] init] autorelease]
+#define MUTABLE_ATTR_STR(x)				[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
 
 
 const int VERSION_MAJOR = 1;
@@ -119,6 +122,9 @@ NSStringEncoding outputStrEncoding = NSUTF8StringEncoding; // default
 
 // the order of properties in the output
 NSArray *propertyOrder;
+
+// the separator strings between properties in the output
+NSArray *propertySeparators = nil;
 
 // the prefix strings
 NSString *prefixStrBullet = 			@"* ";
@@ -360,6 +366,55 @@ NSArray* arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 	return [NSArray array];
 }
 
+
+// create an NSArray from a string where components are
+// separated by an arbitrary character and this separator character
+// must be present as both the first and the last character
+// in the given string (e.g.: @"/first/second/third/")
+NSArray* arrayFromArbitrarilySeparatedString(NSString *str, NSError **error)
+{
+	if (str == nil)
+	{
+		if (error != NULL)
+			*error = [NSError
+				errorWithDomain:kInternalErrorDomain
+				code:0
+				userInfo:[NSDictionary
+					dictionaryWithObject:@"Given string is null"
+					forKey:NSLocalizedDescriptionKey
+					]
+				];
+		return nil;
+	}
+	if ([str length] < 2)
+	{
+		if (error != NULL)
+			*error = [NSError
+				errorWithDomain:kInternalErrorDomain
+				code:0
+				userInfo:[NSDictionary
+					dictionaryWithObject:@"Given string has less than two characters"
+					forKey:NSLocalizedDescriptionKey
+					]
+				];
+		return nil;
+	}
+	
+	NSString *separatorChar = nil;
+	
+	NSString *firstChar = [str substringToIndex:1];
+	NSString *lastChar = [str substringFromIndex:[str length]-1];
+	if ([firstChar isEqualToString:lastChar])
+		separatorChar = firstChar;
+	
+	if (separatorChar != nil)
+	{
+		NSString *trimmedStr = [str substringWithRange:NSMakeRange(1,([str length]-2))];
+		return [trimmedStr componentsSeparatedByString:separatorChar];
+	}
+	
+	return [NSArray array];
+}
 
 
 
@@ -827,6 +882,25 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 }
 
 
+// return separator string to prefix a printed property with, based on the
+// number of the property (as in: is it the first to be printed (1), the second
+// (2) and so on.)
+NSString* getPropSeparatorStr(NSUInteger propertyNumber)
+{
+	NSCAssert((propertySeparators != nil), @"propertySeparators is nil");
+	NSCAssert(([propertySeparators count] > 0), @"propertySeparators is empty");
+	
+	// we subtract two here because the first printed property is always
+	// prefixed with a bullet (so we only have propertySeparator prefix
+	// strings for properties thereafter -- thus -1) and we want a zero-based
+	// index to use for the array access (thus the other -1)
+	NSUInteger indexToGet = (propertyNumber >= 2) ? (propertyNumber-2) : 0;
+	NSUInteger lastIndex = [propertySeparators count]-1;
+	if (indexToGet > lastIndex)
+		indexToGet = lastIndex;
+	
+	return [propertySeparators objectAtIndex:indexToGet];
+}
 
 
 
@@ -1023,12 +1097,9 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
-			if (thisPropOutputValue != nil)
-				[thisPropOutputValueAttrStr appendAttributedString:kMutableAttributedStringWithString(@"\n")];
-			
 			if (thisPropOutputName != nil)
 			{
-				[thisPropOutputNameAttrStr appendAttributedString:kMutableAttributedStringWithString(@" ")];
+				[thisPropOutputNameAttrStr appendAttributedString:MUTABLE_ATTR_STR(@" ")];
 				[retVal appendAttributedString:thisPropOutputNameAttrStr];
 			}
 			
@@ -1051,7 +1122,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 	
 	if (event != nil)
 	{
-		BOOL firstPrintedProperty = YES;
+		NSUInteger printedProps = 0;
 		
 		for (NSString *thisProp in propertyOrder)
 		{
@@ -1061,24 +1132,26 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 				if (thisPropStr != nil && [thisPropStr length] > 0)
 				{
 					NSMutableAttributedString *prefixStr;
-					if (firstPrintedProperty)
+					if (printedProps == 0)
 						prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
 					else
-						prefixStr = kMutableAttributedStringWithString(prefixStrIndent);
+						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(printedProps+1));
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
-					if (firstPrintedProperty)
+					if (printedProps == 0)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
 					addToOutputBuffer(thisOutput);
 					
-					firstPrintedProperty = NO;
+					printedProps++;
 				}
 			}
 		}
+		
+		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		
 		printedItems++;
 	}
@@ -1183,12 +1256,9 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
-			if (thisPropOutputValue != nil)
-				[thisPropOutputValueAttrStr appendAttributedString:kMutableAttributedStringWithString(@"\n")];
-			
 			if (thisPropOutputName != nil)
 			{
-				[thisPropOutputNameAttrStr appendAttributedString:kMutableAttributedStringWithString(@" ")];
+				[thisPropOutputNameAttrStr appendAttributedString:MUTABLE_ATTR_STR(@" ")];
 				[retVal appendAttributedString:thisPropOutputNameAttrStr];
 			}
 			
@@ -1211,7 +1281,7 @@ void printCalTask(CalTask *task, int printOptions)
 	
 	if (task != nil)
 	{
-		BOOL firstPrintedProperty = YES;
+		NSUInteger printedProps = 0;
 		
 		for (NSString *thisProp in propertyOrder)
 		{
@@ -1222,28 +1292,30 @@ void printCalTask(CalTask *task, int printOptions)
 				if (thisPropStr != nil && [thisPropStr length] > 0)
 				{
 					NSMutableAttributedString *prefixStr;
-					if (firstPrintedProperty)
+					if (printedProps == 0)
 					{
-						BOOL useAlertBullet = 	(firstPrintedProperty && [task dueDate] != nil &&
+						BOOL useAlertBullet = 	([task dueDate] != nil &&
 												 [now compare:[task dueDate]] == NSOrderedDescending);
 						prefixStr = mutableAttrStrWithAttrs(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), getBulletStringAttributes(useAlertBullet));
 					}
 					else
-						prefixStr = kMutableAttributedStringWithString(prefixStrIndent);
+						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(printedProps+1));
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
 					
-					if (firstPrintedProperty)
+					if (printedProps == 0)
 						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
 					
 					addToOutputBuffer(thisOutput);
 					
-					firstPrintedProperty = NO;
+					printedProps++;
 				}
 			}
 		}
+		
+		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		
 		printedItems++;
 	}
@@ -1279,9 +1351,9 @@ void printItemSections(NSArray *sections, int printOptions)
 			if (!titlePrintedForCurrentSection)
 			{
 				if (!currentIsFirstPrintedSection)
-					addToOutputBuffer(kMutableAttributedStringWithString(@"\n"));
+					addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 				
-				NSMutableAttributedString *thisOutput = kMutableAttributedStringWithString(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
+				NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
 				
 				[thisOutput addAttributes:getSectionTitleStringAttributes(sectionTitle) range:NSMakeRange(0,[[thisOutput string] length])];
 				
@@ -1475,6 +1547,7 @@ int main(int argc, char *argv[])
 	BOOL arg_noCalendarNames = NO;
 	NSString *arg_strEncoding = nil;
 	NSString *arg_propertyOrderStr = nil;
+	NSString *arg_propertySeparatorsStr = nil;
 	
 	BOOL arg_output_is_uncompletedTasks = NO;
 	BOOL arg_output_is_eventsToday = NO;
@@ -1615,6 +1688,8 @@ int main(int argc, char *argv[])
 						notesNewlinesIndentModifier = [[constArgsDict objectForKey:@"notesNewlinesIndent"] integerValue];
 					if ([allArgKeys containsObject:@"limitItems"])
 						maxPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
+					if ([allArgKeys containsObject:@"propertySeparators"])
+						arg_propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
 				}
 			}
 		}
@@ -1753,6 +1828,8 @@ int main(int argc, char *argv[])
 			arg_strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-li") == 0) || (strcmp(argv[i], "--limitItems") == 0)) && (i+1 < argc))
 			maxPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
+		else if (((strcmp(argv[i], "-ps") == 0) || (strcmp(argv[i], "--propertySeparators") == 0)) && (i+1 < argc))
+			arg_propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 	}
 	
 	
@@ -1773,6 +1850,23 @@ int main(int argc, char *argv[])
 	}
 	else
 		propertyOrder = kDefaultPropertyOrder;
+	
+	
+	if (arg_propertySeparatorsStr != nil)
+	{
+		NSError *propertySeparatorsArgParseError = nil;
+		propertySeparators = arrayFromArbitrarilySeparatedString(arg_propertySeparatorsStr, &propertySeparatorsArgParseError);
+		if (propertySeparators == nil && propertySeparatorsArgParseError != nil)
+		{
+			NSPrintErr(
+				@"* Invalid value for argument -ps (or --propertySeparators):\n  \"%@\".\n",
+				[propertySeparatorsArgParseError localizedDescription]
+				);
+			NSPrintErr(@"  Make sure you start and end the value with the separator character\n  (like this: -ps \"|first|second|third|\")\n");
+		}
+	}
+	if (propertySeparators == nil || [propertySeparators count] == 0)
+		propertySeparators = kDefaultPropertySeparators;
 	
 	
 	if (arg_strEncoding != nil)
