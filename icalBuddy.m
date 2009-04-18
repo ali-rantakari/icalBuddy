@@ -93,7 +93,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
-const int VERSION_BUILD = 1;
+const int VERSION_BUILD = 5;
 
 
 
@@ -129,7 +129,6 @@ NSArray *propertySeparators = nil;
 // the prefix strings
 NSString *prefixStrBullet = 			@"* ";
 NSString *prefixStrBulletAlert = 		@"! ";
-NSString *prefixStrIndent = 			@"    ";
 NSString *sectionSeparatorStr = 		@"\n------------------------";
 
 NSString *timeFormatStr = 				@"%H:%M";
@@ -969,30 +968,20 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		{
 			thisPropOutputName = strConcat(localizedStr(@"location"), @":", nil);
 			
-			if ([event location] != nil && ![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
+			if ([event location] != nil &&
+				![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
+				)
 				thisPropOutputValue = [event location];
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
 			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
 			
-			if ([event notes] != nil && ![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
+			if ([event notes] != nil &&
+				![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
+				)
 			{
-				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
-				thisPropOutputValue = [
-					[event notes]
-					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[
-						NSString
-						stringWithFormat:@"\n%@%@",
-							prefixStrIndent,
-							[@""
-								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
-								withString:@" "
-								startingAtIndex:0
-							]
-					]
-					];
+				thisPropOutputValue = [event notes];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -1185,21 +1174,11 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 		{
 			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
 			
-			if ([task notes] != nil && ![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""])
+			if ([task notes] != nil &&
+				![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
+				)
 			{
-				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
-				thisPropOutputValue = [[task notes]
-					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[NSString
-						stringWithFormat:@"\n%@%@",
-							prefixStrIndent,
-							[@""
-								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
-								withString:@" "
-								startingAtIndex:0
-							]
-					]
-					];
+				thisPropOutputValue = [task notes];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -1646,8 +1625,6 @@ int main(int argc, char *argv[])
 						prefixStrBullet = [constArgsDict objectForKey:@"bullet"];
 					if ([allArgKeys containsObject:@"alertBullet"])
 						prefixStrBulletAlert = [constArgsDict objectForKey:@"alertBullet"];
-					if ([allArgKeys containsObject:@"indent"])
-						prefixStrIndent = [constArgsDict objectForKey:@"indent"];
 					if ([allArgKeys containsObject:@"sectionSeparator"])
 						sectionSeparatorStr = [constArgsDict objectForKey:@"sectionSeparator"];
 					if ([allArgKeys containsObject:@"timeFormat"])
@@ -1794,8 +1771,6 @@ int main(int argc, char *argv[])
 			arg_noCalendarNames = YES;
 		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
 			displayRelativeDates = NO;
-		else if (((strcmp(argv[i], "-i") == 0) || (strcmp(argv[i], "--indent") == 0)) && (i+1 < argc))
-			prefixStrIndent = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
@@ -2430,7 +2405,6 @@ int main(int argc, char *argv[])
 		NSPrint(@"-po        Set property order (value required)\n");
 		NSPrint(@"-b         Set bullet point (value required)\n");
 		NSPrint(@"-ab        Set alert bullet point (value required)\n");
-		NSPrint(@"-i         Set indenting (value required)\n");
 		NSPrint(@"-ss        Set section separator (value required)\n");
 		NSPrint(@"-ic,-ec    Include or exclude calendars (value required)\n");
 		NSPrint(@"-iep,-eep  Include or exclude event properties (value required)\n");

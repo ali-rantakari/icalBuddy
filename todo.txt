@@ -2,9 +2,12 @@
 TODO:
 
 
+- implement new way to deal with newline indenting for notes values
+	- do we need the -nni (--notesNewlinesIndent) argument anymore? should it be replaced?
+	- will probably need to do the indenting in the "item printing" functions
+	  instead of in the "property returning" functions
 - document the -ps argument
-- remove the indent argument and all related variables and macros
-- add a way to remove linebreaks from notes values
+- add a way to remove linebreaks from notes values (and replace them with a space)
 
 
 user requests:
