@@ -405,6 +405,19 @@ NSArray* arrayFromArbitrarilySeparatedString(NSString *str, NSError **error)
 	NSString *lastChar = [str substringFromIndex:[str length]-1];
 	if ([firstChar isEqualToString:lastChar])
 		separatorChar = firstChar;
+	else
+	{
+		if (error != NULL)
+			*error = [NSError
+				errorWithDomain:kInternalErrorDomain
+				code:0
+				userInfo:[NSDictionary
+					dictionaryWithObject:@"Given string must start and end with the separator character"
+					forKey:NSLocalizedDescriptionKey
+					]
+				];
+		return nil;
+	}
 	
 	if (separatorChar != nil)
 	{
@@ -981,7 +994,20 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
 				)
 			{
-				thisPropOutputValue = [event notes];
+				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
+				thisPropOutputValue = [
+					[event notes]
+					stringByReplacingOccurrencesOfString:@"\n"
+					withString:[
+						NSString
+						stringWithFormat:@"\n%@",
+							[@""
+								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
+								withString:@" "
+								startingAtIndex:0
+							]
+					]
+					];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
@@ -1178,7 +1204,20 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 				![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
 				)
 			{
-				thisPropOutputValue = [task notes];
+				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
+				thisPropOutputValue = [
+					[task notes]
+					stringByReplacingOccurrencesOfString:@"\n"
+					withString:[
+						NSString
+						stringWithFormat:@"\n%@",
+							[@""
+								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
+								withString:@" "
+								startingAtIndex:0
+							]
+					]
+					];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
