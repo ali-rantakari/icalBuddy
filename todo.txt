@@ -1,37 +1,17 @@
 
 TODO:
 
-- check replaceInMutableAttrStr() -- was tired when wrote it
-- implement new way to deal with newline indenting for notes values
-	- do we need the -nni (--notesNewlinesIndent) argument anymore? should it be replaced?
-		- no, we still need it.
-	- will probably need to do the indenting in the "item printing" functions
-	  instead of in the "property returning" functions
 - document the -ps argument
-- add a way to remove linebreaks from notes values (and replace them with a space)
+- add an argument for replacing newlines within notes values with a custom separator
+	- purpose: if property separator strings won't have newlines in them, notes values
+	  shouldn't either. difficult to make this automatic since the property output
+	  strings -returning functions don't know what the current line's prefixStr looks
+	  like and they add indentation to the newlines.
 
 
 user requests:
 -------------------------
 
-- Different properties on the same lines
-	- could be implemented by:
-		- making the leading newline part of the "indent" string so that it can be
-		  omitted -> voila, items on the same line with custom separator
-		- changing the indent argument to an "property separators" argument that can
-		  be followed by a list of separators to use for printed properties (in the
-		  same order as properties are printed) -- and if the number of specified
-		  values is lower than the gaps between printed props, use the last given
-		  value for all the rest of the gaps. this way users could specify different
-		  separators for all the different "property gaps".
-			- needs changes to the argument reading code: when iterating through
-			  the arguments and we find this "property separators" argument,
-			  read all the values after that until we come across the next
-			  arg that begins with "-" (excluding "\-" so that the users could
-			  specify a prop separator value that begins with a dash) and then
-			  continue reading args from that index (...okay, maybe I won't
-			  need to do this actually... should think this through. yeah,
-			  I don't think this is needed)
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
 	- these two features above here will need similar architectural changes, i.e.
 	  abstracting the methods for determining the output presentation and writing
@@ -43,16 +23,24 @@ user requests:
 other (my own ideas):
 -------------------------
 
-- Write better examples to the web page in order to better illustrate the customizability of output formatting
-- Make getEventPropStr() and getTaskPropStr() use NSMutableAttributedStrings from the beginning so that formatting could occur even within property names and values
-	- Would this make the necessary string concatenation code too ugly? If so, how to deal with that? attrStrConcat() ?
+- Write better examples to the web page in order to better illustrate the customizability
+  of output formatting
+- Make getEventPropStr() and getTaskPropStr() use NSMutableAttributedStrings from the beginning
+  so that formatting could occur even within property names and values
+	- I want to be able to format the calendar name in the title property values
+	- Would this make the necessary string concatenation code too ugly? If so, how to deal with
+	  that? attrStrConcat() ?
 - Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
-- Implement wrapping to a specified number of maximum characters on each line (problem: will look off with non-fixed-width fonts if we try to match indenting levels and fixing those problems with arguments might become really complex (i.e. you would need too many different kinds of arguments for all the different cases))
+- Implement wrapping to a specified number of maximum characters on each line (problem: will
+  look off with non-fixed-width fonts if we try to match indenting levels and fixing those
+  problems with arguments might become really complex (i.e. you would need too many different
+  kinds of arguments for all the different cases))
 
 - Add timezone support (how to handle these?)
 
 
-Replace versionNumberCompare() with this: (is this adequate? must test. might break with more than single-digit numbers.)
+Replace versionNumberCompare() with this: (is this adequate? must test. might break with more
+than single-digit numbers.)
 
 	NSNumberFormatter *conv = [[[NSNumberFormatter alloc] init] autorelease];
 	NSNumber *curVersNum = [conv numberFromString:[versDict objectForKey:(id)@"Version"]];
