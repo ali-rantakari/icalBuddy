@@ -135,7 +135,7 @@ deploy: package
 	@echo ======================================
 	
 	@echo "Checking latest version number vs. current version number..."
-	@( if [ "`./icalBuddy -u | grep -c \"latest: $(APP_VERSION)\"`" == "0" ];then\
+	@( if [ "`curl -Ss http://hasseg.org/icalBuddy/?versioncheck=y`" != "$(APP_VERSION)" ];then\
 		echo "Version number is $(APP_VERSION). Press enter to continue uploading to server or Ctrl-C to cancel.";\
 		read INPUTSTR;\
 		scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(TEMP_DEPLOYMENT_L10NMANFILE) $(TEMP_DEPLOYMENT_CONFIGMANFILE) $(TEMP_DEPLOYMENT_FAQFILE) $(SCP_TARGET);\
