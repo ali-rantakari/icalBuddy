@@ -89,6 +89,7 @@ THE SOFTWARE.
 // helper macros for dealing with NSMutableAttributedStrings
 #define kEmptyMutableAttributedString 	[[[NSMutableAttributedString alloc] init] autorelease]
 #define MUTABLE_ATTR_STR(x)				[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
+#define ATTR_STR(x)						[[[NSAttributedString alloc] initWithString:(x)] autorelease]
 
 
 const int VERSION_MAJOR = 1;
@@ -308,6 +309,31 @@ NSString* strConcat(NSString *firstStr, ...)
 	return nil;
 }
 
+
+// replaces all occurrences of searchStr in str with replaceStr
+void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr)
+{
+	if (str == nil || searchStr == nil || replaceStr == nil)
+		return;
+	
+	NSUInteger replaceStrLength = [[replaceStr string] length];
+	NSString *strRegularString = [str string];
+	NSRange searchRange = NSMakeRange(0, [strRegularString length]);
+	NSRange foundRange;
+	do
+	{
+		foundRange = [strRegularString rangeOfString:searchStr options:NSLiteralSearch range:searchRange];
+		if (foundRange.location != NSNotFound)
+		{
+			[str replaceCharactersInRange:foundRange withAttributedString:replaceStr];
+			
+			strRegularString = [str string];
+			searchRange.location = foundRange.location + replaceStrLength;
+			searchRange.length = [strRegularString length] - searchRange.location;
+		}
+	}
+	while (foundRange.location != NSNotFound);
+}
 
 
 // returns localized, human-readable string corresponding to the
@@ -1152,6 +1178,9 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					else
 						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 					
+					if ([[prefixStr string] rangeOfString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[[prefixStr string] length])].location != NSNotFound)
+						replaceInMutableAttrStr(thisPropStr, @"\n", prefixStr);
+					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
 					[thisOutput appendAttributedString:thisPropStr];
@@ -1318,6 +1347,9 @@ void printCalTask(CalTask *task, int printOptions)
 					}
 					else
 						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+					
+					if ([[prefixStr string] rangeOfString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[[prefixStr string] length])].location != NSNotFound)
+						replaceInMutableAttrStr(thisPropStr, @"\n", prefixStr);
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];

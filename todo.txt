@@ -1,9 +1,10 @@
 
 TODO:
 
-
+- check replaceInMutableAttrStr() -- was tired when wrote it
 - implement new way to deal with newline indenting for notes values
 	- do we need the -nni (--notesNewlinesIndent) argument anymore? should it be replaced?
+		- no, we still need it.
 	- will probably need to do the indenting in the "item printing" functions
 	  instead of in the "property returning" functions
 - document the -ps argument
