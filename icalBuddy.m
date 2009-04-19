@@ -2762,6 +2762,7 @@ int main(int argc, char *argv[])
 		NSPrint(@"-tf,-df    Set time or date format (value required)\n");
 		NSPrint(@"-dts       Set date-time separator (value required)\n");
 		NSPrint(@"-po        Set property order (value required)\n");
+		NSPrint(@"-ps        Set property separators (value required)\n");
 		NSPrint(@"-b         Set bullet point (value required)\n");
 		NSPrint(@"-ab        Set alert bullet point (value required)\n");
 		NSPrint(@"-ss        Set section separator (value required)\n");

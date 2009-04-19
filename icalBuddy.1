@@ -17,6 +17,7 @@
 .Op Fl df Ar format
 .Op Fl dts Ar separator
 .Op Fl po Ar value
+.Op Fl ps Ar value
 .Op Fl b Ar value
 .Op Fl ab Ar value
 .Op Fl ss Ar value
@@ -101,6 +102,16 @@ as the separator string to use between dates and times in the output. The defaul
 Print properties of events/tasks in the order specified by
 .Ar value
 , which must be a comma-separated list of property names. The allowed property names are: title, location, notes, url, datetime, priority.
+.It Fl ps , Fl -propertySeparators Ar value
+Use the strings specified in
+.Ar value
+as the separators between item properties in the output.
+.Ar value
+must be a list of strings where each component is separated by an arbitrary character that is present also as the first and the last character in the value (that means you can use any character you'd like as the separator, as long as you also use it at the beginning and the end.) The components specified in
+.Ar value
+will be used in order, for each item, starting from the first printed property. If the number of printed properties for an item is bigger than the number of components in
+.Ar value
+, the last component is used as the separator for the remaining properties. For example, a value of "|, | - |" would specify ", " as the separator between the first and the second property and " - " as the separator between all the rest of the properties. The default is "|\\n    |" (i.e. use a newline and four spaces as the separator for all properties.) 
 .It Fl b , Fl -bullet Ar value
 Sets
 .Ar value
