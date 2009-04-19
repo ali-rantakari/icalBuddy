@@ -29,17 +29,19 @@ THE SOFTWARE.
 */
 
 
-#import <Foundation/Foundation.h>
-#import <CalendarStore/CalendarStore.h>
-#import <AppKit/AppKit.h>
-#import <AddressBook/AddressBook.h>
-#import "ANSIEscapeHelper.h"
+#include <Foundation/Foundation.h>
+#include <CalendarStore/CalendarStore.h>
+#include <AppKit/AppKit.h>
+#include <AddressBook/AddressBook.h>
+#include "ANSIEscapeHelper.h"
 
 
 #define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
-#define kVersionCheckURL 		[NSURL URLWithString:@"http://hasseg.org/icalBuddy/?versioncheck=y"]
-#define kVersionCheckTimeout 	10.0
+#define kVersionCheckURL 		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:@"?versioncheck=y"]]
+#define kWhatsChangedURL		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:[@"?whatschanged=y&currentversion=" stringByAppendingString:versionNumber()]]]
+#define kDownloadURLFormat		[kAppSiteURLPrefix stringByAppendingString:@"%@/icalBuddy-v%@.zip"]
 #define kVersionCheckHeaderName	@"Orghassegsoftwarelatestversion"
+#define kServerConnectTimeout 	10.0
 
 
 #define kInternalErrorDomain @"org.hasseg.icalBuddy"
@@ -240,6 +242,23 @@ void NSPrintErr(NSString *aStr, ...)
 }
 
 
+// returns YES if success, NO if failure
+BOOL moveFileToTrash(NSString *filePath)
+{
+	if (filePath == nil)
+		return NO;
+	
+	NSString *fileDir = [filePath stringByDeletingLastPathComponent];
+	NSString *fileName = [filePath lastPathComponent];
+	
+	return [[NSWorkspace sharedWorkspace]
+		performFileOperation:NSWorkspaceRecycleOperation
+		source:fileDir
+		destination:@""
+		files:[NSArray arrayWithObject:fileName]
+		tag:nil
+		];
+}
 
 
 
@@ -337,6 +356,37 @@ void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr
 		}
 	}
 	while (foundRange.location != NSNotFound);
+}
+
+
+void stripHTML(NSMutableString *str)
+{
+	if (str == nil)
+		return;
+	
+	NSScanner *scanner;
+	NSString *tempStr;
+	BOOL foundATag = NO;
+	do
+	{
+		scanner = [NSScanner scannerWithString:str];
+		
+		foundATag = [scanner scanUpToString:@"<" intoString:NULL];
+		if (foundATag)
+		{
+			BOOL foundTagEnd = [scanner scanUpToString:@">" intoString:&tempStr];
+			if (foundTagEnd)
+				[str
+					replaceOccurrencesOfString:strConcat(tempStr, @">", nil)
+					withString:@""
+					options:NSLiteralSearch
+					range:NSMakeRange(0, [str length])
+					];
+			else
+				foundATag = false;
+		}
+	}
+	while (foundATag);
 }
 
 
@@ -1480,7 +1530,7 @@ NSString* latestUpdateVersionOnServer(NSString** errorStr)
 	NSURLRequest *request = [NSURLRequest
 		requestWithURL:url
 		cachePolicy:NSURLRequestReloadIgnoringCacheData
-		timeoutInterval:kVersionCheckTimeout
+		timeoutInterval:kServerConnectTimeout
 		];
 	
 	NSHTTPURLResponse *response;
@@ -1539,6 +1589,74 @@ NSString* latestUpdateVersionOnServer(NSString** errorStr)
 }
 
 
+
+
+// returns a list of changes since the current version from the server. on error,
+// errorStr will contain an error message.
+NSString* whatsChangedOnServer(NSString** errorStr)
+{
+	NSURL *url = kWhatsChangedURL;
+	NSURLRequest *request = [NSURLRequest
+		requestWithURL:url
+		cachePolicy:NSURLRequestReloadIgnoringCacheData
+		timeoutInterval:kServerConnectTimeout
+		];
+	
+	NSHTTPURLResponse *response;
+	NSError *error;
+	NSData *data = [NSURLConnection
+		sendSynchronousRequest:request
+		returningResponse:&response
+		error:&error
+		];
+	
+	if (error == nil && response != nil)
+	{
+		NSInteger statusCode = [response statusCode];
+		if (statusCode >= 400)
+		{
+			if (errorStr != NULL)
+				*errorStr = [
+					NSString
+					stringWithFormat:@"HTTP connection failed. Status code %d: \"%@\"",
+						statusCode,
+						[NSHTTPURLResponse localizedStringForStatusCode:statusCode]
+					];
+			return nil;
+		}
+		else if (data != nil)
+		{
+			NSMutableString *responseStr = [[[NSMutableString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+			
+			if (responseStr != nil && [responseStr length] > 0)
+			{
+				[responseStr
+					replaceOccurrencesOfString:@"<li>"
+					withString:@"* "
+					options:NSCaseInsensitiveSearch
+					range:NSMakeRange(0, [responseStr length])
+					];
+				
+				stripHTML(responseStr);
+				
+				return responseStr;
+			}
+		}
+	}
+	else
+	{
+		if (errorStr != NULL)
+			*errorStr = [
+				NSString
+				stringWithFormat:@"Connection failed. Error: - %@ %@",
+					[error localizedDescription],
+					[[error userInfo] objectForKey:NSErrorFailingURLStringKey]
+				];
+		return nil;
+	}
+	
+	return nil;
+}
 
 
 
@@ -2013,10 +2131,21 @@ int main(int argc, char *argv[])
 					@"Navigate to the following URL to see the release notes and download the latest version:\n\n%@?currentversion=%@\n\n",
 					kAppSiteURLPrefix, currentVersionStr
 					);
+				NSPrint(@"Do you want to navigate to this URL now?\n");
+				NSPrint(@"  y = yes, go to the icalBuddy website\n");
+				NSPrint(@"  n = no, just quit\n");
+				NSPrint(@"  a = show a list of what's changed since the current\n");
+				NSPrint(@"      version and then choose whether to automatically\n");
+				NSPrint(@"      download and install the latest version\n");
+				
 				char inputChar;
-				while(inputChar != 'y' && inputChar != 'n' && inputChar != 'Y' && inputChar != 'N' && inputChar != '\n')
+				while(inputChar != 'y' && inputChar != 'Y' &&
+					  inputChar != 'n' && inputChar != 'N' &&
+				  	  inputChar != 'a' && inputChar != 'A' &&
+				  	  inputChar != '\n'
+					  )
 				{
-					NSPrint(@"Do you want to navigate to this URL now? [y/n] ");
+					NSPrint(@"[y/n/a]: ");
 					scanf("%s&*c",&inputChar);
 				}
 				
@@ -2032,6 +2161,127 @@ int main(int argc, char *argv[])
 							]
 						]
 						];
+				}
+				else if (inputChar == 'a' || inputChar == 'A')
+				{
+					NSPrint(@"\n\nLoading list of changes from server...");
+					
+					NSString *whatsChangedCheckErrorStr = nil;
+					NSString *whatsChangedStr = whatsChangedOnServer(&whatsChangedCheckErrorStr);
+					
+					if (whatsChangedStr != nil && whatsChangedCheckErrorStr == nil)
+					{
+						NSPrint(@"...done.\n\n");
+						NSPrint(@"CHANGES SINCE THE CURRENT VERSION (%@):\n", currentVersionStr);
+						NSPrint(@"=============================================\n");
+						NSPrint(@"\n");
+						NSPrint(whatsChangedStr);
+						NSPrint(@"\n\n");
+						NSPrint(@"=============================================\n");
+						NSPrint(@"Do you want to automatically download and\n");
+						NSPrint(@"install the latest version (%@) ?\n", latestVersionStr);
+						
+						while(inputChar != 'y' && inputChar != 'Y' &&
+							  inputChar != 'n' && inputChar != 'N' &&
+							  inputChar != '\n'
+							  )
+						{
+							NSPrint(@"[y/n]: ");
+							scanf("%s&*c",&inputChar);
+						}
+						
+						if (inputChar == 'y' || inputChar == 'Y')
+						{
+							const char *archivePath = "/tmp/icalBuddy-autoUpdate-archive.zip";
+							const char *archiveExtractPath = "/tmp/icalBuddy-autoUpdate-tempdir/";
+							
+							NSPrint(@"\n\n");
+							NSPrint(@">> Downloading distribution archive...\n");
+							NSPrint(@"--------------------------------------------\n");
+							NSPrint(@" - saving archive to: %s\n", archivePath);
+							NSPrint(@"\n");
+							
+							int exitStatus = 0;
+							char cmd [1000];
+							sprintf(
+								cmd,
+								"curl \"%s\" > \"%s\"",
+								[[NSString stringWithFormat:kDownloadURLFormat, latestVersionStr, latestVersionStr] cStringUsingEncoding:NSASCIIStringEncoding],
+								archivePath
+								);
+							exitStatus = system(cmd);
+							
+							if (exitStatus != 0)
+								NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+							else
+							{
+								NSPrint(@"\n\n");
+								NSPrint(@">> Extracting distribution archive...\n");
+								NSPrint(@"--------------------------------------------\n");
+								NSPrint(@" - extracting to: %s\n", archiveExtractPath);
+								NSPrint(@"\n");
+								
+								sprintf(
+									cmd,
+									"mkdir -p \"%s\" && unzip \"%s\" -d \"%s\"",
+									archiveExtractPath,
+									archivePath,
+									archiveExtractPath
+									);
+								exitStatus = system(cmd);
+								
+								if (exitStatus != 0)
+									NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+								else
+								{
+									NSPrint(@"\n\n");
+									NSPrint(@">> Running installation script...\n");
+									NSPrint(@"--------------------------------------------\n");
+									
+									sprintf(
+										cmd,
+										"cd \"%s\" && ./install.command -y",
+										archiveExtractPath
+										);
+									exitStatus = system(cmd);
+									
+									if (exitStatus != 0)
+										NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+									else
+									{
+										NSPrint(@"\n\n");
+										NSPrint(@">> Cleaning up...\n");
+										NSPrint(@"--------------------------------------------\n");
+										
+										NSPrint(@" - Moving distribution archive to trash\n");
+										BOOL fileDeleteSuccess = NO;
+										fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archivePath]);
+										if (!fileDeleteSuccess)
+											NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+										else
+										{
+											NSPrint(@" - Moving temporary extract folder for distribution archive to trash\n");
+											fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archiveExtractPath]);
+											if (!fileDeleteSuccess)
+												NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+											else
+											{
+												NSPrint(@"\n\n");
+												NSPrint(@"=======================\n");
+												NSPrint(@"icalBuddy has been successfully updated to v%@!\n", latestVersionStr);
+												NSPrint(@"Run \"icalBuddy -V\" to confirm this.\n");
+												NSPrint(@"\n");
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						NSPrintErr(@"...Error: %@\n\n", whatsChangedCheckErrorStr);
+					}
 				}
 			}
 		}
