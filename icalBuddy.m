@@ -91,6 +91,10 @@ THE SOFTWARE.
 #define MUTABLE_ATTR_STR(x)				[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
 #define ATTR_STR(x)						[[[NSAttributedString alloc] initWithString:(x)] autorelease]
 
+#define WHITESPACE(x)					[@"" stringByPaddingToLength:(x) withString:@" " startingAtIndex:0]
+
+
+
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
@@ -1021,17 +1025,14 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				)
 			{
 				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
+				thisNewlinesIndentModifier = MAX(0, thisNewlinesIndentModifier);
 				thisPropOutputValue = [
 					[event notes]
 					stringByReplacingOccurrencesOfString:@"\n"
 					withString:[
 						NSString
 						stringWithFormat:@"\n%@",
-							[@""
-								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
-								withString:@" "
-								startingAtIndex:0
-							]
+							WHITESPACE(thisNewlinesIndentModifier)
 					]
 					];
 			}
@@ -1178,8 +1179,28 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					else
 						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 					
-					if ([[prefixStr string] rangeOfString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[[prefixStr string] length])].location != NSNotFound)
-						replaceInMutableAttrStr(thisPropStr, @"\n", prefixStr);
+					// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
+					// with a number of whitespace characters ("indentation") that matches the
+					// length of prefixStr's contents after the last newline
+					NSRange prefixStrLastNewlineRange = [[prefixStr string]
+						rangeOfString:@"\n"
+						options:(NSLiteralSearch|NSBackwardsSearch)
+						range:NSMakeRange(0,[[prefixStr string] length])
+						];
+					if (prefixStrLastNewlineRange.location != NSNotFound)
+					{
+						replaceInMutableAttrStr(
+							thisPropStr,
+							@"\n",
+							ATTR_STR(
+								strConcat(
+									@"\n",
+									WHITESPACE([[prefixStr string] length]-NSMaxRange(prefixStrLastNewlineRange)),
+									nil
+									)
+								)
+							);
+					}
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
@@ -1234,17 +1255,14 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 				)
 			{
 				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
+				thisNewlinesIndentModifier = MAX(0, thisNewlinesIndentModifier);
 				thisPropOutputValue = [
 					[task notes]
 					stringByReplacingOccurrencesOfString:@"\n"
 					withString:[
 						NSString
 						stringWithFormat:@"\n%@",
-							[@""
-								stringByPaddingToLength:MAX(0, thisNewlinesIndentModifier)
-								withString:@" "
-								startingAtIndex:0
-							]
+							WHITESPACE(thisNewlinesIndentModifier)
 					]
 					];
 			}
@@ -1348,8 +1366,28 @@ void printCalTask(CalTask *task, int printOptions)
 					else
 						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 					
-					if ([[prefixStr string] rangeOfString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[[prefixStr string] length])].location != NSNotFound)
-						replaceInMutableAttrStr(thisPropStr, @"\n", prefixStr);
+					// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
+					// with a number of whitespace characters ("indentation") that matches the
+					// length of prefixStr's contents after the last newline
+					NSRange prefixStrLastNewlineRange = [[prefixStr string]
+						rangeOfString:@"\n"
+						options:(NSLiteralSearch|NSBackwardsSearch)
+						range:NSMakeRange(0,[[prefixStr string] length])
+						];
+					if (prefixStrLastNewlineRange.location != NSNotFound)
+					{
+						replaceInMutableAttrStr(
+							thisPropStr,
+							@"\n",
+							ATTR_STR(
+								strConcat(
+									@"\n",
+									WHITESPACE([[prefixStr string] length]-NSMaxRange(prefixStrLastNewlineRange)),
+									nil
+									)
+								)
+							);
+					}
 					
 					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
 					[thisOutput appendAttributedString:prefixStr];
