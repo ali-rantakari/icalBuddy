@@ -145,7 +145,7 @@ NSSet *includedEventProperties = 		nil;
 NSSet *excludedEventProperties = 		nil;
 NSSet *includedTaskProperties = 		nil;
 NSSet *excludedTaskProperties = 		nil;
-NSInteger notesNewlinesIndentModifier =	0;
+NSString *notesNewlineReplacement =		nil;
 
 BOOL displayRelativeDates = YES;
 NSUInteger maxNumPrintedItems = 0; // 0 = no limit
@@ -1074,16 +1074,22 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
 				)
 			{
-				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
-				thisNewlinesIndentModifier = MAX(0, thisNewlinesIndentModifier);
+				NSString *thisNewlineReplacement;
+				if (notesNewlineReplacement == nil)
+				{
+					NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1;
+					thisNewlineReplacement = [NSString
+						stringWithFormat:@"\n%@",
+							WHITESPACE(thisNewlinesIndentModifier)
+						];
+				}
+				else
+					thisNewlineReplacement = notesNewlineReplacement;
+				
 				thisPropOutputValue = [
 					[event notes]
 					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[
-						NSString
-						stringWithFormat:@"\n%@",
-							WHITESPACE(thisNewlinesIndentModifier)
-					]
+					withString:thisNewlineReplacement
 					];
 			}
 		}
@@ -1304,16 +1310,22 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 				![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
 				)
 			{
-				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1+notesNewlinesIndentModifier;
-				thisNewlinesIndentModifier = MAX(0, thisNewlinesIndentModifier);
+				NSString *thisNewlineReplacement;
+				if (notesNewlineReplacement == nil)
+				{
+					NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1;
+					thisNewlineReplacement = [NSString
+						stringWithFormat:@"\n%@",
+							WHITESPACE(thisNewlinesIndentModifier)
+						];
+				}
+				else
+					thisNewlineReplacement = notesNewlineReplacement;
+				
 				thisPropOutputValue = [
 					[task notes]
 					stringByReplacingOccurrencesOfString:@"\n"
-					withString:[
-						NSString
-						stringWithFormat:@"\n%@",
-							WHITESPACE(thisNewlinesIndentModifier)
-					]
+					withString:thisNewlineReplacement
 					];
 			}
 		}
@@ -1888,8 +1900,8 @@ int main(int argc, char *argv[])
 						arg_noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
 					if ([allArgKeys containsObject:@"noRelativeDates"])
 						displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
-					if ([allArgKeys containsObject:@"notesNewlinesIndent"])
-						notesNewlinesIndentModifier = [[constArgsDict objectForKey:@"notesNewlinesIndent"] integerValue];
+					if ([allArgKeys containsObject:@"notesNewlineReplacement"])
+						notesNewlineReplacement = [constArgsDict objectForKey:@"notesNewlineReplacement"];
 					if ([allArgKeys containsObject:@"limitItems"])
 						maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 					if ([allArgKeys containsObject:@"propertySeparators"])
@@ -2018,8 +2030,8 @@ int main(int argc, char *argv[])
 			includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-etp") == 0) || (strcmp(argv[i], "--excludeTaskProps") == 0)) && (i+1 < argc))
 			excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-nni") == 0) || (strcmp(argv[i], "--notesNewlinesIndent") == 0)) && (i+1 < argc))
-			notesNewlinesIndentModifier = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue];
+		else if (((strcmp(argv[i], "-nnr") == 0) || (strcmp(argv[i], "--notesNewlineReplacement") == 0)) && (i+1 < argc))
+			notesNewlineReplacement = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ic") == 0) || (strcmp(argv[i], "--includeCals") == 0)) && (i+1 < argc))
 			arg_includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-ec") == 0) || (strcmp(argv[i], "--excludeCals") == 0)) && (i+1 < argc))
@@ -2770,7 +2782,7 @@ int main(int argc, char *argv[])
 		NSPrint(@"-iep,-eep  Include or exclude event properties (value required)\n");
 		NSPrint(@"-itp,-etp  Include or exclude task properties (value required)\n");
 		NSPrint(@"-cf,-lf    Set config or localization file path (value required)\n");
-		NSPrint(@"-nni       Set indentation for new lines in notes (value required)\n");
+		NSPrint(@"-nnr       Set replacement for newlines within notes (value required)\n");
 		NSPrint(@"\n");
 		NSPrint(@"See the icalBuddy manual page for a more complete list of\n");
 		NSPrint(@"all the possible arguments and their descriptions (just type\n");

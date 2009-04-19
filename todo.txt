@@ -1,14 +1,6 @@
 
 TODO:
 
-- document the -ps argument
-- add an argument for replacing newlines within notes values with a custom separator
-	- purpose: if property separator strings won't have newlines in them, notes values
-	  shouldn't either. difficult to make this automatic since the property output
-	  strings -returning functions don't know what the current line's prefixStr looks
-	  like and they add indentation to the newlines.
-
-
 user requests:
 -------------------------
 

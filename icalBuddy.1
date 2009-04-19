@@ -29,7 +29,7 @@
 .Op Fl etp Ar value
 .Op Fl cf Ar path
 .Op Fl lf Ar path
-.Op Fl nni Ar num
+.Op Fl nnr Ar value
 .Ar command
 .Sh DESCRIPTION          \" Section Header - required - don't modify
 .Nm
@@ -184,10 +184,9 @@ instead of the default one (~/.icalBuddyConfig.plist). Pass in an empty string (
 Use the localization file located at
 .Ar path
 instead of the default one (~/.icalBuddyLocalization.plist).
-.It Fl nni , -notesNewlinesIndent Ar num
-Modifies the indentation level for new lines in values for the notes property by
-.Ar num
-number of whitespace characters. The default indentation level (number of whitespace characters) is the number of characters in the localized version of the string "notes: " (the name of the "notes" property + 2). So in order to indent two characters further, you would use this argument with the value 2.
+.It Fl nnr , -notesNewlineReplacement Ar value
+Replaces newlines in values of the notes property with
+.Ar value
 .El
 .Pp                      \" new paragraph
 .Sh EXAMPLES

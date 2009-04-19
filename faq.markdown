@@ -33,9 +33,25 @@ As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonli
 You can use the `-b` (or `--bullet`) argument to change the normal bullet point value (`"* "` by default) and `-ab` (or `--alertBullet`) to change the alert bullet point value (`"! "` by default, used for tasks that are late from their due date.) Also note that you can change indenting for non-bulleted lines with the `-i` (or `--indent`) argument. See [the manual page][manpageonline] for more info.
 
 
+### Q: How can I keep all (or some) event/task properties on the same line?
+
+You can use the `-ps` (or `--propertySeparators`) argument to specify the strings to use between the properties that get printed out. An example:
+
+    $ icalBuddy eventsToday+2
+	* An Event (Work)
+	    location: Meeting room A
+	    tomorrow at 13:00 - 14:15
+    $
+	$ icalBuddy -ps "| / | -- |" eventsToday+2
+	* An Event (Work) / Meeting room A -- tomorrow at 13:00 - 14:15
+
+
 ### Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
-The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. The only workaround I've come up with so far is to try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped". If you know how to fix this in a smarter way, please [let me know][hassegcontact].
+The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. There are two workarounds I've come up with, depending on the application you're using to invoke icalBuddy:
+
+ 1. If the application you're using to call icalBuddy allows you to set the "writing direction" for the printed output, set that to something other than "natural".
+ 2. If the application you're using to call icalBuddy <em>does not</em> allow you to set the "writing direction", you can try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped".
 
 
 ### Q: The question I had in mind is not answered here. What should I do?
