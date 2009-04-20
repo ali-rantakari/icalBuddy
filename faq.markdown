@@ -69,5 +69,5 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [geektool]: 			http://projects.tynsoe.org/en/geektool
 [xulian]: 				http://sites.google.com/site/lianxukeefo/Home/research/geektool-utf8
 [datetimeformats]: 		http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
-[hassegcontact]: 		http://hasseg.org/blog/?page_id=2
+[hassegcontact]: 		http://hasseg.org/
 
