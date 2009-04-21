@@ -1298,19 +1298,28 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 {
 	if (task != nil)
 	{
-		NSString *thisPropOutputName = nil;
-		NSString *thisPropOutputValue = nil;
+		NSMutableAttributedString *thisPropOutputName = nil;
+		NSMutableAttributedString *thisPropOutputValue = nil;
+		NSMutableAttributedString *thisPropOutputValueSuffix = nil;
 		
 		if ([propName isEqualToString:kPropName_title])
 		{
-			if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
-				thisPropOutputValue = [task title];
-			else
-				thisPropOutputValue = strConcat([task title], @" (", [[task calendar] title], @")", nil);
+			thisPropOutputValue = MUTABLE_ATTR_STR([task title]);
+			
+			if (!(printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC))
+			{
+				thisPropOutputValueSuffix = MUTABLE_ATTR_STR(@" ");
+				[thisPropOutputValueSuffix
+					appendAttributedString: mutableAttrStrWithAttrs(
+						strConcat(@"(", [[task calendar] title], @")", nil),
+						getCalNameInTitleStringAttributes()
+						)
+					];
+			}
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"notes"), @":", nil));
 			
 			if ([task notes] != nil &&
 				![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
@@ -1328,46 +1337,47 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 				else
 					thisNewlineReplacement = notesNewlineReplacement;
 				
-				thisPropOutputValue = [
-					[task notes]
-					stringByReplacingOccurrencesOfString:@"\n"
-					withString:thisNewlineReplacement
-					];
+				thisPropOutputValue = MUTABLE_ATTR_STR((
+					[[task notes]
+						stringByReplacingOccurrencesOfString:@"\n"
+						withString:thisNewlineReplacement
+						]
+					));
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"url"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"url"), @":", nil));
 			
 			if ([task url] != nil)
-				thisPropOutputValue = [NSString stringWithFormat:@"%@", [task url]];
+				thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat:@"%@", [task url]]));
 		}
 		else if ([propName isEqualToString:kPropName_datetime])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"dueDate"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"dueDate"), @":", nil));
 			
 			if ([task dueDate] != nil && !(printOptions & PRINT_OPTION_SINGLE_DAY))
-				thisPropOutputValue = dateStr([task dueDate], true, false);
+				thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([task dueDate], true, false));
 		}
 		else if ([propName isEqualToString:kPropName_priority])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"priority"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"priority"), @":", nil));
 			
 			if ([task priority] != CalPriorityNone)
 			{
 				switch([task priority])
 				{
 					case CalPriorityHigh:
-						thisPropOutputValue = localizedStr(kPriorityStr_high);
+						thisPropOutputValue = MUTABLE_ATTR_STR(localizedStr(kPriorityStr_high));
 						break;
 					case CalPriorityMedium:
-						thisPropOutputValue = localizedStr(kPriorityStr_medium);
+						thisPropOutputValue = MUTABLE_ATTR_STR(localizedStr(kPriorityStr_medium));
 						break;
 					case CalPriorityLow:
-						thisPropOutputValue = localizedStr(kPriorityStr_low);
+						thisPropOutputValue = MUTABLE_ATTR_STR(localizedStr(kPriorityStr_low));
 						break;
 					default:
-						thisPropOutputValue = [NSString stringWithFormat:@"%d", [task priority]];
+						thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat:@"%d", [task priority]]));
 						break;
 				}
 			}
@@ -1375,27 +1385,35 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 		
 		if (thisPropOutputValue != nil)
 		{
-			NSMutableAttributedString *thisPropOutputNameAttrStr = nil;
-			NSMutableAttributedString *thisPropOutputValueAttrStr = nil;
-			
 			if (thisPropOutputName != nil)
-				thisPropOutputNameAttrStr = mutableAttrStrWithAttrs(thisPropOutputName, getPropNameStringAttributes(propName));
+			{
+				[thisPropOutputName
+					setAttributes:getPropNameStringAttributes(propName)
+					range:NSMakeRange(0, [[thisPropOutputName string] length])
+					];
+			}
 			
 			if (thisPropOutputValue != nil)
 			{
-				thisPropOutputValue = [thisPropOutputValue stringByReplacingOccurrencesOfString:@"%" withString:@"%%"];
-				thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
+				replaceInMutableAttrStr(thisPropOutputValue, @"%", ATTR_STR(@"%%"));
+				[thisPropOutputValue
+					setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
+					range:NSMakeRange(0, [[thisPropOutputValue string] length])
+					];
+				
+				if (thisPropOutputValueSuffix != nil)
+					[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
 			}
 			
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
 			if (thisPropOutputName != nil)
 			{
-				[thisPropOutputNameAttrStr appendAttributedString:MUTABLE_ATTR_STR(@" ")];
-				[retVal appendAttributedString:thisPropOutputNameAttrStr];
+				[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
+				[retVal appendAttributedString:thisPropOutputName];
 			}
 			
-			[retVal appendAttributedString:thisPropOutputValueAttrStr];
+			[retVal appendAttributedString:thisPropOutputValue];
 			
 			return retVal;
 		}
