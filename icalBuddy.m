@@ -908,6 +908,16 @@ NSDictionary* getBulletStringAttributes(BOOL isAlertBullet)
 }
 
 
+// return string attributes for calendar names printed along
+// with title properties
+NSDictionary* getCalNameInTitleStringAttributes()
+{
+	return [NSDictionary dictionaryWithObjectsAndKeys:
+				[ansiEscapeHelper colorForSGRCode:SGRCodeFgMagenta], NSForegroundColorAttributeName,
+				nil
+				];
+}
+
 
 // return string attributes for formatting a property name
 NSDictionary* getPropNameStringAttributes(NSString *propName)
@@ -980,11 +990,14 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 {
 	if (event != nil)
 	{
-		NSString *thisPropOutputName = nil;
-		NSString *thisPropOutputValue = nil;
+		NSMutableAttributedString *thisPropOutputName = nil;
+		NSMutableAttributedString *thisPropOutputValue = nil;
+		NSMutableAttributedString *thisPropOutputValueSuffix = nil;
 		
 		if ([propName isEqualToString:kPropName_title])
 		{
+			NSString *thisPropTempValue = nil;
+			
 			if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
 			{
 				// special case for events in the Birthdays calendar (they don't seem to have titles
@@ -1011,33 +1024,38 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 								);
 							thisTitle = [NSString stringWithFormat:localizedStr(@"someonesBirthday"), contactFullName];
 						}
-						if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
-							thisPropOutputValue = thisTitle;
-						else
-							thisPropOutputValue = [NSString stringWithFormat: @"%@ (%@)", thisTitle, [[event calendar] title]];
+						thisPropTempValue = thisTitle;
 					}
 				}
 			}
 			else
+				thisPropTempValue = [event title];
+			
+			thisPropOutputValue = MUTABLE_ATTR_STR(thisPropTempValue);
+			
+			if (!(printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC))
 			{
-				if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
-					thisPropOutputValue = [event title];
-				else
-					thisPropOutputValue = [NSString stringWithFormat: @"%@ (%@)", [event title], [[event calendar] title]];
+				thisPropOutputValueSuffix = MUTABLE_ATTR_STR(@" ");
+				[thisPropOutputValueSuffix
+					appendAttributedString: mutableAttrStrWithAttrs(
+						strConcat(@"(", [[event calendar] title], @")", nil),
+						getCalNameInTitleStringAttributes()
+						)
+					];
 			}
 		}
 		else if ([propName isEqualToString:kPropName_location])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"location"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"location"), @":", nil));
 			
 			if ([event location] != nil &&
 				![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
 				)
-				thisPropOutputValue = [event location];
+				thisPropOutputValue = MUTABLE_ATTR_STR([event location]);
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"notes"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"notes"), @":", nil));
 			
 			if ([event notes] != nil &&
 				![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
@@ -1055,27 +1073,28 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				else
 					thisNewlineReplacement = notesNewlineReplacement;
 				
-				thisPropOutputValue = [
-					[event notes]
-					stringByReplacingOccurrencesOfString:@"\n"
-					withString:thisNewlineReplacement
-					];
+				thisPropOutputValue = MUTABLE_ATTR_STR(
+					[[event notes]
+						stringByReplacingOccurrencesOfString:@"\n"
+						withString:thisNewlineReplacement
+						]
+					);
 			}
 		}
 		else if ([propName isEqualToString:kPropName_url])
 		{
-			thisPropOutputName = strConcat(localizedStr(@"url"), @":", nil);
+			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(@"url"), @":", nil));
 			
 			if ([event url] != nil &&
 				![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
-				thisPropOutputValue = [NSString stringWithFormat: @"%@", [event url]];
+				thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat: @"%@", [event url]]));
 		}
 		else if ([propName isEqualToString:kPropName_datetime])
 		{
 			if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
 			{
 				if (!(printOptions & PRINT_OPTION_SINGLE_DAY))
-					thisPropOutputValue = dateStr([event startDate], true, false);
+					thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], true, false));
 			}
 			else
 			{
@@ -1084,7 +1103,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				if ( !singleDayContext || (singleDayContext && ![event isAllDay]) )
 				{
 					if ([[event startDate] isEqualToDate:[event endDate]])
-						thisPropOutputValue = dateStr([event startDate], (!(printOptions & PRINT_OPTION_SINGLE_DAY)), true);
+						thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], (!(printOptions & PRINT_OPTION_SINGLE_DAY)), true));
 					else
 					{
 						if (printOptions & PRINT_OPTION_SINGLE_DAY)
@@ -1092,21 +1111,27 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							BOOL startsOnContextDay = datesRepresentSameDay(contextDay, [[event startDate] dateWithCalendarFormat:nil timeZone:nil]);
 							BOOL endsOnContextDay = datesRepresentSameDay(contextDay, [[event endDate] dateWithCalendarFormat:nil timeZone:nil]);
 							if (startsOnContextDay && endsOnContextDay)
-								thisPropOutputValue = [NSString
-									stringWithFormat: @"%@ - %@",
-										dateStr([event startDate], false, true),
-										dateStr([event endDate], false, true)
-									];
+								thisPropOutputValue = MUTABLE_ATTR_STR((
+									[NSString
+										stringWithFormat: @"%@ - %@",
+											dateStr([event startDate], false, true),
+											dateStr([event endDate], false, true)
+										]
+									));
 							else if (startsOnContextDay)
-								thisPropOutputValue = [NSString
-									stringWithFormat: @"%@ - ...",
-										dateStr([event startDate], false, true)
-									];
+								thisPropOutputValue = MUTABLE_ATTR_STR((
+									[NSString
+										stringWithFormat: @"%@ - ...",
+											dateStr([event startDate], false, true)
+										]
+									));
 							else if (endsOnContextDay)
-								thisPropOutputValue = [NSString
-									stringWithFormat: @"... - %@",
-										dateStr([event endDate], false, true)
-									];
+								thisPropOutputValue = MUTABLE_ATTR_STR((
+									[NSString
+										stringWithFormat: @"... - %@",
+											dateStr([event endDate], false, true)
+										]
+									));
 						}
 						else
 						{
@@ -1123,14 +1148,16 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 									// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
 									// we want them displayed as only spanning from <start day> to <end day>
 									NSCalendarDate *endDateMinusOneDay = [[[event endDate] dateWithCalendarFormat:nil timeZone:nil] dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0];
-									thisPropOutputValue = [NSString
-										stringWithFormat: @"%@ - %@",
-											dateStr([event startDate], true, false),
-											dateStr(endDateMinusOneDay, true, false)
-										];
+									thisPropOutputValue = MUTABLE_ATTR_STR((
+										[NSString
+											stringWithFormat: @"%@ - %@",
+												dateStr([event startDate], true, false),
+												dateStr(endDateMinusOneDay, true, false)
+											]
+										));
 								}
 								else
-									thisPropOutputValue = dateStr([event startDate], true, false);
+									thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], true, false));
 							}
 							else
 							{
@@ -1140,7 +1167,9 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 									endDateFormattedStr = dateStr([event endDate], false, true);
 								else
 									endDateFormattedStr = dateStr([event endDate], true, true);
-								thisPropOutputValue = [NSString stringWithFormat: @"%@ - %@", startDateFormattedStr, endDateFormattedStr];
+								thisPropOutputValue = MUTABLE_ATTR_STR((
+									[NSString stringWithFormat: @"%@ - %@", startDateFormattedStr, endDateFormattedStr]
+									));
 							}
 						}
 					}
@@ -1150,27 +1179,35 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		
 		if (thisPropOutputValue != nil)
 		{
-			NSMutableAttributedString *thisPropOutputNameAttrStr = nil;
-			NSMutableAttributedString *thisPropOutputValueAttrStr = nil;
-			
 			if (thisPropOutputName != nil)
-				thisPropOutputNameAttrStr = mutableAttrStrWithAttrs(thisPropOutputName, getPropNameStringAttributes(propName));
+			{
+				[thisPropOutputName
+					setAttributes:getPropNameStringAttributes(propName)
+					range:NSMakeRange(0, [[thisPropOutputName string] length])
+					];
+			}
 			
 			if (thisPropOutputValue != nil)
 			{
-				thisPropOutputValue = [thisPropOutputValue stringByReplacingOccurrencesOfString:@"%" withString:@"%%"];
-				thisPropOutputValueAttrStr = mutableAttrStrWithAttrs(thisPropOutputValue, getPropValueStringAttributes(propName, thisPropOutputValue));
+				replaceInMutableAttrStr(thisPropOutputValue, @"%", ATTR_STR(@"%%"));
+				[thisPropOutputValue
+					setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
+					range:NSMakeRange(0, [[thisPropOutputValue string] length])
+					];
+				
+				if (thisPropOutputValueSuffix != nil)
+					[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
 			}
 			
 			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 			
 			if (thisPropOutputName != nil)
 			{
-				[thisPropOutputNameAttrStr appendAttributedString:MUTABLE_ATTR_STR(@" ")];
-				[retVal appendAttributedString:thisPropOutputNameAttrStr];
+				[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
+				[retVal appendAttributedString:thisPropOutputName];
 			}
 			
-			[retVal appendAttributedString:thisPropOutputValueAttrStr];
+			[retVal appendAttributedString:thisPropOutputValue];
 			
 			return retVal;
 		}
@@ -1269,7 +1306,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			if (printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC)
 				thisPropOutputValue = [task title];
 			else
-				thisPropOutputValue = [NSString stringWithFormat: @"%@ (%@)", [task title], [[task calendar] title]];
+				thisPropOutputValue = strConcat([task title], @" (", [[task calendar] title], @")", nil);
 		}
 		else if ([propName isEqualToString:kPropName_notes])
 		{
