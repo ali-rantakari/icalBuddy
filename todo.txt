@@ -22,11 +22,6 @@ other (my own ideas):
 
 - Write better examples to the web page in order to better illustrate the customizability
   of output formatting
-- Make getEventPropStr() and getTaskPropStr() use NSMutableAttributedStrings from the beginning
-  so that formatting could occur even within property names and values
-	- I want to be able to format the calendar name in the title property values
-	- Would this make the necessary string concatenation code too ugly? If so, how to deal with
-	  that? attrStrConcat() ?
 - Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
 - Implement wrapping to a specified number of maximum characters on each line (problem: will
   look off with non-fixed-width fonts if we try to match indenting levels and fixing those
