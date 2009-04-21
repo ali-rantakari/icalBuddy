@@ -69,6 +69,10 @@ A value for the datetime property
 
 The title of an item (an event or a task)
 
+=item B<C<calendarNameInTitle>>
+
+The calendar name, when printed along with an item's title
+
 =item B<C<notesName>>
 
 The name of the notes property

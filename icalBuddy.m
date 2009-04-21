@@ -912,10 +912,7 @@ NSDictionary* getBulletStringAttributes(BOOL isAlertBullet)
 // with title properties
 NSDictionary* getCalNameInTitleStringAttributes()
 {
-	return [NSDictionary dictionaryWithObjectsAndKeys:
-				[ansiEscapeHelper colorForSGRCode:SGRCodeFgMagenta], NSForegroundColorAttributeName,
-				nil
-				];
+	return getStringAttributesForKey(@"calendarNameInTitle");
 }
 
 
