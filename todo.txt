@@ -5,6 +5,14 @@ user requests:
 -------------------------
 
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
+	- we could start with: icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20
+	  and then add an argument to specify a 'wrapper' character for all printed properties
+	  (in this case, double quotes (")) and maybe an argument for making all properties
+	  get printed, even if they don't have values (so as to keep the column order the same).
+	  would also need an argument for escaping specific characters in property values (in
+	  this case, double quotes (")).
+	  	- would these 2-3 extra arguments be useful for any other purpose? I'm not sure
+		  I'd like to add them there just for this.
 - Display also attachments
 - Display also attendees
 

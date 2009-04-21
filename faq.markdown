@@ -46,6 +46,25 @@ You can use the `-ps` (or `--propertySeparators`) argument to specify the string
 	* An Event (Work) / Meeting room A -- tomorrow at 13:00 - 14:15
 
 
+### Q: Can I get the output in CSV format?
+
+Not really &mdash; this is not supported. If you'd still like to try, you could achieve some kind of a result with something like this:
+
+    $ icalBuddy eventsToday+2
+	* An Event (Work)
+	    location: Meeting room A
+	    13:00 - 14:15
+	* Second Event (Work)
+	    location: Meeting room B
+	    tomorrow at 11:00 - 12:00
+    $
+    $ icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20 | sed -e "s/$/\"/"
+	"An Event (Work)","location: Meeting room A","13:00 - 14:15"
+	"Second Event (Work)","location: Meeting room B","tomorrow at 11:00 - 12:00"
+
+When trying this out, note that properties that have no value are not printed out by icalBuddy, so *the column order will not be consistent* in this CSV output unless all printed items have values for all of the same printed properties. Also, double quotes (`"`) in property values will mess things up completely.
+
+
 ### Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
 The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. There are two workarounds I've come up with, depending on the application you're using to invoke icalBuddy:
