@@ -1230,7 +1230,6 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			
 			if (thisPropOutputValue != nil)
 			{
-				replaceInMutableAttrStr(thisPropOutputValue, @"%", ATTR_STR(@"%%"));
 				[thisPropOutputValue
 					setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
 					range:NSMakeRange(0, [[thisPropOutputValue string] length])
@@ -1439,7 +1438,6 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			
 			if (thisPropOutputValue != nil)
 			{
-				replaceInMutableAttrStr(thisPropOutputValue, @"%", ATTR_STR(@"%%"));
 				[thisPropOutputValue
 					setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
 					range:NSMakeRange(0, [[thisPropOutputValue string] length])
@@ -2932,7 +2930,7 @@ int main(int argc, char *argv[])
 	else
 		finalOutput = [stdoutBuffer string];
 	
-	NSPrint(finalOutput);
+	[finalOutput writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
 	
 	
 	[autoReleasePool release];
