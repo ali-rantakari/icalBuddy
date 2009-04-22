@@ -708,19 +708,24 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 	if (includeDate)
 	{
 		if (displayRelativeDates &&
-			datesRepresentSameDay(calDate, now))
+			datesRepresentSameDay(calDate, now)
+			)
 			outputDate = localizedStr(@"today");
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0]))
+				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0])
+				)
 			outputDate = localizedStr(@"tomorrow");
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:2 hours:0 minutes:0 seconds:0]))
+				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:2 hours:0 minutes:0 seconds:0])
+				)
 			outputDate = localizedStr(@"dayAfterTomorrow");
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0]))
+				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0])
+				)
 			outputDate = localizedStr(@"yesterday");
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-2 hours:0 minutes:0 seconds:0]))
+				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-2 hours:0 minutes:0 seconds:0])
+				)
 			outputDate = localizedStr(@"dayBeforeYesterday");
 		else
 		{
