@@ -56,6 +56,21 @@ THE SOFTWARE.
 #define kSectionDictKey_items 				@"sectionItems"
 #define kSectionDictKey_eventsContextDay 	@"eventsContextDay"
 
+// output formatting parameters
+#define kFormatFgColorPrefix	@"fg:"
+#define kFormatBgColorPrefix	@"bg:"
+#define kFormatDoubleUnderlined	@"double-underlined"
+#define kFormatUnderlined	@"underlined"
+#define kFormatBold			@"bold"
+#define kFormatColorBlack	@"black"
+#define kFormatColorRed		@"red"
+#define kFormatColorGreen	@"green"
+#define kFormatColorYellow	@"yellow"
+#define kFormatColorBlue	@"blue"
+#define kFormatColorMagenta	@"magenta"
+#define kFormatColorWhite	@"white"
+#define kFormatColorCyan	@"cyan"
+
 
 // property names
 #define kPropName_title 	@"title"
@@ -217,7 +232,7 @@ void NSPrint(NSString *aStr, ...)
 			initWithFormat:aStr
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
 			arguments:argList
-		] autorelease
+			] autorelease
 		];
 	va_end(argList);
 	
@@ -233,7 +248,7 @@ void NSPrintErr(NSString *aStr, ...)
 			initWithFormat:aStr
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
 			arguments:argList
-		] autorelease
+			] autorelease
 		];
 	va_end(argList);
 	
@@ -788,58 +803,60 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 		
 		BOOL isColorAttribute = NO;
 		BOOL isBackgroundColor = NO;
-		if ([part hasPrefix:@"fg:"] ||
-			[part isEqualToString:@"black"] ||
-			[part isEqualToString:@"red"] ||
-			[part isEqualToString:@"green"] ||
-			[part isEqualToString:@"yellow"] ||
-			[part isEqualToString:@"blue"] ||
-			[part isEqualToString:@"magenta"] ||
-			[part isEqualToString:@"white"] ||
-			[part isEqualToString:@"cyan"]
+		if ([part hasPrefix:kFormatFgColorPrefix] ||
+			[part isEqualToString:kFormatColorBlack] ||
+			[part isEqualToString:kFormatColorRed] ||
+			[part isEqualToString:kFormatColorGreen] ||
+			[part isEqualToString:kFormatColorYellow] ||
+			[part isEqualToString:kFormatColorBlue] ||
+			[part isEqualToString:kFormatColorMagenta] ||
+			[part isEqualToString:kFormatColorWhite] ||
+			[part isEqualToString:kFormatColorCyan]
 			)
 		{
 			thisAttrName = NSForegroundColorAttributeName;
 			isColorAttribute = YES;
 		}
-		else if ([part hasPrefix:@"bg:"])
+		else if ([part hasPrefix:kFormatBgColorPrefix])
 		{
 			thisAttrName = NSBackgroundColorAttributeName;
 			isColorAttribute = YES;
 			isBackgroundColor = YES;
 		}
-		else if ([part isEqualToString:@"bold"])
+		else if ([part isEqualToString:kFormatBold])
 		{
 			thisAttrName = NSFontAttributeName;
 			thisAttrValue = [[NSFontManager sharedFontManager] convertFont:[ansiEscapeHelper font] toHaveTrait:NSBoldFontMask];
 		}
-		else if ([part hasSuffix:@"underlined"])
+		else if ([part isEqualToString:kFormatUnderlined])
 		{
 			thisAttrName = NSUnderlineStyleAttributeName;
-			if ([part hasPrefix:@"double-"])
-				thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleDouble];
-			else
-				thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleSingle];
+			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleSingle];
+		}
+		else if ([part isEqualToString:kFormatDoubleUnderlined])
+		{
+			thisAttrName = NSUnderlineStyleAttributeName;
+			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleDouble];
 		}
 		
 		if (isColorAttribute)
 		{
 			enum sgrCode thisColorSGRCode = SGRCodeNoneOrInvalid;
-			if ([part hasSuffix:@"black"])
+			if ([part hasSuffix:kFormatColorBlack])
 				thisColorSGRCode = SGRCodeFgBlack;
-			else if ([part hasSuffix:@"red"])
+			else if ([part hasSuffix:kFormatColorRed])
 				thisColorSGRCode = SGRCodeFgRed;
-			else if ([part hasSuffix:@"green"])
+			else if ([part hasSuffix:kFormatColorGreen])
 				thisColorSGRCode = SGRCodeFgGreen;
-			else if ([part hasSuffix:@"yellow"])
+			else if ([part hasSuffix:kFormatColorYellow])
 				thisColorSGRCode = SGRCodeFgYellow;
-			else if ([part hasSuffix:@"blue"])
+			else if ([part hasSuffix:kFormatColorBlue])
 				thisColorSGRCode = SGRCodeFgBlue;
-			else if ([part hasSuffix:@"magenta"])
+			else if ([part hasSuffix:kFormatColorMagenta])
 				thisColorSGRCode = SGRCodeFgMagenta;
-			else if ([part hasSuffix:@"white"])
+			else if ([part hasSuffix:kFormatColorWhite])
 				thisColorSGRCode = SGRCodeFgWhite;
-			else if ([part hasSuffix:@"cyan"])
+			else if ([part hasSuffix:kFormatColorCyan])
 				thisColorSGRCode = SGRCodeFgCyan;
 			
 			if (thisColorSGRCode != SGRCodeNoneOrInvalid)
@@ -1833,26 +1850,26 @@ int main(int argc, char *argv[])
 	
 	// default formatting for different output elements
 	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
-		@"cyan",		 		@"datetimeName",
-		@"yellow",		 		@"datetimeValue",
+		kFormatColorCyan,		@"datetimeName",
+		kFormatColorYellow,		@"datetimeValue",
 		@"",		 	 		@"titleValue",
-		@"cyan", 	 			@"notesName",
+		kFormatColorCyan, 	 	@"notesName",
 		@"", 		 			@"notesValue",
-		@"cyan", 		 		@"urlName",
+		kFormatColorCyan, 		@"urlName",
 		@"", 			 		@"urlValue",
-		@"cyan", 		 		@"locationName",
+		kFormatColorCyan, 		@"locationName",
 		@"", 		 			@"locationValue",
-		@"cyan", 		 		@"dueDateName",
+		kFormatColorCyan, 		@"dueDateName",
 		@"", 			 		@"dueDateValue",
-		@"cyan", 	 			@"priorityName",
+		kFormatColorCyan, 	 	@"priorityName",
 		@"", 		 			@"priorityValue",
-		@"red",		 			@"priorityValueHigh",
-		@"yellow",	 			@"priorityValueMedium",
-		@"green",				@"priorityValueLow",
-		@"blue", 				@"sectionTitle",
-		@"bold",				@"firstItemLine",
+		kFormatColorRed,		@"priorityValueHigh",
+		kFormatColorYellow,	 	@"priorityValueMedium",
+		kFormatColorGreen,		@"priorityValueLow",
+		kFormatColorBlue, 		@"sectionTitle",
+		kFormatBold,			@"firstItemLine",
 		@"", 					@"bullet",
-		@"red,bold",			@"alertBullet",
+		strConcat(kFormatColorRed, @",", kFormatBold, nil),		@"alertBullet",
 		nil
 		];
 	
