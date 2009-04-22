@@ -335,11 +335,11 @@ NSString* strConcat(NSString *firstStr, ...)
 	if (firstStr)
 	{
 		va_list argList;
-		NSString *retVal = [NSString stringWithString:firstStr];
+		NSMutableString *retVal = [firstStr mutableCopy];
 		NSString *str;
 		va_start(argList, firstStr);
 		while((str = va_arg(argList, NSString*)))
-			retVal = [retVal stringByAppendingString:str];
+			[retVal appendString:str];
 		va_end(argList);
 		return retVal;
 	}
