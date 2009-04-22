@@ -38,7 +38,7 @@ THE SOFTWARE.
 
 #define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
 #define kVersionCheckURL 		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:@"?versioncheck=y"]]
-#define kWhatsChangedURL		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:[@"?whatschanged=y&currentversion=" stringByAppendingString:versionNumber()]]]
+#define kWhatsChangedURL		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:[@"?whatschanged=y&currentversion=" stringByAppendingString:versionNumberStr()]]]
 #define kDownloadURLFormat		[kAppSiteURLPrefix stringByAppendingString:@"%@/icalBuddy-v%@.zip"]
 #define kVersionCheckHeaderName	@"Orghassegsoftwarelatestversion"
 #define kServerConnectTimeout 	10.0
@@ -204,7 +204,7 @@ ANSIEscapeHelper *ansiEscapeHelper;
 // BEGIN: Misc. helper functions
 
 
-NSString* versionNumber()
+NSString* versionNumberStr()
 {
 	return [NSString stringWithFormat:@"%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD];
 }
@@ -1655,7 +1655,7 @@ NSString* latestUpdateVersionOnServer(NSString** errorStr)
 		else
 		{
 			NSString *latestVersionString = [[response allHeaderFields] valueForKey:kVersionCheckHeaderName];
-			NSString *currentVersionString = versionNumber();
+			NSString *currentVersionString = versionNumberStr();
 			
 			if (latestVersionString == nil)
 			{
@@ -2318,7 +2318,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	if (arg_printVersion)
 	{
-		NSPrintf(@"%@\n", versionNumber());
+		NSPrintf(@"%@\n", versionNumberStr());
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
@@ -2330,7 +2330,7 @@ int main(int argc, char *argv[])
 		
 		NSString *versionCheckErrorStr = nil;
 		NSString *latestVersionStr = latestUpdateVersionOnServer(&versionCheckErrorStr);
-		NSString *currentVersionStr = versionNumber();
+		NSString *currentVersionStr = versionNumberStr();
 		
 		if (latestVersionStr == nil && versionCheckErrorStr != nil)
 			NSPrintfErr(@"...%@", versionCheckErrorStr);
@@ -2714,13 +2714,13 @@ int main(int argc, char *argv[])
 						] day];
 					
 					NSUInteger daySpanLeftInRange = eventsDateRangeDaysSpan - rangeStartToAnEventStartDaysSpan;
-					anEventDaysSpan = MIN(daySpanLeftInRange, anEventDaysSpan);
+					NSUInteger anEventDaysSpanToConsider = MIN(daySpanLeftInRange, anEventDaysSpan);
 					
 					
 					NSCalendarDate *thisEventStartDate = [[anEvent startDate] dateWithCalendarFormat:nil timeZone:nil];
 					
 					NSUInteger i;
-					for (i = 0; i <= anEventDaysSpan; i++)
+					for (i = 0; i <= anEventDaysSpanToConsider; i++)
 					{
 						NSCalendarDate *thisEventStartDatePlusi = [thisEventStartDate
 							dateByAddingYears:0 months:0 days:i hours:0 minutes:0 seconds:0
@@ -2889,7 +2889,7 @@ int main(int argc, char *argv[])
 		NSPrintf(@"all the possible arguments and their descriptions (just type\n");
 		NSPrintf(@"'man icalBuddy' into the terminal.)\n");
 		NSPrintf(@"\n");
-		NSPrintf(@"Version %@\n", versionNumber());
+		NSPrintf(@"Version %@\n", versionNumberStr());
 		NSPrintf(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org/icalBuddy\n");
 		NSPrintf(@"\n");
 	}
