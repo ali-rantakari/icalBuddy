@@ -1018,7 +1018,10 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				// so we have to use the URI to find the ABPerson from the Address Book
 				// and print their name from there)
 				
-				NSString *personId = [[NSString stringWithFormat:@"%@", [event url]] stringByReplacingOccurrencesOfString:@"addressbook://" withString:@""];
+				NSString *personId = [[NSString stringWithFormat:@"%@", [event url]]
+					stringByReplacingOccurrencesOfString:@"addressbook://"
+					withString:@""
+					];
 				ABRecord *person = [[ABAddressBook sharedAddressBook] recordForUniqueId:personId];
 				
 				if (person != nil)
@@ -1117,13 +1120,25 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				if ( !singleDayContext || (singleDayContext && ![event isAllDay]) )
 				{
 					if ([[event startDate] isEqualToDate:[event endDate]])
-						thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], (!(printOptions & PRINT_OPTION_SINGLE_DAY)), true));
+						thisPropOutputValue = MUTABLE_ATTR_STR(
+							dateStr(
+								[event startDate],
+								(!(printOptions & PRINT_OPTION_SINGLE_DAY)),
+								true
+								)
+							);
 					else
 					{
 						if (printOptions & PRINT_OPTION_SINGLE_DAY)
 						{
-							BOOL startsOnContextDay = datesRepresentSameDay(contextDay, [[event startDate] dateWithCalendarFormat:nil timeZone:nil]);
-							BOOL endsOnContextDay = datesRepresentSameDay(contextDay, [[event endDate] dateWithCalendarFormat:nil timeZone:nil]);
+							BOOL startsOnContextDay = datesRepresentSameDay(
+								contextDay,
+								[[event startDate] dateWithCalendarFormat:nil timeZone:nil]
+								);
+							BOOL endsOnContextDay = datesRepresentSameDay(
+								contextDay,
+								[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
+								);
 							if (startsOnContextDay && endsOnContextDay)
 								thisPropOutputValue = MUTABLE_ATTR_STR((
 									[NSString
@@ -1161,7 +1176,15 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 								{
 									// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
 									// we want them displayed as only spanning from <start day> to <end day>
-									NSCalendarDate *endDateMinusOneDay = [[[event endDate] dateWithCalendarFormat:nil timeZone:nil] dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0];
+									NSCalendarDate *endDateMinusOneDay = [
+										[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
+										dateByAddingYears:0
+										months:0
+										days:-1
+										hours:0
+										minutes:0
+										seconds:0
+										];
 									thisPropOutputValue = MUTABLE_ATTR_STR((
 										[NSString
 											stringWithFormat: @"%@ - %@",
@@ -1177,7 +1200,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							{
 								NSString *startDateFormattedStr = dateStr([event startDate], true, true);
 								NSString *endDateFormattedStr;
-								if (datesRepresentSameDay([[event startDate] dateWithCalendarFormat:nil timeZone:nil], [[event endDate] dateWithCalendarFormat:nil timeZone:nil]))
+								if (datesRepresentSameDay(
+										[[event startDate] dateWithCalendarFormat:nil timeZone:nil],
+										[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
+										)
+									)
 									endDateFormattedStr = dateStr([event endDate], false, true);
 								else
 									endDateFormattedStr = dateStr([event endDate], true, true);
@@ -1283,7 +1310,10 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					[thisOutput appendAttributedString:thisPropStr];
 					
 					if (numPrintedProps == 0)
-						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
+						[thisOutput
+							addAttributes:getFirstLineStringAttributes()
+							range:NSMakeRange(0,[[thisOutput string] length])
+							];
 					
 					addToOutputBuffer(thisOutput);
 					
@@ -1461,7 +1491,10 @@ void printCalTask(CalTask *task, int printOptions)
 					{
 						BOOL useAlertBullet = 	([task dueDate] != nil &&
 												 [now compare:[task dueDate]] == NSOrderedDescending);
-						prefixStr = mutableAttrStrWithAttrs(((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet), getBulletStringAttributes(useAlertBullet));
+						prefixStr = mutableAttrStrWithAttrs(
+							((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet),
+							getBulletStringAttributes(useAlertBullet)
+							);
 					}
 					else
 						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
@@ -1494,7 +1527,10 @@ void printCalTask(CalTask *task, int printOptions)
 					[thisOutput appendAttributedString:thisPropStr];
 					
 					if (numPrintedProps == 0)
-						[thisOutput addAttributes:getFirstLineStringAttributes() range:NSMakeRange(0,[[thisOutput string] length])];
+						[thisOutput
+							addAttributes:getFirstLineStringAttributes()
+							range:NSMakeRange(0,[[thisOutput string] length])
+							];
 					
 					addToOutputBuffer(thisOutput);
 					
@@ -1541,9 +1577,14 @@ void printItemSections(NSArray *sections, int printOptions)
 				if (!currentIsFirstPrintedSection)
 					addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 				
-				NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil));
+				NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(
+					strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil)
+					);
 				
-				[thisOutput addAttributes:getSectionTitleStringAttributes(sectionTitle) range:NSMakeRange(0,[[thisOutput string] length])];
+				[thisOutput
+					addAttributes:getSectionTitleStringAttributes(sectionTitle)
+					range:NSMakeRange(0,[[thisOutput string] length])
+					];
 				
 				addToOutputBuffer(thisOutput);
 				
@@ -1700,7 +1741,9 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	sprintf(
 		cmd,
 		"curl \"%s\" > \"%s\"",
-		[[NSString stringWithFormat:kDownloadURLFormat, latestVersionStr, latestVersionStr] cStringUsingEncoding:NSASCIIStringEncoding],
+		[[NSString stringWithFormat:kDownloadURLFormat, latestVersionStr, latestVersionStr]
+			cStringUsingEncoding:NSASCIIStringEncoding
+			],
 		archivePath
 		);
 	exitStatus = system(cmd);
@@ -1917,7 +1960,10 @@ int main(int argc, char *argv[])
 			if ([configFilePath length] > 0)
 			{
 				BOOL userSpecifiedConfigFileIsDir;
-				BOOL userSpecifiedConfigFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&userSpecifiedConfigFileIsDir];
+				BOOL userSpecifiedConfigFileExists = [[NSFileManager defaultManager]
+					fileExistsAtPath:configFilePath
+					isDirectory:&userSpecifiedConfigFileIsDir
+					];
 				if (!userSpecifiedConfigFileExists)
 				{
 					NSPrintErr(@"Error: specified configuration file doesn't exist: '%@'\n", configFilePath);
@@ -1936,7 +1982,10 @@ int main(int argc, char *argv[])
 			if ([L10nFilePath length] > 0)
 			{
 				BOOL userSpecifiedL10nFileIsDir;
-				BOOL userSpecifiedL10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:L10nFilePath isDirectory:&userSpecifiedL10nFileIsDir];
+				BOOL userSpecifiedL10nFileExists = [[NSFileManager defaultManager]
+					fileExistsAtPath:L10nFilePath
+					isDirectory:&userSpecifiedL10nFileIsDir
+					];
 				if (!userSpecifiedL10nFileExists)
 				{
 					NSPrintErr(@"Error: specified localization file doesn't exist: '%@'\n", L10nFilePath);
@@ -1961,7 +2010,10 @@ int main(int argc, char *argv[])
 	if (configFilePath != nil && [configFilePath length] > 0)
 	{
 		BOOL configFileIsDir;
-		BOOL configFileExists = [[NSFileManager defaultManager] fileExistsAtPath:configFilePath isDirectory:&configFileIsDir];
+		BOOL configFileExists = [[NSFileManager defaultManager]
+			fileExistsAtPath:configFilePath
+			isDirectory:&configFileIsDir
+			];
 		if (configFileExists && !configFileIsDir)
 		{
 			BOOL configFileIsValid = YES;
@@ -1970,12 +2022,17 @@ int main(int argc, char *argv[])
 			
 			if (configDict == nil)
 			{
-				NSPrintErr(@"* Error in configuration file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyConfig man page.\n", configFilePath);
+				NSPrintErr(@"* Error in configuration file \"%@\":\n", configFilePath);
+				NSPrintErr(@"  can not recognize file format -- must be a valid property list\n");
+				NSPrintErr(@"  with a structure specified in the icalBuddyConfig man page.\n");
 				configFileIsValid = NO;
 			}
 			
 			if (!configFileIsValid)
-				NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
+			{
+				NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\n");
+				NSPrintErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
+			}
 			else
 			{
 				NSDictionary *constArgsDict = [configDict objectForKey:@"constantArguments"];
@@ -2052,7 +2109,9 @@ int main(int argc, char *argv[])
 			
 			if (L10nStringsDict == nil)
 			{
-				NSPrintErr(@"* Error in localization file \"%@\":\n  can not recognize file format -- must be a valid property list\n  with a structure specified in the icalBuddyLocalization man page.\n", L10nFilePath);
+				NSPrintErr(@"* Error in localization file \"%@\":\n", L10nFilePath);
+				NSPrintErr(@"can not recognize file format -- must be a valid property list\n");
+				NSPrintErr(@"with a structure specified in the icalBuddyLocalization man page.\n");
 				L10nFileIsValid = NO;
 			}
 			
@@ -2076,14 +2135,19 @@ int main(int argc, char *argv[])
 					thisVal = [L10nStringsDict objectForKey:thisKey];
 					if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
 					{
-						NSPrintErr(@"* Error in localization file \"%@\"\n  (key: \"%@\", value: \"%@\"):\n  value must include %@ to indicate position for a variable.\n", L10nFilePath, thisKey, thisVal, requiredSubstring);
+						NSPrintErr(@"* Error in localization file \"%@\"\n", L10nFilePath);
+						NSPrintErr(@"(key: \"%@\", value: \"%@\"):\n", thisKey, thisVal);
+						NSPrintErr(@"value must include %@ to indicate position for a variable.\n", requiredSubstring);
 						L10nFileIsValid = NO;
 					}
 				}
 			}
 			
 			if (!L10nFileIsValid)
-				NSPrintErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\nand \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", L10nFilePath);
+			{
+				NSPrintErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\n");
+				NSPrintErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", L10nFilePath);
+			}
 		}
 	}
 	
@@ -2176,7 +2240,11 @@ int main(int argc, char *argv[])
 		// and then add to the list the omitted property names in the default order
 		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(arg_propertyOrderStr);
 		NSMutableArray *tempPropertyOrder = [NSMutableArray arrayWithCapacity:10];
-		[tempPropertyOrder addObjectsFromArray:[specifiedPropertyOrder filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF IN %@", kDefaultPropertyOrder]]];
+		[tempPropertyOrder
+			addObjectsFromArray:[specifiedPropertyOrder
+				filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF IN %@", kDefaultPropertyOrder]
+				]
+			];
 		for (NSString *thisPropertyInDefaultOrder in kDefaultPropertyOrder)
 		{
 			if (![tempPropertyOrder containsObject:thisPropertyInDefaultOrder])
@@ -2223,11 +2291,17 @@ int main(int argc, char *argv[])
 		if (matchedEncoding != 0)
 			outputStrEncoding = matchedEncoding;
 		else
+		{
 			NSPrintErr(
-				@"\nError: Invalid string encoding argument: \"%@\". Run \"icalBuddy strEncodings\" to see all the possible values. Using default encoding \"%@\".\n\n",
-				arg_strEncoding,
+				@"\nError: Invalid string encoding argument: \"%@\".\n",
+				arg_strEncoding
+				);
+			NSPrintErr(@"Run \"icalBuddy strEncodings\" to see all the possible values.");
+			NSPrintErr(
+				@"Using default encoding \"%@\".\n\n",
 				[NSString localizedNameOfStringEncoding: outputStrEncoding]
 				);
+		}
 	}
 	
 	
@@ -2448,9 +2522,9 @@ int main(int argc, char *argv[])
 		// - first include what has been specified to be included,
 		// - then exclude what has been specified to be excluded
 		if (arg_includeCals != nil)
-			[allCalendars filterUsingPredicate: [NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", arg_includeCals, arg_includeCals]];
+			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", arg_includeCals, arg_includeCals]];
 		if (arg_excludeCals != nil)
-			[allCalendars filterUsingPredicate: [NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", arg_excludeCals, arg_excludeCals]];
+			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", arg_excludeCals, arg_excludeCals]];
 		
 		int tasks_printOptions = PRINT_OPTION_NONE;
 		int events_printOptions = PRINT_OPTION_NONE;
@@ -2472,8 +2546,24 @@ int main(int argc, char *argv[])
 			// get start and end dates for predicate
 			if (arg_output_is_eventsToday)
 			{
-				eventsDateRangeStart = [NSCalendarDate dateWithYear:[now yearOfCommonEra] month:[now monthOfYear] day:[now dayOfMonth] hour:0 minute:0 second:0 timeZone:[now timeZone]];
-				eventsDateRangeEnd = [NSCalendarDate dateWithYear:[now yearOfCommonEra] month:[now monthOfYear] day:[now dayOfMonth] hour:23 minute:59 second:59 timeZone:[now timeZone]];
+				eventsDateRangeStart = [NSCalendarDate
+					dateWithYear:[now yearOfCommonEra]
+					month:[now monthOfYear]
+					day:[now dayOfMonth]
+					hour:0
+					minute:0
+					second:0
+					timeZone:[now timeZone]
+					];
+				eventsDateRangeEnd = [NSCalendarDate
+					dateWithYear:[now yearOfCommonEra]
+					month:[now monthOfYear]
+					day:[now dayOfMonth]
+					hour:23
+					minute:59
+					second:59
+					timeZone:[now timeZone]
+					];
 			}
 			else if (arg_output_is_eventsNow)
 			{
