@@ -223,7 +223,15 @@ void addToOutputBuffer(NSAttributedString *aStr)
 // 		from: http://www.sveinbjorn.org/objectivec_stdout
 // 		(modified to use non-deprecated version of writeToFile:...
 //       and allow for using the "string format" syntax)
-void NSPrint(NSString *aStr, ...)
+
+void NSPrint(NSString *aStr)
+{
+	if (aStr == nil)
+		return;
+	[aStr writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
+}
+
+void NSPrintf(NSString *aStr, ...)
 {
 	va_list argList;
 	va_start(argList, aStr);
@@ -239,7 +247,7 @@ void NSPrint(NSString *aStr, ...)
 	[str writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
 }
 
-void NSPrintErr(NSString *aStr, ...)
+void NSPrintfErr(NSString *aStr, ...)
 {
 	va_list argList;
 	va_start(argList, aStr);
@@ -1691,10 +1699,10 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	char cmd [1000];
 	
 	
-	NSPrint(@"\n\n");
-	NSPrint(@"CHANGES SINCE THE CURRENT VERSION (%@):\n", currentVersionStr);
-	NSPrint(@"=============================================\n");
-	NSPrint(@"\n");
+	NSPrintf(@"\n\n");
+	NSPrintf(@"CHANGES SINCE THE CURRENT VERSION (%@):\n", currentVersionStr);
+	NSPrintf(@"=============================================\n");
+	NSPrintf(@"\n");
 	
 	sprintf(
 		cmd,
@@ -1705,14 +1713,14 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	
 	if (exitStatus != 0)
 	{
-		NSPrintErr(@"\n\nFailed to load list of changes from server (exit status %i)\n\n", exitStatus);
+		NSPrintfErr(@"\n\nFailed to load list of changes from server (exit status %i)\n\n", exitStatus);
 		return;
 	}
 	
-	NSPrint(@"\n\n");
-	NSPrint(@"=============================================\n");
-	NSPrint(@"Do you want to automatically download and\n");
-	NSPrint(@"install the latest version (%@) ?\n", latestVersionStr);
+	NSPrintf(@"\n\n");
+	NSPrintf(@"=============================================\n");
+	NSPrintf(@"Do you want to automatically download and\n");
+	NSPrintf(@"install the latest version (%@) ?\n", latestVersionStr);
 	
 	char inputChar;
 	while(inputChar != 'y' && inputChar != 'Y' &&
@@ -1720,7 +1728,7 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 		  inputChar != '\n'
 		  )
 	{
-		NSPrint(@"[y/n]: ");
+		NSPrintf(@"[y/n]: ");
 		scanf("%s&*c",&inputChar);
 	}
 	
@@ -1730,11 +1738,11 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	const char *archivePath = "/tmp/icalBuddy-autoUpdate-archive.zip";
 	const char *archiveExtractPath = "/tmp/icalBuddy-autoUpdate-tempdir/";
 	
-	NSPrint(@"\n\n");
-	NSPrint(@">> Downloading distribution archive...\n");
-	NSPrint(@"--------------------------------------------\n");
-	NSPrint(@" - saving archive to: %s\n", archivePath);
-	NSPrint(@"\n");
+	NSPrintf(@"\n\n");
+	NSPrintf(@">> Downloading distribution archive...\n");
+	NSPrintf(@"--------------------------------------------\n");
+	NSPrintf(@" - saving archive to: %s\n", archivePath);
+	NSPrintf(@"\n");
 	
 	sprintf(
 		cmd,
@@ -1748,15 +1756,15 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	
 	if (exitStatus != 0)
 	{
-		NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
 		return;
 	}
 	
-	NSPrint(@"\n\n");
-	NSPrint(@">> Extracting distribution archive...\n");
-	NSPrint(@"--------------------------------------------\n");
-	NSPrint(@" - extracting to: %s\n", archiveExtractPath);
-	NSPrint(@"\n");
+	NSPrintf(@"\n\n");
+	NSPrintf(@">> Extracting distribution archive...\n");
+	NSPrintf(@"--------------------------------------------\n");
+	NSPrintf(@" - extracting to: %s\n", archiveExtractPath);
+	NSPrintf(@"\n");
 	
 	sprintf(
 		cmd,
@@ -1769,13 +1777,13 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	
 	if (exitStatus != 0)
 	{
-		NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
 		return;
 	}
 	
-	NSPrint(@"\n\n");
-	NSPrint(@">> Running installation script...\n");
-	NSPrint(@"--------------------------------------------\n");
+	NSPrintf(@"\n\n");
+	NSPrintf(@">> Running installation script...\n");
+	NSPrintf(@"--------------------------------------------\n");
 	
 	sprintf(
 		cmd,
@@ -1786,36 +1794,36 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	
 	if (exitStatus != 0)
 	{
-		NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
 		return;
 	}
 	
-	NSPrint(@"\n\n");
-	NSPrint(@">> Cleaning up...\n");
-	NSPrint(@"--------------------------------------------\n");
+	NSPrintf(@"\n\n");
+	NSPrintf(@">> Cleaning up...\n");
+	NSPrintf(@"--------------------------------------------\n");
 	
-	NSPrint(@" - Moving distribution archive to trash\n");
+	NSPrintf(@" - Moving distribution archive to trash\n");
 	BOOL fileDeleteSuccess = NO;
 	fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archivePath]);
 	if (!fileDeleteSuccess)
 	{
-		NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
 		return;
 	}
 	
-	NSPrint(@" - Moving temporary extract folder for distribution archive to trash\n");
+	NSPrintf(@" - Moving temporary extract folder for distribution archive to trash\n");
 	fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archiveExtractPath]);
 	if (!fileDeleteSuccess)
 	{
-		NSPrintErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
 		return;
 	}
 	
-	NSPrint(@"\n\n");
-	NSPrint(@"=======================\n");
-	NSPrint(@"icalBuddy has been successfully updated to v%@!\n", latestVersionStr);
-	NSPrint(@"Run \"icalBuddy -V\" to confirm this.\n");
-	NSPrint(@"\n");
+	NSPrintf(@"\n\n");
+	NSPrintf(@"=======================\n");
+	NSPrintf(@"icalBuddy has been successfully updated to v%@!\n", latestVersionStr);
+	NSPrintf(@"Run \"icalBuddy -V\" to confirm this.\n");
+	NSPrintf(@"\n");
 }
 
 
@@ -1964,12 +1972,12 @@ int main(int argc, char *argv[])
 					];
 				if (!userSpecifiedConfigFileExists)
 				{
-					NSPrintErr(@"Error: specified configuration file doesn't exist: '%@'\n", configFilePath);
+					NSPrintfErr(@"Error: specified configuration file doesn't exist: '%@'\n", configFilePath);
 					configFilePath = nil;
 				}
 				else if (userSpecifiedConfigFileIsDir)
 				{
-					NSPrintErr(@"Error: specified configuration file is a directory: '%@'\n", configFilePath);
+					NSPrintfErr(@"Error: specified configuration file is a directory: '%@'\n", configFilePath);
 					configFilePath = nil;
 				}
 			}
@@ -1986,12 +1994,12 @@ int main(int argc, char *argv[])
 					];
 				if (!userSpecifiedL10nFileExists)
 				{
-					NSPrintErr(@"Error: specified localization file doesn't exist: '%@'\n", L10nFilePath);
+					NSPrintfErr(@"Error: specified localization file doesn't exist: '%@'\n", L10nFilePath);
 					L10nFilePath = nil;
 				}
 				else if (userSpecifiedL10nFileIsDir)
 				{
-					NSPrintErr(@"Error: specified localization file is a directory: '%@'\n", L10nFilePath);
+					NSPrintfErr(@"Error: specified localization file is a directory: '%@'\n", L10nFilePath);
 					L10nFilePath = nil;
 				}
 			}
@@ -2020,16 +2028,16 @@ int main(int argc, char *argv[])
 			
 			if (configDict == nil)
 			{
-				NSPrintErr(@"* Error in configuration file \"%@\":\n", configFilePath);
-				NSPrintErr(@"  can not recognize file format -- must be a valid property list\n");
-				NSPrintErr(@"  with a structure specified in the icalBuddyConfig man page.\n");
+				NSPrintfErr(@"* Error in configuration file \"%@\":\n", configFilePath);
+				NSPrintfErr(@"  can not recognize file format -- must be a valid property list\n");
+				NSPrintfErr(@"  with a structure specified in the icalBuddyConfig man page.\n");
 				configFileIsValid = NO;
 			}
 			
 			if (!configFileIsValid)
 			{
-				NSPrintErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\n");
-				NSPrintErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
+				NSPrintfErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\n");
+				NSPrintfErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", configFilePath);
 			}
 			else
 			{
@@ -2107,9 +2115,9 @@ int main(int argc, char *argv[])
 			
 			if (L10nStringsDict == nil)
 			{
-				NSPrintErr(@"* Error in localization file \"%@\":\n", L10nFilePath);
-				NSPrintErr(@"can not recognize file format -- must be a valid property list\n");
-				NSPrintErr(@"with a structure specified in the icalBuddyLocalization man page.\n");
+				NSPrintfErr(@"* Error in localization file \"%@\":\n", L10nFilePath);
+				NSPrintfErr(@"can not recognize file format -- must be a valid property list\n");
+				NSPrintfErr(@"with a structure specified in the icalBuddyLocalization man page.\n");
 				L10nFileIsValid = NO;
 			}
 			
@@ -2133,9 +2141,9 @@ int main(int argc, char *argv[])
 					thisVal = [L10nStringsDict objectForKey:thisKey];
 					if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
 					{
-						NSPrintErr(@"* Error in localization file \"%@\"\n", L10nFilePath);
-						NSPrintErr(@"(key: \"%@\", value: \"%@\"):\n", thisKey, thisVal);
-						NSPrintErr(@"value must include %@ to indicate position for a variable.\n", requiredSubstring);
+						NSPrintfErr(@"* Error in localization file \"%@\"\n", L10nFilePath);
+						NSPrintfErr(@"(key: \"%@\", value: \"%@\"):\n", thisKey, thisVal);
+						NSPrintfErr(@"value must include %@ to indicate position for a variable.\n", requiredSubstring);
 						L10nFileIsValid = NO;
 					}
 				}
@@ -2143,8 +2151,8 @@ int main(int argc, char *argv[])
 			
 			if (!L10nFileIsValid)
 			{
-				NSPrintErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\n");
-				NSPrintErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", L10nFilePath);
+				NSPrintfErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\n");
+				NSPrintfErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", L10nFilePath);
 			}
 		}
 	}
@@ -2260,11 +2268,11 @@ int main(int argc, char *argv[])
 		propertySeparators = arrayFromArbitrarilySeparatedString(arg_propertySeparatorsStr, &propertySeparatorsArgParseError);
 		if (propertySeparators == nil && propertySeparatorsArgParseError != nil)
 		{
-			NSPrintErr(
+			NSPrintfErr(
 				@"* Invalid value for argument -ps (or --propertySeparators):\n  \"%@\".\n",
 				[propertySeparatorsArgParseError localizedDescription]
 				);
-			NSPrintErr(@"  Make sure you start and end the value with the separator character\n  (like this: -ps \"|first|second|third|\")\n");
+			NSPrintfErr(@"  Make sure you start and end the value with the separator character\n  (like this: -ps \"|first|second|third|\")\n");
 		}
 	}
 	if (propertySeparators == nil || [propertySeparators count] == 0)
@@ -2290,12 +2298,12 @@ int main(int argc, char *argv[])
 			outputStrEncoding = matchedEncoding;
 		else
 		{
-			NSPrintErr(
+			NSPrintfErr(
 				@"\nError: Invalid string encoding argument: \"%@\".\n",
 				arg_strEncoding
 				);
-			NSPrintErr(@"Run \"icalBuddy strEncodings\" to see all the possible values.");
-			NSPrintErr(
+			NSPrintfErr(@"Run \"icalBuddy strEncodings\" to see all the possible values.");
+			NSPrintfErr(
 				@"Using default encoding \"%@\".\n\n",
 				[NSString localizedNameOfStringEncoding: outputStrEncoding]
 				);
@@ -2310,7 +2318,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	if (arg_printVersion)
 	{
-		NSPrint(@"%@\n", versionNumber());
+		NSPrintf(@"%@\n", versionNumber());
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
@@ -2318,31 +2326,31 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if (arg_updatesCheck)
 	{
-		NSPrint(@"Checking for updates... ");
+		NSPrintf(@"Checking for updates... ");
 		
 		NSString *versionCheckErrorStr = nil;
 		NSString *latestVersionStr = latestUpdateVersionOnServer(&versionCheckErrorStr);
 		NSString *currentVersionStr = versionNumber();
 		
 		if (latestVersionStr == nil && versionCheckErrorStr != nil)
-			NSPrintErr(@"...%@", versionCheckErrorStr);
+			NSPrintfErr(@"...%@", versionCheckErrorStr);
 		else
 		{
 			if (latestVersionStr == nil)
-				NSPrint(@"...you're up to date! (current & latest: %@)\n\n", currentVersionStr);
+				NSPrintf(@"...you're up to date! (current & latest: %@)\n\n", currentVersionStr);
 			else
 			{
-				NSPrint(@"...update found! (latest: %@  current: %@)\n\n", latestVersionStr, currentVersionStr);
-				NSPrint(
+				NSPrintf(@"...update found! (latest: %@  current: %@)\n\n", latestVersionStr, currentVersionStr);
+				NSPrintf(
 					@"Navigate to the following URL to see the release notes and download the latest version:\n\n%@?currentversion=%@\n\n",
 					kAppSiteURLPrefix, currentVersionStr
 					);
-				NSPrint(@"Do you want to navigate to this URL now?\n");
-				NSPrint(@"  y = yes, go to the icalBuddy website\n");
-				NSPrint(@"  n = no, just quit\n");
-				NSPrint(@"  a = show a list of what's changed since the current\n");
-				NSPrint(@"      version and then choose whether to automatically\n");
-				NSPrint(@"      download and install the latest version\n");
+				NSPrintf(@"Do you want to navigate to this URL now?\n");
+				NSPrintf(@"  y = yes, go to the icalBuddy website\n");
+				NSPrintf(@"  n = no, just quit\n");
+				NSPrintf(@"  a = show a list of what's changed since the current\n");
+				NSPrintf(@"      version and then choose whether to automatically\n");
+				NSPrintf(@"      download and install the latest version\n");
 				
 				char inputChar;
 				while(inputChar != 'y' && inputChar != 'Y' &&
@@ -2351,7 +2359,7 @@ int main(int argc, char *argv[])
 				  	  inputChar != '\n'
 					  )
 				{
-					NSPrint(@"[y/n/a]: ");
+					NSPrintf(@"[y/n/a]: ");
 					scanf("%s&*c",&inputChar);
 				}
 				
@@ -2381,14 +2389,14 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if ([arg_output isEqualToString:@"strEncodings"])
 	{
-		NSPrint(@"\nAvailable String encodings (you can use one of these\nas an argument to the --strEncoding option):\n\n");
+		NSPrintf(@"\nAvailable String encodings (you can use one of these\nas an argument to the --strEncoding option):\n\n");
 		const NSStringEncoding *availableEncoding = [NSString availableStringEncodings];
 		while(*availableEncoding != 0)
 		{
-			NSPrint(@"%@\n", [NSString localizedNameOfStringEncoding: *availableEncoding]);
+			NSPrintf(@"%@\n", [NSString localizedNameOfStringEncoding: *availableEncoding]);
 			availableEncoding++;
 		}
-		NSPrint(@"\n");
+		NSPrintf(@"\n");
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
@@ -2401,7 +2409,7 @@ int main(int argc, char *argv[])
 		CalCalendar *cal;
 		for (cal in allCalendars)
 		{
-			NSPrint(@"* %@\n  uid: %@\n", [cal title], [cal uid]);
+			NSPrintf(@"* %@\n  uid: %@\n", [cal title], [cal uid]);
 		}
 	}
 	// ------------------------------------------------------------------
@@ -2417,12 +2425,12 @@ int main(int argc, char *argv[])
 		if (!configFileExists)
 		{
 			[kConfigFileStub writeToFile:configFilePath atomically:YES];
-			NSPrint(@"Configuration file did not exist; it has now been created.\n");
+			NSPrintf(@"Configuration file did not exist; it has now been created.\n");
 		}
 		
 		if (configFileIsDir)
 		{
-			NSPrintErr(
+			NSPrintfErr(
 				@"There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n",
 				configFilePath
 				);
@@ -2472,7 +2480,7 @@ int main(int argc, char *argv[])
 				
 				if (foundEditorPath != nil)
 				{
-					NSPrint(
+					NSPrintf(
 						@"Opening config file for editing with %@ -- press\nany key to continue or Ctrl-C to cancel.\n",
 						foundEditorPath
 						);
@@ -2481,7 +2489,7 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					NSPrintErr(
+					NSPrintfErr(
 						@"Error: Can not find or execute any of the following\neditors in your $PATH: %@\n",
 						[preferredEditors componentsJoinedByString:@", "]
 						);
@@ -2491,12 +2499,12 @@ int main(int argc, char *argv[])
 			{
 				if ([[NSWorkspace sharedWorkspace] fullPathForApplication:kPropertyListEditorAppName] != nil)
 				{
-					NSPrint(@"Opening configuration file with the Property List\nEditor application.\n");
+					NSPrintf(@"Opening configuration file with the Property List\nEditor application.\n");
 					[[NSWorkspace sharedWorkspace] openFile:configFilePath withApplication:kPropertyListEditorAppName];
 				}
 				else
 				{
-					NSPrint(@"Opening configuration file with the default application\nassociated with the property list type.\n");
+					NSPrintf(@"Opening configuration file with the default application\nassociated with the property list type.\n");
 					[[NSWorkspace sharedWorkspace] openFile:configFilePath];
 				}
 			}
@@ -2575,12 +2583,12 @@ int main(int argc, char *argv[])
 				
 				if (eventsDateRangeStart == nil)
 				{
-					NSPrintErr(@"Error: invalid start date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
+					NSPrintfErr(@"Error: invalid start date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
 					return(0);
 				}
 				else if (eventsDateRangeEnd == nil)
 				{
-					NSPrintErr(@"Error: invalid end date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsTo);
+					NSPrintfErr(@"Error: invalid end date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsTo);
 					return(0);
 				}
 				
@@ -2834,56 +2842,56 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else
 	{
-		NSPrint(@"\n");
-		NSPrint(@"USAGE: %@ [options] <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
-		NSPrint(@"\n");
-		NSPrint(@"<command> specifies the general action icalBuddy should take. Possible values\n");
-		NSPrint(@"for it are:\n");
-		NSPrint(@"\n");
-		NSPrint(@"  'eventsToday'      Print events occurring today\n");
-		NSPrint(@"  'eventsToday+NUM'  Print events occurring between today and NUM days into\n");
-		NSPrint(@"                     the future\n");
-		NSPrint(@"  'eventsNow'        Print events occurring at present time\n");
-		NSPrint(@"  'eventsFrom:START to:END'\n");
-		NSPrint(@"                     Print events occurring between the two specified dates\n");
-		NSPrint(@"                     (START and END), where both are specified in the format:\n");
-		NSPrint(@"                     \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
-		NSPrint(@"  'uncompletedTasks' Print uncompleted tasks\n");
-		NSPrint(@"  'calendars'        Print all calendars\n");
-		NSPrint(@"  'strEncodings'     Print all the possible string encodings\n");
-		NSPrint(@"  'editConfig'       Open the configuration file for editing in a GUI editor\n");
-		NSPrint(@"  'editConfigCLI'    Open the configuration file for editing in a CLI editor\n");
-		NSPrint(@"\n");
-		NSPrint(@"Some of the [options] you can use are:\n");
-		NSPrint(@"\n");
-		NSPrint(@"-V         Print version number (no <command> needed)\n");
-		NSPrint(@"-u         Check for updates to self online (no <command> needed)\n");
-		NSPrint(@"-sc,-sd    Separate by calendar or date\n");
-		NSPrint(@"-f         Format output\n");
-		NSPrint(@"-nc        No calendar names\n");
-		NSPrint(@"-nrd       No relative dates\n");
-		NSPrint(@"-n         Include only events from now on\n");
-		NSPrint(@"-li        Limit items (value required)\n");
-		NSPrint(@"-tf,-df    Set time or date format (value required)\n");
-		NSPrint(@"-dts       Set date-time separator (value required)\n");
-		NSPrint(@"-po        Set property order (value required)\n");
-		NSPrint(@"-ps        Set property separators (value required)\n");
-		NSPrint(@"-b         Set bullet point (value required)\n");
-		NSPrint(@"-ab        Set alert bullet point (value required)\n");
-		NSPrint(@"-ss        Set section separator (value required)\n");
-		NSPrint(@"-ic,-ec    Include or exclude calendars (value required)\n");
-		NSPrint(@"-iep,-eep  Include or exclude event properties (value required)\n");
-		NSPrint(@"-itp,-etp  Include or exclude task properties (value required)\n");
-		NSPrint(@"-cf,-lf    Set config or localization file path (value required)\n");
-		NSPrint(@"-nnr       Set replacement for newlines within notes (value required)\n");
-		NSPrint(@"\n");
-		NSPrint(@"See the icalBuddy manual page for a more complete list of\n");
-		NSPrint(@"all the possible arguments and their descriptions (just type\n");
-		NSPrint(@"'man icalBuddy' into the terminal.)\n");
-		NSPrint(@"\n");
-		NSPrint(@"Version %@\n", versionNumber());
-		NSPrint(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org/icalBuddy\n");
-		NSPrint(@"\n");
+		NSPrintf(@"\n");
+		NSPrintf(@"USAGE: %@ [options] <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
+		NSPrintf(@"\n");
+		NSPrintf(@"<command> specifies the general action icalBuddy should take. Possible values\n");
+		NSPrintf(@"for it are:\n");
+		NSPrintf(@"\n");
+		NSPrintf(@"  'eventsToday'      Print events occurring today\n");
+		NSPrintf(@"  'eventsToday+NUM'  Print events occurring between today and NUM days into\n");
+		NSPrintf(@"                     the future\n");
+		NSPrintf(@"  'eventsNow'        Print events occurring at present time\n");
+		NSPrintf(@"  'eventsFrom:START to:END'\n");
+		NSPrintf(@"                     Print events occurring between the two specified dates\n");
+		NSPrintf(@"                     (START and END), where both are specified in the format:\n");
+		NSPrintf(@"                     \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
+		NSPrintf(@"  'uncompletedTasks' Print uncompleted tasks\n");
+		NSPrintf(@"  'calendars'        Print all calendars\n");
+		NSPrintf(@"  'strEncodings'     Print all the possible string encodings\n");
+		NSPrintf(@"  'editConfig'       Open the configuration file for editing in a GUI editor\n");
+		NSPrintf(@"  'editConfigCLI'    Open the configuration file for editing in a CLI editor\n");
+		NSPrintf(@"\n");
+		NSPrintf(@"Some of the [options] you can use are:\n");
+		NSPrintf(@"\n");
+		NSPrintf(@"-V         Print version number (no <command> needed)\n");
+		NSPrintf(@"-u         Check for updates to self online (no <command> needed)\n");
+		NSPrintf(@"-sc,-sd    Separate by calendar or date\n");
+		NSPrintf(@"-f         Format output\n");
+		NSPrintf(@"-nc        No calendar names\n");
+		NSPrintf(@"-nrd       No relative dates\n");
+		NSPrintf(@"-n         Include only events from now on\n");
+		NSPrintf(@"-li        Limit items (value required)\n");
+		NSPrintf(@"-tf,-df    Set time or date format (value required)\n");
+		NSPrintf(@"-dts       Set date-time separator (value required)\n");
+		NSPrintf(@"-po        Set property order (value required)\n");
+		NSPrintf(@"-ps        Set property separators (value required)\n");
+		NSPrintf(@"-b         Set bullet point (value required)\n");
+		NSPrintf(@"-ab        Set alert bullet point (value required)\n");
+		NSPrintf(@"-ss        Set section separator (value required)\n");
+		NSPrintf(@"-ic,-ec    Include or exclude calendars (value required)\n");
+		NSPrintf(@"-iep,-eep  Include or exclude event properties (value required)\n");
+		NSPrintf(@"-itp,-etp  Include or exclude task properties (value required)\n");
+		NSPrintf(@"-cf,-lf    Set config or localization file path (value required)\n");
+		NSPrintf(@"-nnr       Set replacement for newlines within notes (value required)\n");
+		NSPrintf(@"\n");
+		NSPrintf(@"See the icalBuddy manual page for a more complete list of\n");
+		NSPrintf(@"all the possible arguments and their descriptions (just type\n");
+		NSPrintf(@"'man icalBuddy' into the terminal.)\n");
+		NSPrintf(@"\n");
+		NSPrintf(@"Version %@\n", versionNumber());
+		NSPrintf(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org/icalBuddy\n");
+		NSPrintf(@"\n");
 	}
 	
 	
@@ -2930,7 +2938,7 @@ int main(int argc, char *argv[])
 	else
 		finalOutput = [stdoutBuffer string];
 	
-	[finalOutput writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
+	NSPrint(finalOutput);
 	
 	
 	[autoReleasePool release];
