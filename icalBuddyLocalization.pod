@@ -118,6 +118,10 @@ The translation of "%d weeks ago", where %d is a number of weeks (the %d must be
 
 The translation of "%d weeks from now", where %d is a number of weeks (the %d must be included to specify the location of this number.)
 
+=item B<C<dateTimeSeparator>>
+
+What to print between the date and the time (for example, in english: " at ".)
+
 =back
 
 =head1 EXAMPLES
@@ -172,6 +176,8 @@ The translation of "%d weeks from now", where %d is a number of weeks (the %d mu
 		<string>medium</string>
 		<key>low</key>
 		<string>low</string>
+		<key>dateTimeSeparator</key>
+		<string> at </string>
 	</dict>
 	</plist>
 

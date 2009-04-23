@@ -48,5 +48,7 @@
 	<string>normaali</string>
 	<key>low</key>
 	<string>alhainen</string>
+	<key>dateTimeSeparator</key>
+	<string> klo </string>
 </dict>
 </plist>

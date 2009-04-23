@@ -48,6 +48,8 @@
 	<string>medium</string>
 	<key>low</key>
 	<string>low</string>
+	<key>dateTimeSeparator</key>
+	<string> at </string>
 </dict>
 </plist>
 

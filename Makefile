@@ -5,6 +5,7 @@
 
 SHELL=/bin/bash
 
+CURRDATE=$(shell date +"%Y-%m-%d")
 APP_VERSION=$(shell ./icalBuddy -V)
 TEMP_DEPLOYMENT_DIR=deployment/$(APP_VERSION)
 TEMP_DEPLOYMENT_ZIPFILE=$(TEMP_DEPLOYMENT_DIR)/icalBuddy-v$(APP_VERSION).zip
@@ -42,14 +43,26 @@ icalBuddy: icalBuddy.m
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+# generate main man page from POD syntax file
+#-------------------------------------------------------------------------
+icalBuddy.1: icalBuddy.pod
+	@echo
+	@echo ---- Generating manpage from POD file:
+	@echo ======================================
+	pod2man --section=1 --release=1.0 --center="icalBuddy" --date="$(CURRDATE)" icalBuddy.pod > icalBuddy.1
+
+
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
 # generate configuration man page from POD syntax file
 #-------------------------------------------------------------------------
 icalBuddyConfig.1: icalBuddyConfig.pod
 	@echo
-	@echo ---- Generating configuration manpage
-	@echo      from pod file:
+	@echo ---- Generating config manpage from POD file:
 	@echo ======================================
-	pod2man --section=1 --release=1.0 --center="icalBuddy configuration" --date="2009-03-23" icalBuddyConfig.pod > icalBuddyConfig.1
+	pod2man --section=1 --release=1.0 --center="icalBuddy configuration" --date="$(CURRDATE)" icalBuddyConfig.pod > icalBuddyConfig.1
 
 
 
@@ -59,10 +72,9 @@ icalBuddyConfig.1: icalBuddyConfig.pod
 #-------------------------------------------------------------------------
 icalBuddyLocalization.1: icalBuddyLocalization.pod
 	@echo
-	@echo ---- Generating localization manpage
-	@echo      from pod file:
+	@echo ---- Generating localization manpage from POD file:
 	@echo ======================================
-	pod2man --section=1 --release=1.0 --center="icalBuddy localization" --date="2009-03-16" icalBuddyLocalization.pod > icalBuddyLocalization.1
+	pod2man --section=1 --release=1.0 --center="icalBuddy localization" --date="$(CURRDATE)" icalBuddyLocalization.pod > icalBuddyLocalization.1
 
 
 
@@ -155,6 +167,7 @@ clean:
 	@echo ---- Cleaning up:
 	@echo ======================================
 	-rm -Rf icalBuddy
+	-rm -Rf icalBuddy.1
 	-rm -Rf icalBuddyLocalization.1
 	-rm -Rf icalBuddyConfig.1
 	-rm -Rf deployment/*

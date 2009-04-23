@@ -20,12 +20,9 @@ user requests:
 other (my own ideas):
 -------------------------
 
-- Add localization key for the date/time separator: " at "
-    - Remove the -dts argument? Or just leave it and say in the docs that you can
-      also set this value in the localization config?
+- Add value for the dateTimeSeparator key in the french localization file
 - Write better examples to the web page in order to better illustrate the customizability
   of output formatting
-- Rewrite man page using the POD syntax (I hate the raw man page syntax so much)
 - Implement wrapping to a specified number of maximum characters on each line (problem: will
   look off with non-fixed-width fonts if we try to match indenting levels and fixing those
   problems with arguments might become really complex (i.e. you would need too many different

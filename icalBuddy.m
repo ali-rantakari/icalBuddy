@@ -125,6 +125,7 @@ THE SOFTWARE.
 #define kL10nKeyPriorityLow			@"low"
 #define kL10nKeySomeonesBirthday	@"someonesBirthday"
 #define kL10nKeyMyBirthday			@"myBirthday"
+#define kL10nKeyDateTimeSeparator	@"dateTimeSeparator"
 
 
 
@@ -197,7 +198,6 @@ NSString *sectionSeparatorStr = 		@"\n------------------------";
 
 NSString *timeFormatStr = 				@"%H:%M";
 NSString *dateFormatStr = 				@"%Y-%m-%d";
-NSString *dateTimeSeparatorStr = 		@" at ";
 NSSet *includedEventProperties = 		nil;
 NSSet *excludedEventProperties = 		nil;
 NSSet *includedTaskProperties = 		nil;
@@ -821,7 +821,7 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 	else if (outputDate == nil && outputTime != nil)
 		return outputTime;
 	else
-		return strConcat(outputDate, dateTimeSeparatorStr, outputTime, nil);
+		return strConcat(outputDate, localizedStr(kL10nKeyDateTimeSeparator), outputTime, nil);
 }
 
 
@@ -1942,6 +1942,7 @@ int main(int argc, char *argv[])
 		@"high",		kL10nKeyPriorityHigh,
 		@"medium",		kL10nKeyPriorityMedium,
 		@"low",			kL10nKeyPriorityLow,
+		@" at ",		kL10nKeyDateTimeSeparator,
 		nil
 		];
 	
@@ -2103,8 +2104,6 @@ int main(int argc, char *argv[])
 						timeFormatStr = [constArgsDict objectForKey:@"timeFormat"];
 					if ([allArgKeys containsObject:@"dateFormat"])
 						dateFormatStr = [constArgsDict objectForKey:@"dateFormat"];
-					if ([allArgKeys containsObject:@"dateTimeSeparator"])
-						dateTimeSeparatorStr = [constArgsDict objectForKey:@"dateTimeSeparator"];
 					if ([allArgKeys containsObject:@"includeEventProps"])
 						includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeEventProps"]);
 					if ([allArgKeys containsObject:@"excludeEventProps"])
@@ -2260,8 +2259,6 @@ int main(int argc, char *argv[])
 			timeFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-df") == 0) || (strcmp(argv[i], "--dateFormat") == 0)) && (i+1 < argc))
 			dateFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-dts") == 0) || (strcmp(argv[i], "--dateTimeSeparator") == 0)) && (i+1 < argc))
-			dateTimeSeparatorStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-iep") == 0) || (strcmp(argv[i], "--includeEventProps") == 0)) && (i+1 < argc))
 			includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-eep") == 0) || (strcmp(argv[i], "--excludeEventProps") == 0)) && (i+1 < argc))
@@ -2921,7 +2918,6 @@ int main(int argc, char *argv[])
 		NSPrintf(@"-n         Include only events from now on\n");
 		NSPrintf(@"-li        Limit items (value required)\n");
 		NSPrintf(@"-tf,-df    Set time or date format (value required)\n");
-		NSPrintf(@"-dts       Set date-time separator (value required)\n");
 		NSPrintf(@"-po        Set property order (value required)\n");
 		NSPrintf(@"-ps        Set property separators (value required)\n");
 		NSPrintf(@"-b         Set bullet point (value required)\n");
