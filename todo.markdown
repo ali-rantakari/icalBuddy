@@ -5,7 +5,7 @@ user requests:
 -------------------------
 
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
-	- we could start with: icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20
+	- we could start with: `icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20`
 	  and then add an argument to specify a 'wrapper' character for all printed properties
 	  (in this case, double quotes (")) and maybe an argument for making all properties
 	  get printed, even if they don't have values (so as to keep the column order the same).
@@ -34,11 +34,11 @@ other (my own ideas):
 Replace versionNumberCompare() with this: (is this adequate? must test. might break with more
 than single-digit numbers.)
 
-	NSNumberFormatter *conv = [[[NSNumberFormatter alloc] init] autorelease];
-	NSNumber *curVersNum = [conv numberFromString:[versDict objectForKey:(id)@"Version"]];
-	NSNumber *curVersBundleNum = [conv numberFromString:sb_bundleVers];
-	
-	if ([curVersBundleNum compare:curVersNum]==NSOrderedAscending)
-		(-> update available)
+    NSNumberFormatter *conv = [[[NSNumberFormatter alloc] init] autorelease];
+    NSNumber *curVersNum = [conv numberFromString:[versDict objectForKey:(id)@"Version"]];
+    NSNumber *curVersBundleNum = [conv numberFromString:sb_bundleVers];
+    
+    if ([curVersBundleNum compare:curVersNum]==NSOrderedAscending)
+        (-> update available)
 
 
