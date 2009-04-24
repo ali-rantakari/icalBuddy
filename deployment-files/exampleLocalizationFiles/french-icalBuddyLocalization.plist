@@ -48,5 +48,7 @@
 	<string>moyenne</string>
 	<key>low</key>
 	<string>basse</string>
+	<key>dateTimeSeparator</key>
+	<string> à </string>
 </dict>
 </plist>
