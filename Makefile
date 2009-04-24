@@ -51,9 +51,6 @@ icalBuddy.1: icalBuddy.pod
 	@echo ======================================
 	pod2man --section=1 --release=1.0 --center="icalBuddy" --date="$(CURRDATE)" icalBuddy.pod > icalBuddy.1
 
-
-
-
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 # generate configuration man page from POD syntax file
@@ -63,8 +60,6 @@ icalBuddyConfig.1: icalBuddyConfig.pod
 	@echo ---- Generating config manpage from POD file:
 	@echo ======================================
 	pod2man --section=1 --release=1.0 --center="icalBuddy configuration" --date="$(CURRDATE)" icalBuddyConfig.pod > icalBuddyConfig.1
-
-
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -78,11 +73,44 @@ icalBuddyLocalization.1: icalBuddyLocalization.pod
 
 
 
+
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
-# generate HTML from manpages and faq
+# generate PDF from man page
 #-------------------------------------------------------------------------
-docs: icalBuddy.1 faq.markdown icalBuddyLocalization.1 icalBuddyConfig.1
+Manual-icalBuddy.pdf: icalBuddy.1
+	@echo
+	@echo ---- Generating PDF from manpage:
+	@echo ======================================
+	man -t ./$? > temp.ps && /System/Library/Printers/Libraries/convert -j "application/pdf" -f ./temp.ps -o ./$@ && rm ./temp.ps
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# generate PDF from config man page
+#-------------------------------------------------------------------------
+Manual-icalBuddyConfig.pdf: icalBuddyConfig.1
+	@echo
+	@echo ---- Generating PDF from config manpage:
+	@echo ======================================
+	man -t ./$? > temp.ps && /System/Library/Printers/Libraries/convert -j "application/pdf" -f ./temp.ps -o ./$@ && rm ./temp.ps
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# generate PDF from localization man page
+#-------------------------------------------------------------------------
+Manual-icalBuddyLocalization.pdf: icalBuddyLocalization.1
+	@echo
+	@echo ---- Generating PDF from localization manpage:
+	@echo ======================================
+	man -t ./$? > temp.ps && /System/Library/Printers/Libraries/convert -j "application/pdf" -f ./temp.ps -o ./$@ && rm ./temp.ps
+
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# generate documentation
+#-------------------------------------------------------------------------
+docs: icalBuddy.1 faq.markdown icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyConfig.pdf Manual-icalBuddyLocalization.pdf
 	@echo
 	@echo ---- Generating HTML from manpages:
 	@echo ======================================
@@ -112,7 +140,7 @@ package: icalBuddy docs
 	
 # create zip archive
 	mkdir -p $(TEMP_DEPLOYMENT_DIR)
-	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1 icalBuddy.m ANSIEscapeHelper.h ANSIEscapeHelper.m" | xargs zip
+	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) $(TEMP_DEPLOYMENT_FAQFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyLocalization.pdf Manual-icalBuddyConfig.pdf icalBuddy.m ANSIEscapeHelper.h ANSIEscapeHelper.m" | xargs zip
 	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
 	
 # if changelog doesn't already exist in the deployment dir
@@ -168,8 +196,11 @@ clean:
 	@echo ======================================
 	-rm -Rf icalBuddy
 	-rm -Rf icalBuddy.1
-	-rm -Rf icalBuddyLocalization.1
+	-rm -Rf Manual-icalBuddy.pdf
 	-rm -Rf icalBuddyConfig.1
+	-rm -Rf Manual-icalBuddyConfig.pdf
+	-rm -Rf icalBuddyLocalization.1
+	-rm -Rf Manual-icalBuddyLocalization.pdf
 	-rm -Rf deployment/*
 
 

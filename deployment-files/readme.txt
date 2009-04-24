@@ -28,6 +28,8 @@ HELP / GETTING STARTED:
 
 After installation you can:
 
+* Read the FAQ by opening the "faq.html" file in your web browser.
+
 * Run "man icalBuddy" in the terminal to read the program's manual page.
   Here you'll find documentation for all of the arguments you can use
   when calling icalBuddy.
@@ -46,6 +48,8 @@ After installation you can:
   manual page. This is if you're interested in writing your own
   localization(s).
 
+All of the three icalBuddy manual pages are also available as PDFs
+for your viewing pleasure.
 
 
 

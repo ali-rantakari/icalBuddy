@@ -46,12 +46,12 @@ You can use the `-b` (or `--bullet`) argument to change the normal bullet point 
 You can use the `-ps` (or `--propertySeparators`) argument to specify the strings to use between the properties that get printed out. An example:
 
     $ icalBuddy eventsToday+2
-	* An Event (Work)
-	    location: Meeting room A
-	    tomorrow at 13:00 - 14:15
+    * An Event (Work)
+        location: Meeting room A
+        tomorrow at 13:00 - 14:15
     $
-	$ icalBuddy -ps "| / | -- |" eventsToday+2
-	* An Event (Work) / Meeting room A -- tomorrow at 13:00 - 14:15
+    $ icalBuddy -ps "| / | -- |" eventsToday+2
+    * An Event (Work) / Meeting room A -- tomorrow at 13:00 - 14:15
 
 
 ### Q: Can I get the output in CSV format?
@@ -59,16 +59,16 @@ You can use the `-ps` (or `--propertySeparators`) argument to specify the string
 Not really &mdash; this is not supported. If you'd still like to try, you could achieve some kind of a result with something like this:
 
     $ icalBuddy eventsToday+2
-	* An Event (Work)
-	    location: Meeting room A
-	    13:00 - 14:15
-	* Second Event (Work)
-	    location: Meeting room B
-	    tomorrow at 11:00 - 12:00
+    * An Event (Work)
+        location: Meeting room A
+        13:00 - 14:15
+    * Second Event (Work)
+        location: Meeting room B
+        tomorrow at 11:00 - 12:00
     $
     $ icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20 | sed -e "s/$/\"/"
-	"An Event (Work)","location: Meeting room A","13:00 - 14:15"
-	"Second Event (Work)","location: Meeting room B","tomorrow at 11:00 - 12:00"
+    "An Event (Work)","location: Meeting room A","13:00 - 14:15"
+    "Second Event (Work)","location: Meeting room B","tomorrow at 11:00 - 12:00"
 
 When trying this out, note that properties that have no value are not printed out by icalBuddy, so *the column order will not be consistent* in this CSV output unless all printed items have values for all of the same printed properties. Also, double quotes (`"`) in property values will mess things up completely.
 
