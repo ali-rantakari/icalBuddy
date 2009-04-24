@@ -115,9 +115,9 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 
 
 
-[wp-manpages]:          http://en.wp-.org/wiki/Manual_page_(Unix)
-[wp-envvars]:           http://en.wp-.org/wiki/Environment_variable
-[wp-bashstartup]:       http://en.wp-.org/wiki/Bash#Startup_scripts
+[wp-manpages]:          http://en.wikipedia.org/wiki/Manual_page_(Unix)
+[wp-envvars]:           http://en.wikipedia.org/wiki/Environment_variable
+[wp-bashstartup]:       http://en.wikipedia.org/wiki/Bash#Startup_scripts
 [manpageonline]:        http://hasseg.org/icalBuddy/man.html
 [tuawmanviewers]:       http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
 [l10nmanpageonline]:    http://hasseg.org/icalBuddy/localization-man.html
