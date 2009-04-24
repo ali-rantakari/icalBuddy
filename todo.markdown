@@ -20,7 +20,6 @@ user requests:
 other (my own ideas):
 -------------------------
 
-- Add value for the dateTimeSeparator key in the french localization file
 - Write better examples to the web page in order to better illustrate the customizability
   of output formatting
 - Implement wrapping to a specified number of maximum characters on each line (problem: will
@@ -28,7 +27,8 @@ other (my own ideas):
   problems with arguments might become really complex (i.e. you would need too many different
   kinds of arguments for all the different cases))
 
-- Add timezone support (how to handle these?)
+- Add timezone support (how to handle these? what kind of support would we need? the
+  "eventsFrom: to:" command already requires the timezone to be specified.)
 
 
 Replace versionNumberCompare() with this: (is this adequate? must test. might break with more
