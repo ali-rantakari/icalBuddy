@@ -147,7 +147,7 @@ Excludes items in calendars specified by I<value> from the output. I<value> must
 
 =item B<-iep>, B<--includeEventProps> I<value>
 
-Includes only event properties specified by I<value> into the output. I<value> must be a comma-separated list of property names. Possible property names are: location, url, notes, startDate and endDate.
+Includes only event properties specified by I<value> into the output. I<value> must be a comma-separated list of property names. Possible property names are: location, url, notes, datetime, title.
 
 =item B<-eep>, B<--excludeEventProps> I<value>
 
@@ -155,7 +155,7 @@ Excludes event properties specified by I<value> from the output. I<value> must b
 
 =item B<-itp>, B<--includeTaskProps> I<value>
 
-Includes only task properties specified by I<value> into the output. I<value> must be a comma-separated list of property names. Possible property names are: url, notes, dueDate and priority.
+Includes only task properties specified by I<value> into the output. I<value> must be a comma-separated list of property names. Possible property names are: url, notes, datetime and priority.
 
 =item B<-etp>, B<--excludeTaskProps> I<value>
 
