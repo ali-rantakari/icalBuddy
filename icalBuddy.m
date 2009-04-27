@@ -1743,6 +1743,7 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	NSCAssert((currentVersionStr != nil), @"currentVersionStr is nil");
 	NSCAssert((latestVersionStr != nil), @"latestVersionStr is nil");
 	
+	BOOL updateSuccess = NO;
 	int exitStatus = 0;
 	char cmd [1000];
 	
@@ -1805,7 +1806,7 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	if (exitStatus != 0)
 	{
 		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		return;
+		goto cleanup;
 	}
 	
 	NSPrintf(@"\n\n");
@@ -1826,7 +1827,7 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	if (exitStatus != 0)
 	{
 		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		return;
+		goto cleanup;
 	}
 	
 	NSPrintf(@"\n\n");
@@ -1843,9 +1844,12 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	if (exitStatus != 0)
 	{
 		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		return;
+		goto cleanup;
 	}
 	
+	updateSuccess = YES;
+	
+cleanup:
 	NSPrintf(@"\n\n");
 	NSPrintf(@">> Cleaning up...\n");
 	NSPrintf(@"--------------------------------------------\n");
@@ -1854,24 +1858,21 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	BOOL fileDeleteSuccess = NO;
 	fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archivePath]);
 	if (!fileDeleteSuccess)
-	{
-		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		return;
-	}
+		NSPrintfErr(@"   Could not move to trash.\n");
 	
 	NSPrintf(@" - Moving temporary extract folder for distribution archive to trash\n");
 	fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archiveExtractPath]);
 	if (!fileDeleteSuccess)
-	{
-		NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		return;
-	}
+		NSPrintfErr(@"   Could not move to trash.\n");
 	
-	NSPrintf(@"\n\n");
-	NSPrintf(@"=======================\n");
-	NSPrintf(@"icalBuddy has been successfully updated to v%@!\n", latestVersionStr);
-	NSPrintf(@"Run \"icalBuddy -V\" to confirm this.\n");
-	NSPrintf(@"\n");
+	if (updateSuccess)
+	{
+		NSPrintf(@"\n\n");
+		NSPrintf(@"=======================\n");
+		NSPrintf(@"icalBuddy has been successfully updated to v%@!\n", latestVersionStr);
+		NSPrintf(@"Run \"icalBuddy -V\" to confirm this.\n");
+		NSPrintf(@"\n");
+	}
 }
 
 
