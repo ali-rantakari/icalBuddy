@@ -152,10 +152,7 @@ package: icalBuddy docs
 			cp $(GENERALCHANGELOGFILELOC) $(VERSIONCHANGELOGFILELOC);\
 			echo "Copied existing changelog.html from project root into deployment dir - opening it for editing";\
 		else\
-			echo "<ul>\
-		<li></li>\
-	</ul>\
-	" > $(VERSIONCHANGELOGFILELOC);\
+			echo -e "<ul>\n	<li></li>\n</ul>\n" > $(VERSIONCHANGELOGFILELOC);\
 			echo "Created new empty changelog.html into deployment dir - opening it for editing";\
 		fi; \
 	else\

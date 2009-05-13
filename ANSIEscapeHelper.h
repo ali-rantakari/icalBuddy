@@ -4,7 +4,8 @@
 //
 //  Created by Ali Rantakari on 18.3.09.
 //
-
+//  Version 0.9
+// 
 /*
 The MIT License
 
