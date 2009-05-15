@@ -158,7 +158,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
-const int VERSION_BUILD = 6;
+const int VERSION_BUILD = 7;
 
 
 
@@ -205,6 +205,7 @@ NSSet *excludedTaskProperties = 		nil;
 NSString *notesNewlineReplacement =		nil;
 
 BOOL displayRelativeDates = YES;
+BOOL excludeEndDates = NO;
 NSUInteger maxNumPrintedItems = 0; // 0 = no limit
 NSUInteger numPrintedItems = 0;
 
@@ -1175,14 +1176,16 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				
 				if ( !singleDayContext || (singleDayContext && ![event isAllDay]) )
 				{
-					if ([[event startDate] isEqualToDate:[event endDate]])
+					if (excludeEndDates || [[event startDate] isEqualToDate:[event endDate]])
+					{
 						thisPropOutputValue = MUTABLE_ATTR_STR(
 							dateStr(
 								[event startDate],
 								(!(printOptions & PRINT_OPTION_SINGLE_DAY)),
-								true
+								![event isAllDay]
 								)
 							);
+					}
 					else
 					{
 						if (printOptions & PRINT_OPTION_SINGLE_DAY)
@@ -2139,6 +2142,8 @@ int main(int argc, char *argv[])
 						maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 					if ([allArgKeys containsObject:@"propertySeparators"])
 						arg_propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
+					if ([allArgKeys containsObject:@"excludeEndDates"])
+						excludeEndDates = [[constArgsDict objectForKey:@"excludeEndDates"] boolValue];
 				}
 			}
 		}
@@ -2250,6 +2255,8 @@ int main(int argc, char *argv[])
 			arg_noCalendarNames = YES;
 		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
 			displayRelativeDates = NO;
+		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--excludeEndDates") == 0))
+			excludeEndDates = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
