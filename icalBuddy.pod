@@ -9,7 +9,7 @@ B<icalBuddy> -- query the OS X calendar database for items
 
 =item B<icalBuddy>
 
-[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-li>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
+[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-n>] [B<-eed>] [B<-li>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
 
 =back
 
@@ -90,9 +90,6 @@ Use ANSI escape sequences to format the output and hopefully make it more readab
 
 Omit calendar names from the output. Does not apply if the B<-sc> argument is used.
 
-
-
-
 =item B<-nrd>, B<--noRelativeDates>
 
 Do not use "natural language relative dates" when displaying dates (e.g. "today", "yesterday" or "day after tomorrow".)
@@ -100,6 +97,10 @@ Do not use "natural language relative dates" when displaying dates (e.g. "today"
 =item B<-n>, B<--includeOnlyEventsFromNowOn>
 
 If the I<command> value C<eventsToday> is used, only output events that occur between the current time and the end of the day (as opposed to events that occur between the start and end of the day, as by default.)
+
+=item B<-eed>, B<--excludeEndDates>
+
+Do not output the date/time of when events end.
 
 =item B<-li>, B<--limitItems> I<num>
 

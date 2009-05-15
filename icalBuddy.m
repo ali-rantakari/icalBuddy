@@ -2924,6 +2924,7 @@ int main(int argc, char *argv[])
 		NSPrintf(@"-nc        No calendar names\n");
 		NSPrintf(@"-nrd       No relative dates\n");
 		NSPrintf(@"-n         Include only events from now on\n");
+		NSPrintf(@"-eed       Exclude end datetimes\n");
 		NSPrintf(@"-li        Limit items (value required)\n");
 		NSPrintf(@"-tf,-df    Set time or date format (value required)\n");
 		NSPrintf(@"-po        Set property order (value required)\n");
