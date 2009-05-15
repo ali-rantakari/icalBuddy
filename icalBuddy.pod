@@ -100,7 +100,7 @@ If the I<command> value C<eventsToday> is used, only output events that occur be
 
 =item B<-eed>, B<--excludeEndDates>
 
-Do not output the date/time of when events end.
+Do not output the dates/times of when events end.
 
 =item B<-li>, B<--limitItems> I<num>
 

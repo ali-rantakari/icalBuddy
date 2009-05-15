@@ -4,6 +4,9 @@
 Icon*
 .DS_Store
 
+# jEdit temp files
+\#*#
+
 # generated files
 deployment
 changelog.*
