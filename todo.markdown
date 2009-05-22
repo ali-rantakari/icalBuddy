@@ -4,6 +4,7 @@ TODO:
 user requests:
 -------------------------
 
+- Output both events and tasks into the same list
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
 	- we could start with: `icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20`
 	  and then add an argument to specify a 'wrapper' character for all printed properties

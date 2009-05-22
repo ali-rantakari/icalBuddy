@@ -103,14 +103,14 @@ You should write a shell script that dynamically determines the start and end da
 
 icalBuddy uses the text-based [links][links] web browser to download the list of changes from the server and format them to a nice text representation. This problem might occur if you're using a HTTP proxy that links doesn't know about. Do the following to configure the correct proxies for links:
 
-1. Open links (just type `links` into the Terminal)
-2. Press *esc*. This will bring up the menu at the top
-3. Using the arrow keys, navigate to the *Setup > Network options* menu item and press enter
-4. Move the cursor over to the *HTTP proxy* and *FTP proxy* fields and enter your proxies there
-5. Move the cursor to the *Ok* button and press enter
-6. Press *esc* to bring up the menu again
-7. Navigate to the *Setup > Save options* menu item and press enter
-8. Press *Q* to quit and *enter* to confirm
+ 1. Open links (just type `links` into the Terminal)
+ 2. Press *esc*. This will bring up the menu at the top
+ 3. Using the arrow keys, navigate to the *Setup > Network options* menu item and press enter
+ 4. Move the cursor over to the *HTTP proxy* and *FTP proxy* fields and enter your proxies there
+ 5. Move the cursor to the *Ok* button and press enter
+ 6. Press *esc* to bring up the menu again
+ 7. Navigate to the *Setup > Save options* menu item and press enter
+ 8. Press *Q* to quit and *enter* to confirm
 
 After doing this, links is configured to use your proxies and you may try `icalBuddy -u` again.
 
