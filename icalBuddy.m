@@ -569,12 +569,14 @@ NSInteger prioritySort(id task1, id task2, void *context)
 		// check if one task is late and the other is not
 		BOOL task1late = NO;
 		BOOL task2late = NO;
-		if ([task1 dueDate] != nil)
-			if ([now compare:[task1 dueDate]] == NSOrderedDescending)
-				task1late = YES;
-		if ([task2 dueDate] != nil)
-			if ([now compare:[task2 dueDate]] == NSOrderedDescending)
-				task2late = YES;
+		if ([task1 dueDate] != nil &&
+			[now compare:[task1 dueDate]] == NSOrderedDescending
+			)
+			task1late = YES;
+		if ([task2 dueDate] != nil &&
+			[now compare:[task2 dueDate]] == NSOrderedDescending
+			)
+			task2late = YES;
 		
 		if (task1late && !task2late)
 			return NSOrderedAscending;
@@ -722,13 +724,15 @@ BOOL shouldPrintProperty(NSString *propertyName, NSSet *inclusionsSet, NSSet *ex
 	
 	BOOL retVal = YES;
 	
-	if (inclusionsSet != nil)
-		if (![inclusionsSet containsObject:propertyName])
-			retVal = NO;
+	if (inclusionsSet != nil &&
+		![inclusionsSet containsObject:propertyName]
+		)
+		retVal = NO;
 	
-	if (retVal == YES && exclusionsSet != nil)
-		if ([exclusionsSet containsObject:propertyName] || [exclusionsSet containsObject:@"*"])
-			retVal = NO;
+	if (retVal == YES && exclusionsSet != nil &&
+		([exclusionsSet containsObject:propertyName] || [exclusionsSet containsObject:@"*"])
+		)
+		retVal = NO;
 	
 	return retVal;
 }
