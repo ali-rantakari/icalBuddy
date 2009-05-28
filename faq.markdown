@@ -25,6 +25,11 @@ The most common problem is that the directory where icalBuddy resides (`/usr/loc
  1. Call icalBuddy using the absolute path, like this: `/usr/local/bin/icalBuddy <arguments>`
  2. Add icalBuddy's location permanently into your shell configuration file. The default shell on OS X is Bash &mdash; see [Wikipedia's Bash entry][wp-bashstartup] for info on where to find these configuration files and when they are used. The command you need to add to one of these files is something like this (this example adds `/usr/local/bin` to the `PATH` environment variable): `export PATH=$PATH:/usr/local/bin`
 
+It's important to note that *GeekTool doesn't run these shell configuration files at all* so in order to use icalBuddy there you'll need to either **use the absolute path** (as described in step #1 above) or **execute the shell configuration file yourself** in your GeekTool command, like this:
+
+    source ~/.bashrc;
+    icalBuddy <arguments>
+
 
 ### Q: How can I get icalBuddy to display times according to a 12-hour clock?
 
