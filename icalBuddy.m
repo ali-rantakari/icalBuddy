@@ -1997,6 +1997,8 @@ int main(int argc, char *argv[])
 	BOOL arg_includeOnlyEventsFromNowOn = NO;
 	BOOL arg_useFormatting = NO;
 	BOOL arg_noCalendarNames = NO;
+	BOOL arg_sortTasksByDueDate = NO;
+	BOOL arg_sortTasksByDueDateAscending = NO;
 	NSString *arg_strEncoding = nil;
 	NSString *arg_propertyOrderStr = nil;
 	NSString *arg_propertySeparatorsStr = nil;
@@ -2154,6 +2156,10 @@ int main(int argc, char *argv[])
 						arg_propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
 					if ([allArgKeys containsObject:@"excludeEndDates"])
 						excludeEndDates = [[constArgsDict objectForKey:@"excludeEndDates"] boolValue];
+					if ([allArgKeys containsObject:@"sortTasksByDate"])
+						arg_sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
+					if ([allArgKeys containsObject:@"sortTasksByDateAscending"])
+						arg_sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
 				}
 			}
 		}
@@ -2267,6 +2273,10 @@ int main(int argc, char *argv[])
 			displayRelativeDates = NO;
 		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--excludeEndDates") == 0))
 			excludeEndDates = YES;
+		else if ((strcmp(argv[i], "-std") == 0) || (strcmp(argv[i], "--sortTasksByDate") == 0))
+			arg_sortTasksByDueDate = YES;
+		else if ((strcmp(argv[i], "-stda") == 0) || (strcmp(argv[i], "--sortTasksByDateAscending") == 0))
+			arg_sortTasksByDueDateAscending = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
@@ -2703,8 +2713,19 @@ int main(int argc, char *argv[])
 			NSPredicate *uncompletedTasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasks:allCalendars];
 			uncompletedTasks = [[CalCalendarStore defaultCalendarStore] tasksWithPredicate:uncompletedTasksPredicate];
 			
-			// sort the tasks by priority
-			uncompletedTasks = [uncompletedTasks sortedArrayUsingFunction:prioritySort context:NULL];
+			// sort the tasks
+			if (arg_sortTasksByDueDate || arg_sortTasksByDueDateAscending)
+			{
+				uncompletedTasks = [uncompletedTasks
+					sortedArrayUsingDescriptors:[NSArray
+						arrayWithObjects:
+							[[[NSSortDescriptor alloc] initWithKey:@"dueDate" ascending:arg_sortTasksByDueDateAscending] autorelease],
+							nil
+						]
+					];
+			}
+			else
+				uncompletedTasks = [uncompletedTasks sortedArrayUsingFunction:prioritySort context:NULL];
 			
 			// default print options
 			tasks_printOptions = (arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
