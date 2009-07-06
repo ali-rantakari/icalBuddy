@@ -144,7 +144,7 @@ Sets I<value> as the string to be used as the alert bullet point in the output. 
 
 =item B<-ss>, B<--sectionSeparator> I<value>
 
-Sets I<value> as the string to be used as the section separator in the output. The default is a newline followed by a bunch of minus/dash (-) characters.
+Sets I<value> as the string to be used as the section separator in the output. The default is a newline followed by a bunch of hyphens (-).
 
 =item B<-ic>, B<--includeCals> I<value>
 
