@@ -4,9 +4,6 @@ TODO:
 user requests:
 -------------------------
 
-- BUG: `-etp "*"` won't print titles (probably the same for -eep)
-  (user ref: Joey)
-- Order tasks only by due date (user ref: Franz-Ferdinand)
 - Display events also from delegate calendars
     - CalendarStore API won't work -- this is not an OS X feature, but an iCal
       feature
