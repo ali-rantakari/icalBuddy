@@ -4,6 +4,12 @@ TODO:
 user requests:
 -------------------------
 
+- BUG: `-etp "*"` won't print titles (probably the same for -eep)
+  (user ref: Joey)
+- Order tasks only by due date (user ref: Franz-Ferdinand)
+- Display events also from delegate calendars
+    - CalendarStore API won't work -- this is not an OS X feature, but an iCal
+      feature
 - Output both events and tasks into the same list
 - Output in CSV format (i.e. support for more than one (or even arbitrary) output format(s))
 	- we could start with: `icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20`
@@ -14,6 +20,7 @@ user requests:
 	  this case, double quotes (")).
 	  	- would these 2-3 extra arguments be useful for any other purpose? I'm not sure
 		  I'd like to add them there just for this.
+- AddressBookBuddy (user ref: Paul E.)
 - Display also attachments
 - Display also attendees
 
