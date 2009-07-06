@@ -2957,6 +2957,7 @@ int main(int argc, char *argv[])
 		NSPrintf(@"-n         Include only events from now on\n");
 		NSPrintf(@"-eed       Exclude end datetimes\n");
 		NSPrintf(@"-li        Limit items (value required)\n");
+		NSPrintf(@"-std,-stda Sort tasks by due date (stda = ascending)\n");
 		NSPrintf(@"-tf,-df    Set time or date format (value required)\n");
 		NSPrintf(@"-po        Set property order (value required)\n");
 		NSPrintf(@"-ps        Set property separators (value required)\n");

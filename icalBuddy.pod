@@ -9,7 +9,7 @@ B<icalBuddy> -- query the OS X calendar database for items
 
 =item B<icalBuddy>
 
-[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-n>] [B<-eed>] [B<-li>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
+[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-n>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
 
 =back
 
@@ -105,6 +105,14 @@ Do not output the dates/times of when events end.
 =item B<-li>, B<--limitItems> I<num>
 
 Limit the number of printed items (events/tasks) in the output to a maximum of I<num> items.
+
+=item B<-std>, B<--sortTasksByDate>
+
+Sort tasks by their due dates, in descending order.
+
+=item B<-stda>, B<--sortTasksByDateAscending>
+
+Sort tasks by their due dates, in ascending order.
 
 =item B<--strEncoding> I<encoding>
 
