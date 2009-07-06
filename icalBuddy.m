@@ -729,8 +729,11 @@ BOOL shouldPrintProperty(NSString *propertyName, NSSet *inclusionsSet, NSSet *ex
 		)
 		retVal = NO;
 	
-	if (retVal == YES && exclusionsSet != nil &&
-		([exclusionsSet containsObject:propertyName] || [exclusionsSet containsObject:@"*"])
+	if (retVal == YES &&
+		exclusionsSet != nil &&
+		([exclusionsSet containsObject:propertyName] ||
+		 ([exclusionsSet containsObject:@"*"] && ![propertyName isEqualToString:kPropName_title])
+		 )
 		)
 		retVal = NO;
 	
