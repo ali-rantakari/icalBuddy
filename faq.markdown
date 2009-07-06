@@ -128,6 +128,13 @@ The calendar items in question probably have text in a language that's written f
  2. If the application you're using to call icalBuddy <em>does not</em> allow you to set the "writing direction", you can try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped".
 
 
+### Q: Why doesn't icalBuddy display events from calendars I see under the "Delegates" heading in iCal's calendar list?
+
+icalBuddy uses OS X's CalendarStore API to access the calendar data. The CalDAV accounts (which is what a lot of people use to sync their Google Calendar account with iCal) are a feature of the iCal application, not the operating system itself, which is why the CalendarStore API won't return information about those calendars to icalBuddy. Nevertheless, I will try to see if I could get this feature working in the future using some other way.
+
+**Current workaround:** Note that as opposed to delegate calendars, *subscribed calendars are visible to icalBuddy*, so if you want events from your Google Calendar calendars to be visible in icalBuddy, one trick to do it is to add a subscription to that calendar's feed into iCal (please refer to [Google's documentation][gcal-feeds] for help on how to do it). If you're using CalDAV to sync your Google Calendar account with iCal and also add subscriptions to some of those calendars in order to get them to show up in icalBuddy's output, remember to uncheck the visibility checkboxes of these subscription calendars in iCal &mdash; otherwise their events would be shown twice there (once for the CalDAV "delegate" calendar entry and once for the calendar subscription). Also remember to set the *auto-refresh* value sufficiently high for the subscribed calendars.
+
+
 ### Q: The question I had in mind is not answered here. What should I do?
 
 You should look through icalBuddy's [manual page][manpageonline] and see if what you're looking for is documented there. Just type `man icalBuddy` into the terminal to see it. If what you're looking for is not in the manual, you can [contact the me, the author][hassegcontact].
@@ -147,4 +154,5 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [datetimeformats]:      http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
 [hassegcontact]:        http://hasseg.org/
 [links]:                http://links.sourceforge.net/
+[gcal-feeds]:           http://www.google.com/support/calendar/bin/answer.py?hl=en&answer=37648
 
