@@ -1164,7 +1164,8 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
 			
 			if ([event url] != nil &&
-				![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
+				![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday]
+				)
 				thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat: @"%@", [event url]]));
 		}
 		else if ([propName isEqualToString:kPropName_datetime])
@@ -1384,7 +1385,8 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 			}
 		}
 		
-		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
+		if (numPrintedProps > 0)
+			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		
 		numPrintedItems++;
 	}
@@ -1600,7 +1602,8 @@ void printCalTask(CalTask *task, int printOptions)
 			}
 		}
 		
-		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
+		if (numPrintedProps > 0)
+			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		
 		numPrintedItems++;
 	}
