@@ -13,7 +13,7 @@ Yes indeed: icalBuddy, like most other Unix-type command line applications, has 
 
 icalBuddy uses unicode (UTF-8) string encoding by default in its output, so make sure that the application you're using to invoke it understands UTF-8. If there's a mismatch between the string encoding icalBuddy uses for its output and the string encoding an application uses to read that output, some special characters (like umlauts, chinese or arabic) might not display correctly.
 
-You can turn on UTF-8 encoding in **Apple's Terminal.app** from *preferences > settings > (whichever style you're using) > advanced > international > character encoding*. In **iTerm** this can be done from *"Bookmarks" menu > manage profiles... > terminal profiles > (whichever profile you're using, probably "default") > encoding*. **[GeekTool][geektool]** doesn't understand UTF-8 by default, but you can get a custom build that does from [Xu Lian's page here][xulian].
+You can turn on UTF-8 encoding in **Apple's Terminal.app** from *preferences > settings > (whichever style you're using) > advanced > international > character encoding*. In **iTerm** this can be done from *"Bookmarks" menu > manage profiles... > terminal profiles > (whichever profile you're using, probably "default") > encoding*. **[GeekTool][geektool]** doesn't understand UTF-8 by default, but you can install [my custom build of it][custom-geektool] that does.
 
 You can also use the `--strEncoding` argument to make icalBuddy output using some other string encoding. Run `icalBuddy strEncodings` to see all the possible values you can use for that argument.
 
@@ -124,7 +124,7 @@ After doing this, links is configured to use your proxies and you may try `icalB
 
 The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. There are two workarounds I've come up with, depending on the application you're using to invoke icalBuddy:
 
- 1. If the application you're using to call icalBuddy allows you to set the "writing direction" for the printed output, set that to something other than "natural".
+ 1. If the application you're using to call icalBuddy allows you to set the "writing direction" for the printed output, set that to something other than "natural". GeekTool doesn't support this by default, but you can instead use [my custom build of it][custom-geektool] that does.
  2. If the application you're using to call icalBuddy <em>does not</em> allow you to set the "writing direction", you can try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped".
 
 
@@ -150,7 +150,7 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [tuawmanviewers]:       http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
 [l10nmanpageonline]:    http://hasseg.org/icalBuddy/localization-man.html
 [geektool]:             http://projects.tynsoe.org/en/geektool
-[xulian]:               http://sites.google.com/site/lianxukeefo/Home/research/geektool-utf8
+[custom-geektool]:      http://hasseg.org/blog/?p=350
 [datetimeformats]:      http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
 [hassegcontact]:        http://hasseg.org/
 [links]:                http://links.sourceforge.net/
