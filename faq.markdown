@@ -46,6 +46,14 @@ As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonli
 You can use the `-b` (or `--bullet`) argument to change the normal bullet point value (`"* "` by default) and `-ab` (or `--alertBullet`) to change the alert bullet point value (`"! "` by default, used for tasks that are late from their due date.) Also note that you can change indenting for non-bulleted lines with the `-i` (or `--indent`) argument. See [the manual page][manpageonline] for more info.
 
 
+### Q: Newlines (`"\n"`) and/or other escape sequences I'm adding to argument values don't seem to be interpreted correctly. How do I fix this?
+
+icalBuddy doesn't interpret escape sequences such as `\n` in the argument values. In the (I assume most common) case of the newline, you simply need to input an *actual newline* into the argument value, like this:
+
+    icalBuddy -b "
+    - " <other_arguments>
+
+
 ### Q: How can I keep all (or some) event/task properties on the same line?
 
 You can use the `-ps` (or `--propertySeparators`) argument to specify the strings to use between the properties that get printed out. An example:
