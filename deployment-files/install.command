@@ -4,8 +4,8 @@
 # (c) 2008-2009 Ali Rantakari
 # 
 
-DN=`dirname $0`
-THISDIR="`cd $DN; pwd`"
+DN="`dirname \"$0\"`"
+THISDIR="`cd \"$DN\"; pwd`"
 
 BINDIR=/usr/local/bin
 MANDIR=/usr/local/share/man/man1
