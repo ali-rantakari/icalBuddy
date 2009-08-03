@@ -61,8 +61,8 @@ THE SOFTWARE.
 
 // dictionary keys for the SGR code dictionaries that the array
 // escapeCodesForString:cleanString: returns contains
-#define kCodeDictKey_code		@"code"
-#define kCodeDictKey_location	@"location"
+#define kCodeDictKey_code			@"code"
+#define kCodeDictKey_location		@"location"
 
 // dictionary keys for the string formatting attribute
 // dictionaries that the array attributesForString:cleanString:
@@ -72,24 +72,33 @@ THE SOFTWARE.
 #define kAttrDictKey_attrValue		@"attributeValue"
 
 // minimum weight for an NSFont for it to be considered bold
-#define kBoldFontMinWeight 9
+#define kBoldFontMinWeight			9
 
 
 @implementation ANSIEscapeHelper
 
-@synthesize font, ansiColors;
+@synthesize font;
+@synthesize ansiColors;
+@synthesize defaultStringColor;
 
 - (id) init
 {
-	self = [super init];
-	
-	// default font
-	self.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	
-	// default ANSI colors
-	self.ansiColors = [NSMutableDictionary dictionary];
+	if (( self = [super init] ))
+	{
+		self.font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+		self.defaultStringColor = [NSColor blackColor];
+		self.ansiColors = [NSMutableDictionary dictionary];
+	}
 	
 	return self;
+}
+
+- (void) dealloc
+{
+	self.font = nil;
+	self.ansiColors = nil;
+	self.defaultStringColor = nil;
+	[super dealloc];
 }
 
 
@@ -103,8 +112,12 @@ THE SOFTWARE.
 	NSArray *attributesAndRanges = [self attributesForString:aString cleanString:&cleanString];
 	NSMutableAttributedString *attributedString = [[[NSMutableAttributedString alloc]
 													initWithString:cleanString
-													attributes:[NSDictionary dictionaryWithObject:self.font forKey:NSFontAttributeName]
-												   ] autorelease];
+													attributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                self.font, NSFontAttributeName,
+                                                                self.defaultStringColor, NSForegroundColorAttributeName,
+                                                                nil
+																]
+													] autorelease];
 	
 	NSDictionary *thisAttributeDict;
 	for (thisAttributeDict in attributesAndRanges)
