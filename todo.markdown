@@ -4,6 +4,8 @@ TODO:
 user requests:
 -------------------------
 
+- Consider -ic and -ec for the "calendars" command (user ref: Derek)
+- Add argument -co (or: --calendarOrder) (user ref: Derek)
 - Output both events and tasks into the same list (user ref: Richard B. +someone else)
 - Display events also from delegate calendars
     - CalendarStore API won't work -- this is not an OS X feature, but an iCal
