@@ -2477,7 +2477,15 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if ([arg_output isEqualToString:@"calendars"])
 	{
-		NSArray *allCalendars = [[CalCalendarStore defaultCalendarStore] calendars];
+		// get all calendars
+		NSMutableArray *allCalendars = [NSMutableArray arrayWithCapacity:10];
+		[allCalendars addObjectsFromArray: [[CalCalendarStore defaultCalendarStore] calendars]];
+		
+		// filter calendars based on arguments
+		if (arg_includeCals != nil)
+			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", arg_includeCals, arg_includeCals]];
+		if (arg_excludeCals != nil)
+			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", arg_excludeCals, arg_excludeCals]];
 		
 		CalCalendar *cal;
 		for (cal in allCalendars)
@@ -2597,9 +2605,7 @@ int main(int argc, char *argv[])
 		NSMutableArray *allCalendars = [NSMutableArray arrayWithCapacity:10];
 		[allCalendars addObjectsFromArray: [[CalCalendarStore defaultCalendarStore] calendars]];
 		
-		// filter calendars to use:
-		// - first include what has been specified to be included,
-		// - then exclude what has been specified to be excluded
+		// filter calendars based on arguments
 		if (arg_includeCals != nil)
 			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", arg_includeCals, arg_includeCals]];
 		if (arg_excludeCals != nil)
