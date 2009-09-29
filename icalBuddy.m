@@ -1691,8 +1691,8 @@ NSString* latestUpdateVersionOnServer(NSString** errorStr)
 		timeoutInterval:kServerConnectTimeout
 		];
 	
-	NSHTTPURLResponse *response;
-	NSError *error;
+	NSHTTPURLResponse *response = nil;
+	NSError *error = nil;
 	[NSURLConnection
 		sendSynchronousRequest:request
 		returningResponse:&response
@@ -1734,12 +1734,19 @@ NSString* latestUpdateVersionOnServer(NSString** errorStr)
 	else
 	{
 		if (errorStr != NULL)
-			*errorStr = [
-				NSString
-				stringWithFormat:@"Connection failed. Error: - %@ %@",
-					[error localizedDescription],
-					[[error userInfo] objectForKey:NSErrorFailingURLStringKey]
-				];
+		{
+			if (error != nil)
+			{
+				*errorStr = [
+					NSString
+					stringWithFormat:@"Connection failed. Error: - %@ %@",
+						[error localizedDescription],
+						[[error userInfo] objectForKey:NSErrorFailingURLStringKey]
+					];
+			}
+			else
+				*errorStr = @"Connection failed.";
+		}
 		return nil;
 	}
 	
