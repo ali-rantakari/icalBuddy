@@ -2723,6 +2723,22 @@ int main(int argc, char *argv[])
 							nil
 						]
 					];
+				
+				if (arg_sortTasksByDueDateAscending)
+				{
+					// put tasks with no due date last
+					NSArray *tasksWithNoDueDate = [uncompletedTasks
+						filteredArrayUsingPredicate:[NSPredicate
+							predicateWithFormat:@"dueDate == nil"
+							]
+						];
+					uncompletedTasks = [uncompletedTasks
+						filteredArrayUsingPredicate:[NSPredicate
+							predicateWithFormat:@"dueDate != nil"
+							]
+						];
+					uncompletedTasks = [uncompletedTasks arrayByAddingObjectsFromArray:tasksWithNoDueDate];
+				}
 			}
 			else
 				uncompletedTasks = [uncompletedTasks sortedArrayUsingFunction:prioritySort context:NULL];
