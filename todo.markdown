@@ -4,6 +4,7 @@ TODO:
 user requests:
 -------------------------
 
+- Add support for date suffixes (e.g. 1st, 2nd...) (user ref: Sam)
 - Consider -ic and -ec for the "calendars" command (user ref: Derek)
 - Add argument -co (or: --calendarOrder) (user ref: Derek)
 - Output both events and tasks into the same list (user ref: Richard B. +someone else)
