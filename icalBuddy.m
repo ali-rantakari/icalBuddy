@@ -1773,7 +1773,12 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	BOOL updateSuccess = NO;
 	int exitStatus = 0;
 	char cmd [1000];
-	NSString *tempFile = nil;
+	NSString *whatsChangedHTMLPath = [tempDir
+		stringByAppendingPathComponent:[NSString
+			stringWithFormat:@"icalBuddyTempFile-%d",(rand()%100000)
+			]
+		];
+	NSString *htmlElementsPHPFilePath = [tempDir stringByAppendingPathComponent:@"icalBuddyTempPHPScript.php"];
 	NSString *archivePath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-archive.zip"];
 	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-tempdir"];
 	
@@ -1813,23 +1818,17 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 			NSString *whatsChangedStr = [[[NSString alloc] initWithData:whatsChangedData encoding:NSUTF8StringEncoding] autorelease];
 			
 			// write received HTML into a temp file
-			tempFile = [tempDir
-				stringByAppendingPathComponent:[NSString
-					stringWithFormat:@"icalBuddyTempFile-%d",(rand()%100000)
-					]
-				];
-			[whatsChangedStr writeToFile:tempFile atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-			
-			NSPrintf(@"%@\n", tempFile);
+			[whatsChangedStr writeToFile:whatsChangedHTMLPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 			
 			// execute some php to translate the HTML onto readable text
 			// no, I couldn't find a good way to do this in Obj-C or C :(
-			NSString *phpCode = [NSString stringWithFormat:htmlEntitiesPHPCode, tempFile];
+			NSString *phpCode = [NSString stringWithFormat:htmlEntitiesPHPCode, whatsChangedHTMLPath];
+			[phpCode writeToFile:htmlElementsPHPFilePath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 			
 			sprintf(
 				cmd,
-				"/usr/bin/php <<'PHP_END_INPUT'\n%s\nPHP_END_INPUT",
-				[phpCode UTF8String]
+				"/usr/bin/php '%s'",
+				[htmlElementsPHPFilePath UTF8String]
 				);
 			exitStatus = system(cmd);
 			
@@ -1838,8 +1837,6 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 				NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
 				goto cleanup;
 			}
-			
-			goto cleanup;
 		}
 	}
 	else
@@ -1935,8 +1932,12 @@ cleanup:
 	NSPrintf(@">> Cleaning up...\n");
 	NSPrintf(@"--------------------------------------------\n");
 	
-	if (tempFile != nil && [[NSFileManager defaultManager] fileExistsAtPath:tempFile])
-		[[NSFileManager defaultManager] removeFileAtPath:tempFile handler:nil];
+	if (whatsChangedHTMLPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:whatsChangedHTMLPath])
+		[[NSFileManager defaultManager] removeItemAtPath:whatsChangedHTMLPath error:NULL];
+	
+	if (htmlElementsPHPFilePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:htmlElementsPHPFilePath])
+		[[NSFileManager defaultManager] removeItemAtPath:htmlElementsPHPFilePath error:NULL];
+	
 	
 	BOOL fileDeleteSuccess = NO;
 	if (archivePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archivePath])
@@ -1963,8 +1964,6 @@ cleanup:
 		NSPrintf(@"Run \"icalBuddy -V\" to confirm this.\n");
 		NSPrintf(@"\n");
 	}
-	
-	NSPrintf(@"end\n");
 }
 
 
@@ -2531,7 +2530,6 @@ int main(int argc, char *argv[])
 				else if (inputChar == 'a' || inputChar == 'A')
 				{
 					autoUpdateSelf(currentVersionStr, latestVersionStr);
-					NSPrintf(@"1\n");
 				}
 			}
 		}
