@@ -64,7 +64,7 @@ You can use the `-ps` (or `--propertySeparators`) argument to specify the string
         tomorrow at 13:00 - 14:15
     $
     $ icalBuddy -ps "| / | -- |" eventsToday+2
-    * An Event (Work) / Meeting room A -- tomorrow at 13:00 - 14:15
+    * An Event (Work) / location: Meeting room A -- tomorrow at 13:00 - 14:15
 
 
 ### Q: Can I get the output in CSV format?
