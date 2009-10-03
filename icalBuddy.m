@@ -34,6 +34,7 @@ THE SOFTWARE.
 #include <AppKit/AppKit.h>
 #include <AddressBook/AddressBook.h>
 #include "ANSIEscapeHelper.h"
+#include "htmlEntitiesPHPCode.m"
 
 
 #define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
@@ -1758,14 +1759,23 @@ NSString* latestUpdateVersionOnServer(NSString** errorStr)
 
 
 
+
+
 void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 {
 	NSCAssert((currentVersionStr != nil), @"currentVersionStr is nil");
 	NSCAssert((latestVersionStr != nil), @"latestVersionStr is nil");
 	
+	NSString *tempDir = NSTemporaryDirectory();
+	if (tempDir == nil)
+		tempDir = @"/tmp";
+	
 	BOOL updateSuccess = NO;
 	int exitStatus = 0;
 	char cmd [1000];
+	NSString *tempFile = nil;
+	NSString *archivePath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-archive.zip"];
+	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-tempdir"];
 	
 	
 	NSPrintf(@"\n\n");
@@ -1773,17 +1783,71 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	NSPrintf(@"=============================================\n");
 	NSPrintf(@"\n");
 	
-	sprintf(
-		cmd,
-		"links -dump \"%s\"",
-		[[NSString stringWithFormat:@"%@", kWhatsChangedURL] cStringUsingEncoding:NSASCIIStringEncoding]
-		);
-	exitStatus = system(cmd);
+	NSURLRequest *whatsChangedRequest = [NSURLRequest
+		requestWithURL:kWhatsChangedURL
+		cachePolicy:NSURLRequestReloadIgnoringCacheData
+		timeoutInterval:kServerConnectTimeout
+		];
 	
-	if (exitStatus != 0)
+	NSHTTPURLResponse *whatsChangedResponse = nil;
+	NSError *whatsChangedError = nil;
+	NSData *whatsChangedData = [NSURLConnection
+		sendSynchronousRequest:whatsChangedRequest
+		returningResponse:&whatsChangedResponse
+		error:&whatsChangedError
+		];
+	
+	if (whatsChangedError == nil && whatsChangedResponse != nil && whatsChangedData != nil)
 	{
-		NSPrintfErr(@"\n\nFailed to load list of changes from server (exit status %i)\n\n", exitStatus);
-		return;
+		NSInteger statusCode = [whatsChangedResponse statusCode];
+		if (statusCode >= 400)
+		{
+			NSPrintfErr(@"\n\nFailed to load list of changes from server (HTTP status code: %d \"%@\")\n\n",
+				statusCode,
+				[NSHTTPURLResponse localizedStringForStatusCode:statusCode]
+				);
+			return;
+		}
+		else
+		{
+			NSString *whatsChangedStr = [[[NSString alloc] initWithData:whatsChangedData encoding:NSUTF8StringEncoding] autorelease];
+			
+			// write received HTML into a temp file
+			tempFile = [tempDir
+				stringByAppendingPathComponent:[NSString
+					stringWithFormat:@"icalBuddyTempFile-%d",(rand()%100000)
+					]
+				];
+			[whatsChangedStr writeToFile:tempFile atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+			
+			NSPrintf(@"%@\n", tempFile);
+			
+			// execute some php to translate the HTML onto readable text
+			// no, I couldn't find a good way to do this in Obj-C or C :(
+			NSString *phpCode = [NSString stringWithFormat:htmlEntitiesPHPCode, tempFile];
+			
+			sprintf(
+				cmd,
+				"/usr/bin/php <<'PHP_END_INPUT'\n%s\nPHP_END_INPUT",
+				[phpCode UTF8String]
+				);
+			exitStatus = system(cmd);
+			
+			if (exitStatus != 0)
+			{
+				NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
+				goto cleanup;
+			}
+			
+			goto cleanup;
+		}
+	}
+	else
+	{
+		NSPrintfErr(@"\n\nFailed to load list of changes from server (error: %@)\n\n",
+			(whatsChangedError != nil)?[whatsChangedError localizedDescription]:@"?"
+			);
+		goto cleanup;
 	}
 	
 	NSPrintf(@"\n\n");
@@ -1802,15 +1866,12 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	}
 	
 	if (inputChar != 'y' && inputChar != 'Y')
-		return;
-	
-	const char *archivePath = "/tmp/icalBuddy-autoUpdate-archive.zip";
-	const char *archiveExtractPath = "/tmp/icalBuddy-autoUpdate-tempdir/";
+		goto cleanup;
 	
 	NSPrintf(@"\n\n");
 	NSPrintf(@">> Downloading distribution archive...\n");
 	NSPrintf(@"--------------------------------------------\n");
-	NSPrintf(@" - saving archive to: %s\n", archivePath);
+	NSPrintf(@" - saving archive to: %@\n", archivePath);
 	NSPrintf(@"\n");
 	
 	sprintf(
@@ -1819,7 +1880,7 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 		[[NSString stringWithFormat:kDownloadURLFormat, latestVersionStr, latestVersionStr]
 			cStringUsingEncoding:NSASCIIStringEncoding
 			],
-		archivePath
+		[archivePath UTF8String]
 		);
 	exitStatus = system(cmd);
 	
@@ -1832,15 +1893,15 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	NSPrintf(@"\n\n");
 	NSPrintf(@">> Extracting distribution archive...\n");
 	NSPrintf(@"--------------------------------------------\n");
-	NSPrintf(@" - extracting to: %s\n", archiveExtractPath);
+	NSPrintf(@" - extracting to: %@\n", archiveExtractPath);
 	NSPrintf(@"\n");
 	
 	sprintf(
 		cmd,
 		"mkdir -p \"%s\" && unzip \"%s\" -d \"%s\"",
-		archiveExtractPath,
-		archivePath,
-		archiveExtractPath
+		[archiveExtractPath UTF8String],
+		[archivePath UTF8String],
+		[archiveExtractPath UTF8String]
 		);
 	exitStatus = system(cmd);
 	
@@ -1857,7 +1918,7 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	sprintf(
 		cmd,
 		"cd \"%s\" && ./install.command -y",
-		archiveExtractPath
+		[archiveExtractPath UTF8String]
 		);
 	exitStatus = system(cmd);
 	
@@ -1874,16 +1935,25 @@ cleanup:
 	NSPrintf(@">> Cleaning up...\n");
 	NSPrintf(@"--------------------------------------------\n");
 	
-	NSPrintf(@" - Moving distribution archive to trash\n");
-	BOOL fileDeleteSuccess = NO;
-	fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archivePath]);
-	if (!fileDeleteSuccess)
-		NSPrintfErr(@"   Could not move to trash.\n");
+	if (tempFile != nil && [[NSFileManager defaultManager] fileExistsAtPath:tempFile])
+		[[NSFileManager defaultManager] removeFileAtPath:tempFile handler:nil];
 	
-	NSPrintf(@" - Moving temporary extract folder for distribution archive to trash\n");
-	fileDeleteSuccess = moveFileToTrash([NSString stringWithUTF8String:archiveExtractPath]);
-	if (!fileDeleteSuccess)
-		NSPrintfErr(@"   Could not move to trash.\n");
+	BOOL fileDeleteSuccess = NO;
+	if (archivePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archivePath])
+	{
+		NSPrintf(@" - Moving distribution archive to trash\n");
+		fileDeleteSuccess = moveFileToTrash(archivePath);
+		if (!fileDeleteSuccess)
+			NSPrintfErr(@"   Could not move to trash.\n");
+	}
+	
+	if (archiveExtractPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archiveExtractPath])
+	{
+		NSPrintf(@" - Moving temporary extract folder for distribution archive to trash\n");
+		fileDeleteSuccess = moveFileToTrash(archiveExtractPath);
+		if (!fileDeleteSuccess)
+			NSPrintfErr(@"   Could not move to trash.\n");
+	}
 	
 	if (updateSuccess)
 	{
@@ -1893,6 +1963,8 @@ cleanup:
 		NSPrintf(@"Run \"icalBuddy -V\" to confirm this.\n");
 		NSPrintf(@"\n");
 	}
+	
+	NSPrintf(@"end\n");
 }
 
 
@@ -2459,6 +2531,7 @@ int main(int argc, char *argv[])
 				else if (inputChar == 'a' || inputChar == 'A')
 				{
 					autoUpdateSelf(currentVersionStr, latestVersionStr);
+					NSPrintf(@"1\n");
 				}
 			}
 		}
