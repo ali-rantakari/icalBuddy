@@ -38,7 +38,7 @@ You can use the `-tf` (or `--timeFormat`) argument to specify the format in whic
 
 ### Q: I would like icalBuddy to speak my language instead of just english. Can it be localized?
 
-As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonline] for documentation on how to do this. If you think you have managed to write a nice general localization file for your language, please [contact me][hassegcontact] and I'll include it into the distribution package so that others who'd like to use a localized icalBuddy in your language wouldn't have to redo that work.
+As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonline] for documentation on how to do this. If you think you have managed to write a nice general localization file for your language, please [contact me][hassegcontact] and I'll include it into the distribution package so that others who'd like to use a localized icalBuddy in your language wouldn't have to redo that work. Some finished localization files are included in the distribution package under the `exampleLocalizationFiles` folder.
 
 
 ### Q: How can I change the bullet points used in the output? We don't like them asterisks around these here parts.
