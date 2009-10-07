@@ -425,6 +425,74 @@ void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr
 }
 
 
+#define UNICHAR_NEWLINE 10
+#define UNICHAR_TAB 9
+#define UNICHAR_SPACE 32
+#define TAB_STOP_LENGTH 8
+
+void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUInteger width)
+{
+	// replace tabs with spaces to avoid problems with different programs
+	// (that would display our output) using different tab stop lengths:
+	replaceInMutableAttrStr(mutableAttrStr, @"\t", ATTR_STR(WHITESPACE(TAB_STOP_LENGTH)));
+	
+	NSMutableArray *newlineIndices = [NSMutableArray array];
+	NSString *str = [mutableAttrStr string];
+	
+	// find all input string indices where we want to
+	// wrap the line
+	NSUInteger strLength = [str length];
+	NSUInteger strIndex = 0;
+	NSUInteger currentLineLength = 0;
+	NSUInteger lastWhitespaceIndex = 0;
+	unichar currentUnichar;
+	BOOL lastCharWasWhitespace = NO;
+	while(strIndex < strLength)
+	{
+		currentUnichar = [str characterAtIndex:strIndex];
+		
+		if (currentUnichar == UNICHAR_NEWLINE)
+		{
+			lastCharWasWhitespace = NO;
+			lastWhitespaceIndex = 0;
+			currentLineLength = 0;
+		}
+		else if (currentLineLength >= width)
+		{
+			NSUInteger indexToWrapAt = (lastWhitespaceIndex != 0) ? lastWhitespaceIndex : strIndex;
+			[newlineIndices addObject:[NSNumber numberWithUnsignedInteger:indexToWrapAt]];
+			lastWhitespaceIndex = 0;
+			currentLineLength = 0;
+		}
+		else if (!lastCharWasWhitespace && currentUnichar == UNICHAR_SPACE)
+		{
+			lastWhitespaceIndex = strIndex;
+			lastCharWasWhitespace = YES;
+			currentLineLength++;
+		}
+		else
+		{
+			lastCharWasWhitespace = NO;
+			currentLineLength++;
+		}
+		
+		strIndex++;
+	}
+	
+	// insert newlines into each found index
+	NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
+	NSUInteger addedCharsCounter = 0;
+	for (NSNumber *num in newlineIndices)
+	{
+		[mutableAttrStr
+			insertAttributedString:newlineAttrStr
+			atIndex:([num unsignedIntegerValue]+addedCharsCounter)
+			];
+		addedCharsCounter++;
+	}
+}
+
+
 
 // returns localized, human-readable string corresponding to the
 // specified localization dictionary key
@@ -1808,16 +1876,21 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 		}
 		else
 		{
-			NSAttributedString *w = [[[NSAttributedString alloc] initWithHTML:whatsChangedData documentAttributes:NULL] autorelease];
-			NSMutableAttributedString *mw = [[[NSMutableAttributedString alloc] init] autorelease];
-			[mw appendAttributedString:w];
+			NSAttributedString *whatsChangedAttrStr = [[[NSAttributedString alloc]
+				initWithHTML:whatsChangedData
+				documentAttributes:NULL
+				] autorelease];
+			NSMutableAttributedString *whatsChangedMAttrStr = [[[NSMutableAttributedString alloc] init] autorelease];
+			[whatsChangedMAttrStr appendAttributedString:whatsChangedAttrStr];
 			
 			// fix bullet points (replace tabs after bullets with spaces)
-			replaceInMutableAttrStr(mw, @"•\t", ATTR_STR(@"• "));
+			replaceInMutableAttrStr(whatsChangedMAttrStr, @"•\t", ATTR_STR(@"• "));
 			
-			NSString *ww = [ansiEscapeHelper ansiEscapedStringWithAttributedString:mw];
+			wordWrapMutableAttrStr(whatsChangedMAttrStr, 30);
 			
-			NSPrint(ww);
+			NSString *whatsChangedFinalOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:whatsChangedMAttrStr];
+			
+			NSPrint(whatsChangedFinalOutput);
 			
 			return; // for testing
 		}
