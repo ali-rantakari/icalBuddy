@@ -34,7 +34,6 @@ THE SOFTWARE.
 #include <AppKit/AppKit.h>
 #include <AddressBook/AddressBook.h>
 #include "ANSIEscapeHelper.h"
-#include "htmlEntitiesPHPCode.m"
 
 
 #define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
@@ -1773,12 +1772,6 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 	BOOL updateSuccess = NO;
 	int exitStatus = 0;
 	char cmd [1000];
-	NSString *whatsChangedHTMLPath = [tempDir
-		stringByAppendingPathComponent:[NSString
-			stringWithFormat:@"icalBuddyTempFile-%d",(rand()%100000)
-			]
-		];
-	NSString *htmlElementsPHPFilePath = [tempDir stringByAppendingPathComponent:@"icalBuddyTempPHPScript.php"];
 	NSString *archivePath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-archive.zip"];
 	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-tempdir"];
 	
@@ -1815,28 +1808,18 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 		}
 		else
 		{
-			NSString *whatsChangedStr = [[[NSString alloc] initWithData:whatsChangedData encoding:NSUTF8StringEncoding] autorelease];
+			NSAttributedString *w = [[[NSAttributedString alloc] initWithHTML:whatsChangedData documentAttributes:NULL] autorelease];
+			NSMutableAttributedString *mw = [[[NSMutableAttributedString alloc] init] autorelease];
+			[mw appendAttributedString:w];
 			
-			// write received HTML into a temp file
-			[whatsChangedStr writeToFile:whatsChangedHTMLPath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+			// fix bullet points (replace tabs after bullets with spaces)
+			replaceInMutableAttrStr(mw, @"•\t", ATTR_STR(@"• "));
 			
-			// execute some php to translate the HTML onto readable text
-			// no, I couldn't find a good way to do this in Obj-C or C :(
-			NSString *phpCode = [NSString stringWithFormat:htmlEntitiesPHPCode, whatsChangedHTMLPath];
-			[phpCode writeToFile:htmlElementsPHPFilePath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+			NSString *ww = [ansiEscapeHelper ansiEscapedStringWithAttributedString:mw];
 			
-			sprintf(
-				cmd,
-				"/usr/bin/php '%s'",
-				[htmlElementsPHPFilePath UTF8String]
-				);
-			exitStatus = system(cmd);
+			NSPrint(ww);
 			
-			if (exitStatus != 0)
-			{
-				NSPrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-				goto cleanup;
-			}
+			return; // for testing
 		}
 	}
 	else
@@ -1931,13 +1914,6 @@ cleanup:
 	NSPrintf(@"\n\n");
 	NSPrintf(@">> Cleaning up...\n");
 	NSPrintf(@"--------------------------------------------\n");
-	
-	if (whatsChangedHTMLPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:whatsChangedHTMLPath])
-		[[NSFileManager defaultManager] removeItemAtPath:whatsChangedHTMLPath error:NULL];
-	
-	if (htmlElementsPHPFilePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:htmlElementsPHPFilePath])
-		[[NSFileManager defaultManager] removeItemAtPath:htmlElementsPHPFilePath error:NULL];
-	
 	
 	BOOL fileDeleteSuccess = NO;
 	if (archivePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archivePath])
