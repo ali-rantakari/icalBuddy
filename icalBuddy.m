@@ -428,7 +428,7 @@ void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr
 #define UNICHAR_NEWLINE 10
 #define UNICHAR_TAB 9
 #define UNICHAR_SPACE 32
-#define TAB_STOP_LENGTH 8
+#define TAB_STOP_LENGTH 4
 
 void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUInteger width)
 {
@@ -440,6 +440,9 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 	
 	NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
 	
+	// characters we'll to consider as indentation:
+	NSCharacterSet *indentChars = [NSCharacterSet characterSetWithCharactersInString:@" •"];
+	
 	// find all input string indices where we want to
 	// wrap the line
 	NSUInteger strLength = [str length];
@@ -448,7 +451,9 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 	NSUInteger lastWhitespaceIndex = 0;
 	unichar currentUnichar = 0;
 	BOOL lastCharWasWhitespace = NO;
+	BOOL lastCharWasIndentation = NO;
 	NSUInteger numAddedChars = 0;
+	NSUInteger currentLineIndentAmount = 0;
 	while(strIndex < strLength)
 	{
 		if (width <= currentLineLength)
@@ -459,14 +464,20 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 			
 			NSUInteger indexToWrapAt = ((0 < lastWhitespaceIndex) ? lastWhitespaceIndex : strIndex) + numAddedChars;
 			NSUInteger lengthToReplace = ((lastWhitespaceIndex != 0)?1:0);
+			NSRange replaceRange = NSMakeRange(indexToWrapAt, lengthToReplace);
 			
-			NSRange range = NSMakeRange(indexToWrapAt, lengthToReplace);
+			NSAttributedString *replaceStr = nil;
+			if (currentLineIndentAmount == 0)
+				replaceStr = newlineAttrStr;
+			else
+				replaceStr = ATTR_STR(strConcat(@"\n", WHITESPACE(currentLineIndentAmount), nil));
+			
 			[mutableAttrStr
-				replaceCharactersInRange:range
-				withAttributedString:newlineAttrStr
+				replaceCharactersInRange:replaceRange
+				withAttributedString:replaceStr
 				];
 			
-			numAddedChars += 1-lengthToReplace; // the added newline's length is 1
+			numAddedChars += [[replaceStr string] length] - lengthToReplace;
 			
 			lastWhitespaceIndex = 0;
 			currentLineLength = (strIndex-(indexToWrapAt-numAddedChars));
@@ -475,11 +486,21 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 		{
 			currentUnichar = [str characterAtIndex:strIndex];
 			
+			if ((lastCharWasIndentation || currentLineLength == 0) &&
+				[indentChars characterIsMember:currentUnichar]
+				)
+			{
+				lastCharWasIndentation = YES;
+				currentLineIndentAmount++;
+			}
+			else
+				lastCharWasIndentation = NO;
+			
 			if (currentUnichar == UNICHAR_NEWLINE)
 			{
-				lastCharWasWhitespace = NO;
 				lastWhitespaceIndex = 0;
 				currentLineLength = 0;
+				currentLineIndentAmount = 0;
 			}
 			// we want to wrap at the beginning of the last
 			// whitespace run of the current line, excluding the
@@ -491,14 +512,14 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 					 )
 			{
 				lastWhitespaceIndex = strIndex;
-				lastCharWasWhitespace = YES;
 				currentLineLength++;
 			}
 			else
 			{
-				lastCharWasWhitespace = NO;
 				currentLineLength++;
 			}
+			
+			lastCharWasWhitespace = (currentUnichar == UNICHAR_SPACE);
 		}
 		
 		strIndex++;
@@ -1899,13 +1920,11 @@ void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
 			// fix bullet points (replace tabs after bullets with spaces)
 			replaceInMutableAttrStr(whatsChangedMAttrStr, @"•\t", ATTR_STR(@"• "));
 			
-			wordWrapMutableAttrStr(whatsChangedMAttrStr, 30);
+			wordWrapMutableAttrStr(whatsChangedMAttrStr, 80);
 			
 			NSString *whatsChangedFinalOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:whatsChangedMAttrStr];
 			
 			Print(whatsChangedFinalOutput);
-			
-			return; // for testing
 		}
 	}
 	else
