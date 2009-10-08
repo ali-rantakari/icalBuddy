@@ -436,8 +436,9 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 	// (that would display our output) using different tab stop lengths:
 	replaceInMutableAttrStr(mutableAttrStr, @"\t", ATTR_STR(WHITESPACE(TAB_STOP_LENGTH)));
 	
-	NSMutableArray *newlineIndices = [NSMutableArray array];
-	NSString *str = [mutableAttrStr string];
+	NSString *str = [[mutableAttrStr string] copy];
+	
+	NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
 	
 	// find all input string indices where we want to
 	// wrap the line
@@ -445,50 +446,62 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 	NSUInteger strIndex = 0;
 	NSUInteger currentLineLength = 0;
 	NSUInteger lastWhitespaceIndex = 0;
-	unichar currentUnichar;
+	unichar currentUnichar = 0;
 	BOOL lastCharWasWhitespace = NO;
+	NSUInteger numAddedChars = 0;
 	while(strIndex < strLength)
 	{
-		currentUnichar = [str characterAtIndex:strIndex];
-		
-		if (currentUnichar == UNICHAR_NEWLINE)
+		if (width <= currentLineLength)
 		{
-			lastCharWasWhitespace = NO;
+			// insert newline at the wrap index, eating one whitespace
+			// *if* we're wrapping at a whitespace (i.e. don't eat characters
+			// if we've been forced to wrap in the middle of a word)
+			
+			NSUInteger indexToWrapAt = ((0 < lastWhitespaceIndex) ? lastWhitespaceIndex : strIndex) + numAddedChars;
+			NSUInteger lengthToReplace = ((lastWhitespaceIndex != 0)?1:0);
+			
+			NSRange range = NSMakeRange(indexToWrapAt, lengthToReplace);
+			[mutableAttrStr
+				replaceCharactersInRange:range
+				withAttributedString:newlineAttrStr
+				];
+			
+			numAddedChars += 1-lengthToReplace; // the added newline's length is 1
+			
 			lastWhitespaceIndex = 0;
 			currentLineLength = 0;
-		}
-		else if (currentLineLength >= width)
-		{
-			NSUInteger indexToWrapAt = (lastWhitespaceIndex != 0) ? lastWhitespaceIndex : strIndex;
-			[newlineIndices addObject:[NSNumber numberWithUnsignedInteger:indexToWrapAt]];
-			lastWhitespaceIndex = 0;
-			currentLineLength = 0;
-		}
-		else if (!lastCharWasWhitespace && currentUnichar == UNICHAR_SPACE)
-		{
-			lastWhitespaceIndex = strIndex;
-			lastCharWasWhitespace = YES;
-			currentLineLength++;
 		}
 		else
 		{
-			lastCharWasWhitespace = NO;
-			currentLineLength++;
+			currentUnichar = [str characterAtIndex:strIndex];
+			
+			if (currentUnichar == UNICHAR_NEWLINE)
+			{
+				lastCharWasWhitespace = NO;
+				lastWhitespaceIndex = 0;
+				currentLineLength = 0;
+			}
+			// we want to wrap at the beginning of the last
+			// whitespace run of the current line, excluding the
+			// beginning of the line (doesn't make sense to wrap
+			// there):
+			else if (!lastCharWasWhitespace &&
+					 0 < currentLineLength &&
+					 currentUnichar == UNICHAR_SPACE
+					 )
+			{
+				lastWhitespaceIndex = strIndex;
+				lastCharWasWhitespace = YES;
+				currentLineLength++;
+			}
+			else
+			{
+				lastCharWasWhitespace = NO;
+				currentLineLength++;
+			}
 		}
 		
 		strIndex++;
-	}
-	
-	// insert newlines into each found index
-	NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
-	NSUInteger addedCharsCounter = 0;
-	for (NSNumber *num in newlineIndices)
-	{
-		[mutableAttrStr
-			insertAttributedString:newlineAttrStr
-			atIndex:([num unsignedIntegerValue]+addedCharsCounter)
-			];
-		addedCharsCounter++;
 	}
 }
 
