@@ -469,7 +469,7 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 			numAddedChars += 1-lengthToReplace; // the added newline's length is 1
 			
 			lastWhitespaceIndex = 0;
-			currentLineLength = 0;
+			currentLineLength = (strIndex-(indexToWrapAt-numAddedChars));
 		}
 		else
 		{
