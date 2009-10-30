@@ -440,7 +440,7 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 	
 	NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
 	
-	// characters we'll to consider as indentation:
+	// characters we'll consider as indentation:
 	NSCharacterSet *indentChars = [NSCharacterSet characterSetWithCharactersInString:@" •"];
 	
 	// find all input string indices where we want to
