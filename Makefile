@@ -29,21 +29,11 @@ all: icalBuddy
 
 
 
-htmlEntitiesPHPCode.m: htmlEntities.php
-	@echo
-	@echo ---- Writing htmlEntities.php as a NSString literal
-	@echo      definition into htmlEntitiesPHPCode.m:
-	@echo ======================================
-	echo -n 'NSString *htmlEntitiesPHPCode = @"' > $@
-	cat htmlEntities.php | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | perl -pi -e 's/\n/\\n/g' >> $@
-	echo '";' >> $@
-
-
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 # compile the binary itself
 #-------------------------------------------------------------------------
-icalBuddy: icalBuddy.m htmlEntitiesPHPCode.m
+icalBuddy: icalBuddy.m
 	@echo
 	@echo ---- Compiling:
 	@echo ======================================
@@ -209,7 +199,6 @@ clean:
 	-rm -Rf icalBuddyLocalization.1
 	-rm -Rf Manual-icalBuddyLocalization.pdf
 	-rm -Rf deployment/*
-	-rm -Rf htmlEntitiesPHPCode.m
 
 
 
