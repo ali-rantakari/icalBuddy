@@ -85,19 +85,27 @@ THE SOFTWARE.
 
 
 // output formatting parameters
-#define kFormatFgColorPrefix	@"fg:"
-#define kFormatBgColorPrefix	@"bg:"
-#define kFormatDoubleUnderlined	@"double-underlined"
-#define kFormatUnderlined		@"underlined"
-#define kFormatBold				@"bold"
-#define kFormatColorBlack		@"black"
-#define kFormatColorRed			@"red"
-#define kFormatColorGreen		@"green"
-#define kFormatColorYellow		@"yellow"
-#define kFormatColorBlue		@"blue"
-#define kFormatColorMagenta		@"magenta"
-#define kFormatColorWhite		@"white"
-#define kFormatColorCyan		@"cyan"
+#define kFormatFgColorPrefix		@"fg:"
+#define kFormatBgColorPrefix		@"bg:"
+#define kFormatDoubleUnderlined		@"double-underlined"
+#define kFormatUnderlined			@"underlined"
+#define kFormatBold					@"bold"
+#define kFormatColorBlack			@"black"
+#define kFormatColorRed				@"red"
+#define kFormatColorGreen			@"green"
+#define kFormatColorYellow			@"yellow"
+#define kFormatColorBlue			@"blue"
+#define kFormatColorMagenta			@"magenta"
+#define kFormatColorWhite			@"white"
+#define kFormatColorCyan			@"cyan"
+#define kFormatColorBrightBlack		@"bright-black"
+#define kFormatColorBrightRed		@"bright-red"
+#define kFormatColorBrightGreen		@"bright-green"
+#define kFormatColorBrightYellow	@"bright-yellow"
+#define kFormatColorBrightBlue		@"bright-blue"
+#define kFormatColorBrightMagenta	@"bright-magenta"
+#define kFormatColorBrightWhite		@"bright-white"
+#define kFormatColorBrightCyan		@"bright-cyan"
 
 
 // localization configuration keys
@@ -158,7 +166,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
-const int VERSION_BUILD = 13;
+const int VERSION_BUILD = 14;
 
 
 
@@ -977,7 +985,15 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 			[part isEqualToString:kFormatColorBlue] ||
 			[part isEqualToString:kFormatColorMagenta] ||
 			[part isEqualToString:kFormatColorWhite] ||
-			[part isEqualToString:kFormatColorCyan]
+			[part isEqualToString:kFormatColorCyan] ||
+			[part isEqualToString:kFormatColorBrightBlack] ||
+			[part isEqualToString:kFormatColorBrightRed] ||
+			[part isEqualToString:kFormatColorBrightGreen] ||
+			[part isEqualToString:kFormatColorBrightYellow] ||
+			[part isEqualToString:kFormatColorBrightBlue] ||
+			[part isEqualToString:kFormatColorBrightMagenta] ||
+			[part isEqualToString:kFormatColorBrightWhite] ||
+			[part isEqualToString:kFormatColorBrightCyan]
 			)
 		{
 			thisAttrName = NSForegroundColorAttributeName;
@@ -1008,7 +1024,23 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 		if (isColorAttribute)
 		{
 			enum sgrCode thisColorSGRCode = SGRCodeNoneOrInvalid;
-			if ([part hasSuffix:kFormatColorBlack])
+			if ([part hasSuffix:kFormatColorBrightBlack])
+				thisColorSGRCode = SGRCodeFgBrightBlack;
+			else if ([part hasSuffix:kFormatColorBrightRed])
+				thisColorSGRCode = SGRCodeFgBrightRed;
+			else if ([part hasSuffix:kFormatColorBrightGreen])
+				thisColorSGRCode = SGRCodeFgBrightGreen;
+			else if ([part hasSuffix:kFormatColorBrightYellow])
+				thisColorSGRCode = SGRCodeFgBrightYellow;
+			else if ([part hasSuffix:kFormatColorBrightBlue])
+				thisColorSGRCode = SGRCodeFgBrightBlue;
+			else if ([part hasSuffix:kFormatColorBrightMagenta])
+				thisColorSGRCode = SGRCodeFgBrightMagenta;
+			else if ([part hasSuffix:kFormatColorBrightWhite])
+				thisColorSGRCode = SGRCodeFgBrightWhite;
+			else if ([part hasSuffix:kFormatColorBrightCyan])
+				thisColorSGRCode = SGRCodeFgBrightCyan;
+			else if ([part hasSuffix:kFormatColorBlack])
 				thisColorSGRCode = SGRCodeFgBlack;
 			else if ([part hasSuffix:kFormatColorRed])
 				thisColorSGRCode = SGRCodeFgRed;
