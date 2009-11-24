@@ -40,6 +40,12 @@ THE SOFTWARE.
 #import "ANSIEscapeHelper.h"
 
 
+// color definition helper macros
+#define kBrightColorBrightness	1.0
+#define kBrightColorSaturation	0.4
+#define kBrightColorAlpha		1.0
+#define kBrightColorWithHue(h)	[NSColor colorWithCalibratedHue:(h) saturation:kBrightColorSaturation brightness:kBrightColorBrightness alpha:kBrightColorAlpha]
+
 // default colors
 #define kDefaultANSIColorFgBlack	[NSColor blackColor]
 #define kDefaultANSIColorFgRed		[NSColor redColor]
@@ -50,6 +56,15 @@ THE SOFTWARE.
 #define kDefaultANSIColorFgCyan		[NSColor cyanColor]
 #define kDefaultANSIColorFgWhite	[NSColor whiteColor]
 
+#define kDefaultANSIColorFgBrightBlack		[NSColor colorWithCalibratedWhite:0.337 alpha:1.0]
+#define kDefaultANSIColorFgBrightRed		kBrightColorWithHue(1.0)
+#define kDefaultANSIColorFgBrightGreen		kBrightColorWithHue(1.0/3.0)
+#define kDefaultANSIColorFgBrightYellow		kBrightColorWithHue(1.0/6.0)
+#define kDefaultANSIColorFgBrightBlue		kBrightColorWithHue(2.0/3.0)
+#define kDefaultANSIColorFgBrightMagenta	kBrightColorWithHue(5.0/6.0)
+#define kDefaultANSIColorFgBrightCyan		kBrightColorWithHue(0.5)
+#define kDefaultANSIColorFgBrightWhite		[NSColor whiteColor]
+
 #define kDefaultANSIColorBgBlack	[NSColor blackColor]
 #define kDefaultANSIColorBgRed		[NSColor redColor]
 #define kDefaultANSIColorBgGreen	[NSColor greenColor]
@@ -58,6 +73,15 @@ THE SOFTWARE.
 #define kDefaultANSIColorBgMagenta	[NSColor magentaColor]
 #define kDefaultANSIColorBgCyan		[NSColor cyanColor]
 #define kDefaultANSIColorBgWhite	[NSColor whiteColor]
+
+#define kDefaultANSIColorBgBrightBlack		kDefaultANSIColorFgBrightBlack
+#define kDefaultANSIColorBgBrightRed		kDefaultANSIColorFgBrightRed
+#define kDefaultANSIColorBgBrightGreen		kDefaultANSIColorFgBrightGreen
+#define kDefaultANSIColorBgBrightYellow		kDefaultANSIColorFgBrightYellow
+#define kDefaultANSIColorBgBrightBlue		kDefaultANSIColorFgBrightBlue
+#define kDefaultANSIColorBgBrightMagenta	kDefaultANSIColorFgBrightMagenta
+#define kDefaultANSIColorBgBrightCyan		kDefaultANSIColorFgBrightCyan
+#define kDefaultANSIColorBgBrightWhite		kDefaultANSIColorFgBrightWhite
 
 // dictionary keys for the SGR code dictionaries that the array
 // escapeCodesForString:cleanString: returns contains
@@ -123,9 +147,9 @@ THE SOFTWARE.
 	for (thisAttributeDict in attributesAndRanges)
 	{
 		[attributedString
-		 addAttribute:[thisAttributeDict objectForKey:@"attributeName"]
-		 value:[thisAttributeDict objectForKey:@"attributeValue"]
-		 range:[[thisAttributeDict objectForKey:@"range"] rangeValue]
+		 addAttribute:[thisAttributeDict objectForKey:kAttrDictKey_attrName]
+		 value:[thisAttributeDict objectForKey:kAttrDictKey_attrValue]
+		 range:[[thisAttributeDict objectForKey:kAttrDictKey_range] rangeValue]
 		 ];
 	}
 	
@@ -420,6 +444,14 @@ THE SOFTWARE.
 			case SGRCodeFgMagenta:
 			case SGRCodeFgCyan:
 			case SGRCodeFgWhite:
+			case SGRCodeFgBrightBlack:
+			case SGRCodeFgBrightRed:
+			case SGRCodeFgBrightGreen:
+			case SGRCodeFgBrightYellow:
+			case SGRCodeFgBrightBlue:
+			case SGRCodeFgBrightMagenta:
+			case SGRCodeFgBrightCyan:
+			case SGRCodeFgBrightWhite:
 				thisAttributeName = NSForegroundColorAttributeName;
 				break;
 			case SGRCodeBgBlack:
@@ -430,6 +462,14 @@ THE SOFTWARE.
 			case SGRCodeBgMagenta:
 			case SGRCodeBgCyan:
 			case SGRCodeBgWhite:
+			case SGRCodeBgBrightBlack:
+			case SGRCodeBgBrightRed:
+			case SGRCodeBgBrightGreen:
+			case SGRCodeBgBrightYellow:
+			case SGRCodeBgBrightBlue:
+			case SGRCodeBgBrightMagenta:
+			case SGRCodeBgBrightCyan:
+			case SGRCodeBgBrightWhite:
 				thisAttributeName = NSBackgroundColorAttributeName;
 				break;
 			case SGRCodeIntensityBold:
@@ -464,6 +504,22 @@ THE SOFTWARE.
 			case SGRCodeFgCyan:
 			case SGRCodeBgWhite:
 			case SGRCodeFgWhite:
+			case SGRCodeBgBrightBlack:
+			case SGRCodeFgBrightBlack:
+			case SGRCodeBgBrightRed:
+			case SGRCodeFgBrightRed:
+			case SGRCodeBgBrightGreen:
+			case SGRCodeFgBrightGreen:
+			case SGRCodeBgBrightYellow:
+			case SGRCodeFgBrightYellow:
+			case SGRCodeBgBrightBlue:
+			case SGRCodeFgBrightBlue:
+			case SGRCodeBgBrightMagenta:
+			case SGRCodeFgBrightMagenta:
+			case SGRCodeBgBrightCyan:
+			case SGRCodeFgBrightCyan:
+			case SGRCodeBgBrightWhite:
+			case SGRCodeFgBrightWhite:
 				thisAttributeValue = [self colorForSGRCode:thisCode];
 				break;
 			case SGRCodeIntensityBold:
@@ -545,11 +601,23 @@ THE SOFTWARE.
 		case SGRCodeFgMagenta:
 		case SGRCodeFgCyan:
 		case SGRCodeFgWhite:
+		case SGRCodeFgBrightBlack:
+		case SGRCodeFgBrightRed:
+		case SGRCodeFgBrightGreen:
+		case SGRCodeFgBrightYellow:
+		case SGRCodeFgBrightBlue:
+		case SGRCodeFgBrightMagenta:
+		case SGRCodeFgBrightCyan:
+		case SGRCodeFgBrightWhite:
 			return (endCode == SGRCodeAllReset || endCode == SGRCodeFgReset || 
 					endCode == SGRCodeFgBlack || endCode == SGRCodeFgRed || 
 					endCode == SGRCodeFgGreen || endCode == SGRCodeFgYellow || 
 					endCode == SGRCodeFgBlue || endCode == SGRCodeFgMagenta || 
-					endCode == SGRCodeFgCyan || endCode == SGRCodeFgWhite);
+					endCode == SGRCodeFgCyan || endCode == SGRCodeFgWhite ||
+					endCode == SGRCodeFgBrightBlack || endCode == SGRCodeFgBrightRed || 
+					endCode == SGRCodeFgBrightGreen || endCode == SGRCodeFgBrightYellow || 
+					endCode == SGRCodeFgBrightBlue || endCode == SGRCodeFgBrightMagenta || 
+					endCode == SGRCodeFgBrightCyan || endCode == SGRCodeFgBrightWhite);
 			break;
 		case SGRCodeBgBlack:
 		case SGRCodeBgRed:
@@ -559,11 +627,23 @@ THE SOFTWARE.
 		case SGRCodeBgMagenta:
 		case SGRCodeBgCyan:
 		case SGRCodeBgWhite:
+		case SGRCodeBgBrightBlack:
+		case SGRCodeBgBrightRed:
+		case SGRCodeBgBrightGreen:
+		case SGRCodeBgBrightYellow:
+		case SGRCodeBgBrightBlue:
+		case SGRCodeBgBrightMagenta:
+		case SGRCodeBgBrightCyan:
+		case SGRCodeBgBrightWhite:
 			return (endCode == SGRCodeAllReset || endCode == SGRCodeBgReset || 
 					endCode == SGRCodeBgBlack || endCode == SGRCodeBgRed || 
 					endCode == SGRCodeBgGreen || endCode == SGRCodeBgYellow || 
 					endCode == SGRCodeBgBlue || endCode == SGRCodeBgMagenta || 
-					endCode == SGRCodeBgCyan || endCode == SGRCodeBgWhite);
+					endCode == SGRCodeBgCyan || endCode == SGRCodeBgWhite ||
+					endCode == SGRCodeBgBrightBlack || endCode == SGRCodeBgBrightRed || 
+					endCode == SGRCodeBgBrightGreen || endCode == SGRCodeBgBrightYellow || 
+					endCode == SGRCodeBgBrightBlue || endCode == SGRCodeBgBrightMagenta || 
+					endCode == SGRCodeBgBrightCyan || endCode == SGRCodeBgBrightWhite);
 			break;
 		case SGRCodeIntensityBold:
 		case SGRCodeIntensityNormal:
@@ -621,6 +701,30 @@ THE SOFTWARE.
 		case SGRCodeFgWhite:
 			return kDefaultANSIColorFgWhite;
 			break;
+		case SGRCodeFgBrightBlack:
+			return kDefaultANSIColorFgBrightBlack;
+			break;
+		case SGRCodeFgBrightRed:
+			return kDefaultANSIColorFgBrightRed;
+			break;
+		case SGRCodeFgBrightGreen:
+			return kDefaultANSIColorFgBrightGreen;
+			break;
+		case SGRCodeFgBrightYellow:
+			return kDefaultANSIColorFgBrightYellow;
+			break;
+		case SGRCodeFgBrightBlue:
+			return kDefaultANSIColorFgBrightBlue;
+			break;
+		case SGRCodeFgBrightMagenta:
+			return kDefaultANSIColorFgBrightMagenta;
+			break;
+		case SGRCodeFgBrightCyan:
+			return kDefaultANSIColorFgBrightCyan;
+			break;
+		case SGRCodeFgBrightWhite:
+			return kDefaultANSIColorFgBrightWhite;
+			break;
 		case SGRCodeBgBlack:
 			return kDefaultANSIColorBgBlack;
 			break;
@@ -644,6 +748,30 @@ THE SOFTWARE.
 			break;
 		case SGRCodeBgWhite:
 			return kDefaultANSIColorBgWhite;
+			break;
+		case SGRCodeBgBrightBlack:
+			return kDefaultANSIColorBgBrightBlack;
+			break;
+		case SGRCodeBgBrightRed:
+			return kDefaultANSIColorBgBrightRed;
+			break;
+		case SGRCodeBgBrightGreen:
+			return kDefaultANSIColorBgBrightGreen;
+			break;
+		case SGRCodeBgBrightYellow:
+			return kDefaultANSIColorBgBrightYellow;
+			break;
+		case SGRCodeBgBrightBlue:
+			return kDefaultANSIColorBgBrightBlue;
+			break;
+		case SGRCodeBgBrightMagenta:
+			return kDefaultANSIColorBgBrightMagenta;
+			break;
+		case SGRCodeBgBrightCyan:
+			return kDefaultANSIColorBgBrightCyan;
+			break;
+		case SGRCodeBgBrightWhite:
+			return kDefaultANSIColorBgBrightWhite;
 			break;
 		default:
 			break;
@@ -689,6 +817,22 @@ THE SOFTWARE.
 			return SGRCodeFgCyan;
 		else if ([aColor isEqual:kDefaultANSIColorFgWhite])
 			return SGRCodeFgWhite;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightBlack])
+			return SGRCodeFgBrightBlack;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightRed])
+			return SGRCodeFgBrightRed;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightGreen])
+			return SGRCodeFgBrightGreen;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightYellow])
+			return SGRCodeFgBrightYellow;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightBlue])
+			return SGRCodeFgBrightBlue;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightMagenta])
+			return SGRCodeFgBrightMagenta;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightCyan])
+			return SGRCodeFgBrightCyan;
+		else if ([aColor isEqual:kDefaultANSIColorFgBrightWhite])
+			return SGRCodeFgBrightWhite;
 	}
 	else
 	{
@@ -708,6 +852,22 @@ THE SOFTWARE.
 			return SGRCodeBgCyan;
 		else if ([aColor isEqual:kDefaultANSIColorBgWhite])
 			return SGRCodeBgWhite;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightBlack])
+			return SGRCodeBgBrightBlack;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightRed])
+			return SGRCodeBgBrightRed;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightGreen])
+			return SGRCodeBgBrightGreen;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightYellow])
+			return SGRCodeBgBrightYellow;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightBlue])
+			return SGRCodeBgBrightBlue;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightMagenta])
+			return SGRCodeBgBrightMagenta;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightCyan])
+			return SGRCodeBgBrightCyan;
+		else if ([aColor isEqual:kDefaultANSIColorBgBrightWhite])
+			return SGRCodeBgBrightWhite;
 	}
 	
 	return SGRCodeNoneOrInvalid;

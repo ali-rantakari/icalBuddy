@@ -4,7 +4,7 @@
 //
 //  Created by Ali Rantakari on 18.3.09.
 //
-//  Version 0.9
+//  Version 0.9.2
 // 
 /*
 The MIT License
@@ -82,7 +82,25 @@ enum sgrCode
 	SGRCodeBgMagenta =			45,
 	SGRCodeBgCyan =				46,
 	SGRCodeBgWhite =			47,
-	SGRCodeBgReset =			49
+	SGRCodeBgReset =			49,
+	
+	SGRCodeFgBrightBlack =		90,
+	SGRCodeFgBrightRed =		91,
+	SGRCodeFgBrightGreen =		92,
+	SGRCodeFgBrightYellow =		93,
+	SGRCodeFgBrightBlue =		94,
+	SGRCodeFgBrightMagenta =	95,
+	SGRCodeFgBrightCyan =		96,
+	SGRCodeFgBrightWhite =		97,
+	
+	SGRCodeBgBrightBlack =		100,
+	SGRCodeBgBrightRed =		101,
+	SGRCodeBgBrightGreen =		102,
+	SGRCodeBgBrightYellow =		103,
+	SGRCodeBgBrightBlue =		104,
+	SGRCodeBgBrightMagenta =	105,
+	SGRCodeBgBrightCyan =		106,
+	SGRCodeBgBrightWhite =		107
 };
 
 
