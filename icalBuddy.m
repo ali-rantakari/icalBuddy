@@ -90,6 +90,7 @@ THE SOFTWARE.
 #define kFormatDoubleUnderlined		@"double-underlined"
 #define kFormatUnderlined			@"underlined"
 #define kFormatBold					@"bold"
+#define kFormatBlink				@"blink"
 #define kFormatColorBlack			@"black"
 #define kFormatColorRed				@"red"
 #define kFormatColorGreen			@"green"
@@ -107,6 +108,10 @@ THE SOFTWARE.
 #define kFormatColorBrightWhite		@"bright-white"
 #define kFormatColorBrightCyan		@"bright-cyan"
 
+// custom string formatting attribute(s)
+#define kBlinkAttributeName			@"blinkAttributeName"
+#define kSGRCodeBlink				5
+#define kSGRCodeBlinkReset			25
 
 // localization configuration keys
 #define kL10nKeyPropNameTitle		kPropName_title
@@ -1020,6 +1025,11 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 			thisAttrName = NSUnderlineStyleAttributeName;
 			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleDouble];
 		}
+		else if ([part isEqualToString:kFormatBlink])
+		{
+			thisAttrName = kBlinkAttributeName;
+			thisAttrValue = [NSNumber numberWithBool:YES];
+		}
 		
 		if (isColorAttribute)
 		{
@@ -1070,6 +1080,83 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 	}
 	
 	return returnAttributes;
+}
+
+
+
+// insert ANSI escape sequences for custom formatting attributes (e.g. blink,
+// which ANSIEscapeHelper doesn't support (with good reason)) into the given
+// attributed string
+void processCustomStringAttributes(NSMutableAttributedString **aAttributedString)
+{
+	NSMutableAttributedString *str = *aAttributedString;
+	
+	if (str == nil)
+		return;
+	
+	
+	NSArray *attrNames = [NSArray arrayWithObjects:
+						  kBlinkAttributeName,
+						  nil
+						  ];
+	
+	NSRange limitRange;
+	NSRange effectiveRange;
+	id attributeValue;
+	
+	NSMutableArray *codesAndLocations = [NSMutableArray array];
+	
+	for (NSString *thisAttrName in attrNames)
+	{
+		limitRange = NSMakeRange(0, [str length]);
+		while (limitRange.length > 0)
+		{
+			attributeValue = [str
+							  attribute:thisAttrName
+							  atIndex:limitRange.location
+							  longestEffectiveRange:&effectiveRange
+							  inRange:limitRange
+							  ];
+			int thisSGRCode = SGRCodeNoneOrInvalid;
+			
+			if ([thisAttrName isEqualToString:kBlinkAttributeName])
+			{
+				thisSGRCode = (attributeValue != nil) ? kSGRCodeBlink : kSGRCodeBlinkReset;
+			}
+			
+			if (thisSGRCode != SGRCodeNoneOrInvalid)
+			{
+				[codesAndLocations addObject:
+					[NSDictionary
+					dictionaryWithObjectsAndKeys:
+						[NSNumber numberWithInt:thisSGRCode], @"code",
+						[NSNumber numberWithUnsignedInteger:effectiveRange.location], @"location",
+						nil
+						]
+					];
+			}
+			
+			limitRange = NSMakeRange(NSMaxRange(effectiveRange),
+									 NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
+		}
+	}
+	
+	NSUInteger locationOffset = 0;
+	for (NSDictionary *dict in codesAndLocations)
+	{
+		int sgrCode = [[dict objectForKey:@"code"] intValue];
+		NSUInteger location = [[dict objectForKey:@"location"] unsignedIntegerValue];
+		
+		NSAttributedString *ansiStr = ATTR_STR(strConcat(
+			kANSIEscapeCSI,
+			[NSString stringWithFormat:@"%i", sgrCode],
+			kANSIEscapeSGREnd,
+			nil));
+		
+		[str insertAttributedString:ansiStr atIndex:(location+locationOffset)];
+		
+		locationOffset += [ansiStr length];
+	}
 }
 
 
@@ -3232,7 +3319,10 @@ int main(int argc, char *argv[])
 	NSString *finalOutput;
 	
 	if (arg_useFormatting)
+	{
+		processCustomStringAttributes(&stdoutBuffer);
 		finalOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:stdoutBuffer];
+	}
 	else
 		finalOutput = [stdoutBuffer string];
 	
