@@ -282,6 +282,10 @@ Underlined text
 
 Double underlined text (note that this is not supported by Apple's Terminal application)
 
+=item B<C<blink>>
+
+Blinking text
+
 =back
 
 
