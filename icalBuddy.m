@@ -939,7 +939,14 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
 			];
 	
-	if (outputDate != nil && outputTime == nil)
+	if ([outputDate length] == 0)
+		outputDate = nil;
+	if ([outputTime length] == 0)
+		outputTime = nil;
+	
+	if (outputDate == nil && outputTime == nil)
+		return @"";
+	else if (outputDate != nil && outputTime == nil)
 		return outputDate;
 	else if (outputDate == nil && outputTime != nil)
 		return outputTime;
