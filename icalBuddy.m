@@ -219,6 +219,7 @@ NSString *notesNewlineReplacement =		nil;
 
 BOOL displayRelativeDates = YES;
 BOOL excludeEndDates = NO;
+BOOL useCalendarColorsForTitles = YES;
 NSUInteger maxNumPrintedItems = 0; // 0 = no limit
 NSUInteger numPrintedItems = 0;
 
@@ -412,13 +413,114 @@ NSString* strConcat(NSString *firstStr, ...)
 }
 
 
+// returns the closest ANSI color (from the colors used by
+// ansiEscapeHelper) to the given color, or nil if the given
+// color is nil.
+NSColor *getClosestAnsiColorForColor(NSColor *color)
+{
+	if (color == nil)
+		return nil;
+	
+	CGFloat hue = 0.0;
+	CGFloat saturation = 0.0;
+	CGFloat brightness = 0.0;
+	[[color colorUsingColorSpaceName:NSCalibratedRGBColorSpace]
+		getHue:&hue
+		saturation:&saturation
+		brightness:&brightness
+		alpha:NULL
+		];
+	
+	NSColor *closestColor = nil;
+	CGFloat closestColorHueDiff = FLT_MAX;
+	CGFloat closestColorSaturationDiff = FLT_MAX;
+	CGFloat closestColorBrightnessDiff = FLT_MAX;
+	
+	NSArray *ansiFgColorCodes = [NSArray
+		arrayWithObjects:
+			[NSNumber numberWithInt:SGRCodeFgBlack],
+			[NSNumber numberWithInt:SGRCodeFgRed],
+			[NSNumber numberWithInt:SGRCodeFgGreen],
+			[NSNumber numberWithInt:SGRCodeFgYellow],
+			[NSNumber numberWithInt:SGRCodeFgBlue],
+			[NSNumber numberWithInt:SGRCodeFgMagenta],
+			[NSNumber numberWithInt:SGRCodeFgCyan],
+			[NSNumber numberWithInt:SGRCodeFgWhite],
+			nil
+		];
+	for (NSNumber *thisSgrCodeNumber in ansiFgColorCodes)
+	{
+		enum sgrCode thisSgrCode = [thisSgrCodeNumber intValue];
+		NSColor *thisColor = [ansiEscapeHelper colorForSGRCode:thisSgrCode];
+		
+		CGFloat thisHue = 0.0;
+		CGFloat thisSaturation = 0.0;
+		CGFloat thisBrightness = 0.0;
+		[[thisColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace]
+			getHue:&thisHue
+			saturation:&thisSaturation
+			brightness:&thisBrightness
+			alpha:NULL];
+		
+		CGFloat hueDiff = hue-thisHue;
+		if (hueDiff < 0)
+			hueDiff *= -1.0;
+		CGFloat saturationDiff = saturation-thisSaturation;
+		if (saturationDiff < 0)
+			saturationDiff *= -1.0;
+		CGFloat brightnessDiff = brightness-thisBrightness;
+		if (brightnessDiff < 0)
+			brightnessDiff *= -1.0;
+		
+		// comparison depends on hue, saturation and brightness
+		// (strictly in that order):
+		
+		if (hueDiff > closestColorHueDiff)
+			continue;
+		if (hueDiff < closestColorHueDiff)
+		{
+			closestColor = thisColor;
+			closestColorHueDiff = hueDiff;
+			closestColorSaturationDiff = saturationDiff;
+			closestColorBrightnessDiff = brightnessDiff;
+			continue;
+		}
+		
+		if (saturationDiff > closestColorSaturationDiff)
+			continue;
+		if (saturationDiff < closestColorSaturationDiff)
+		{
+			closestColor = thisColor;
+			closestColorHueDiff = hueDiff;
+			closestColorSaturationDiff = saturationDiff;
+			closestColorBrightnessDiff = brightnessDiff;
+			continue;
+		}
+		
+		if (brightnessDiff > closestColorBrightnessDiff)
+			continue;
+		if (brightnessDiff < closestColorBrightnessDiff)
+		{
+			closestColor = thisColor;
+			closestColorHueDiff = hueDiff;
+			closestColorSaturationDiff = saturationDiff;
+			closestColorBrightnessDiff = brightnessDiff;
+			continue;
+		}
+	}
+	
+	return closestColor;
+}
+
+
+
 // replaces all occurrences of searchStr in str with replaceStr
 void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr)
 {
 	if (str == nil || searchStr == nil || replaceStr == nil)
 		return;
 	
-	NSUInteger replaceStrLength = [[replaceStr string] length];
+	NSUInteger replaceStrLength = [replaceStr length];
 	NSString *strRegularString = [str string];
 	NSRange searchRange = NSMakeRange(0, [strRegularString length]);
 	NSRange foundRange;
@@ -490,7 +592,7 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 				withAttributedString:replaceStr
 				];
 			
-			numAddedChars += [[replaceStr string] length] - lengthToReplace;
+			numAddedChars += [replaceStr length] - lengthToReplace;
 			
 			lastWhitespaceIndex = 0;
 			currentLineLength = (strIndex-(indexToWrapAt-numAddedChars));
@@ -1243,6 +1345,7 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 		return [NSDictionary dictionary];
 	
 	NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropValueSuffix];
+	
 	if (propName == kPropName_priority)
 	{
 		if (propValue != nil)
@@ -1255,6 +1358,7 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 				formattingConfigKey = kFormatKeyPriorityValueLow;
 		}
 	}
+	
 	return getStringAttributesForKey(formattingConfigKey);
 }
 
@@ -1513,39 +1617,43 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			}
 		}
 		
-		if (thisPropOutputValue != nil)
+		if (thisPropOutputValue == nil)
+			return nil;
+		
+		if (thisPropOutputName != nil)
 		{
-			if (thisPropOutputName != nil)
-			{
-				[thisPropOutputName
-					setAttributes:getPropNameStringAttributes(propName)
-					range:NSMakeRange(0, [[thisPropOutputName string] length])
-					];
-			}
-			
-			if (thisPropOutputValue != nil)
-			{
-				[thisPropOutputValue
-					setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
-					range:NSMakeRange(0, [[thisPropOutputValue string] length])
-					];
-				
-				if (thisPropOutputValueSuffix != nil)
-					[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
-			}
-			
-			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
-			
-			if (thisPropOutputName != nil)
-			{
-				[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
-				[retVal appendAttributedString:thisPropOutputName];
-			}
-			
-			[retVal appendAttributedString:thisPropOutputValue];
-			
-			return retVal;
+			[thisPropOutputName
+				setAttributes:getPropNameStringAttributes(propName)
+				range:NSMakeRange(0, [thisPropOutputName length])
+				];
 		}
+		
+		[thisPropOutputValue
+			setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
+			range:NSMakeRange(0, [thisPropOutputValue length])
+			];
+		
+		if ([propName isEqualToString:kPropName_title] && useCalendarColorsForTitles)
+			[thisPropOutputValue
+				addAttribute:NSForegroundColorAttributeName
+				value:getClosestAnsiColorForColor([[event calendar] color])
+				range:NSMakeRange(0, [thisPropOutputValue length])
+				];
+		
+		if (thisPropOutputValueSuffix != nil)
+			[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
+		
+		NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
+		
+		if (thisPropOutputName != nil)
+		{
+			[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
+			[retVal appendAttributedString:thisPropOutputName];
+		}
+		
+		[retVal appendAttributedString:thisPropOutputValue];
+		
+		return retVal;
 	}
 	return nil;
 }
@@ -1582,7 +1690,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					NSRange prefixStrLastNewlineRange = [[prefixStr string]
 						rangeOfString:@"\n"
 						options:(NSLiteralSearch|NSBackwardsSearch)
-						range:NSMakeRange(0,[[prefixStr string] length])
+						range:NSMakeRange(0,[prefixStr length])
 						];
 					if (prefixStrLastNewlineRange.location != NSNotFound)
 					{
@@ -1592,7 +1700,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 							ATTR_STR(
 								strConcat(
 									@"\n",
-									WHITESPACE([[prefixStr string] length]-NSMaxRange(prefixStrLastNewlineRange)),
+									WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
 									nil
 									)
 								)
@@ -1606,7 +1714,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 					if (numPrintedProps == 0)
 						[thisOutput
 							addAttributes:getFirstLineStringAttributes()
-							range:NSMakeRange(0,[[thisOutput string] length])
+							range:NSMakeRange(0,[thisOutput length])
 							];
 					
 					addToOutputBuffer(thisOutput);
@@ -1722,39 +1830,43 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			}
 		}
 		
-		if (thisPropOutputValue != nil)
+		if (thisPropOutputValue == nil)
+			return nil;
+		
+		if (thisPropOutputName != nil)
 		{
-			if (thisPropOutputName != nil)
-			{
-				[thisPropOutputName
-					setAttributes:getPropNameStringAttributes(propName)
-					range:NSMakeRange(0, [[thisPropOutputName string] length])
-					];
-			}
-			
-			if (thisPropOutputValue != nil)
-			{
-				[thisPropOutputValue
-					setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
-					range:NSMakeRange(0, [[thisPropOutputValue string] length])
-					];
-				
-				if (thisPropOutputValueSuffix != nil)
-					[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
-			}
-			
-			NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
-			
-			if (thisPropOutputName != nil)
-			{
-				[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
-				[retVal appendAttributedString:thisPropOutputName];
-			}
-			
-			[retVal appendAttributedString:thisPropOutputValue];
-			
-			return retVal;
+			[thisPropOutputName
+				setAttributes:getPropNameStringAttributes(propName)
+				range:NSMakeRange(0, [thisPropOutputName length])
+				];
 		}
+		
+		[thisPropOutputValue
+			setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
+			range:NSMakeRange(0, [thisPropOutputValue length])
+			];
+		
+		if ([propName isEqualToString:kPropName_title] && useCalendarColorsForTitles)
+			[thisPropOutputValue
+				addAttribute:NSForegroundColorAttributeName
+				value:getClosestAnsiColorForColor([[task calendar] color])
+				range:NSMakeRange(0, [thisPropOutputValue length])
+				];
+		
+		if (thisPropOutputValueSuffix != nil)
+			[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
+		
+		NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
+		
+		if (thisPropOutputName != nil)
+		{
+			[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
+			[retVal appendAttributedString:thisPropOutputName];
+		}
+		
+		[retVal appendAttributedString:thisPropOutputValue];
+		
+		return retVal;
 	}
 	return nil;
 }
@@ -1799,7 +1911,7 @@ void printCalTask(CalTask *task, int printOptions)
 					NSRange prefixStrLastNewlineRange = [[prefixStr string]
 						rangeOfString:@"\n"
 						options:(NSLiteralSearch|NSBackwardsSearch)
-						range:NSMakeRange(0,[[prefixStr string] length])
+						range:NSMakeRange(0,[prefixStr length])
 						];
 					if (prefixStrLastNewlineRange.location != NSNotFound)
 					{
@@ -1809,7 +1921,7 @@ void printCalTask(CalTask *task, int printOptions)
 							ATTR_STR(
 								strConcat(
 									@"\n",
-									WHITESPACE([[prefixStr string] length]-NSMaxRange(prefixStrLastNewlineRange)),
+									WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
 									nil
 									)
 								)
@@ -1823,7 +1935,7 @@ void printCalTask(CalTask *task, int printOptions)
 					if (numPrintedProps == 0)
 						[thisOutput
 							addAttributes:getFirstLineStringAttributes()
-							range:NSMakeRange(0,[[thisOutput string] length])
+							range:NSMakeRange(0,[thisOutput length])
 							];
 					
 					addToOutputBuffer(thisOutput);
@@ -1878,7 +1990,7 @@ void printItemSections(NSArray *sections, int printOptions)
 				
 				[thisOutput
 					addAttributes:getSectionTitleStringAttributes(sectionTitle)
-					range:NSMakeRange(0,[[thisOutput string] length])
+					range:NSMakeRange(0,[thisOutput length])
 					];
 				
 				addToOutputBuffer(thisOutput);
