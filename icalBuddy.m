@@ -1633,7 +1633,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			range:NSMakeRange(0, [thisPropOutputValue length])
 			];
 		
-		if ([propName isEqualToString:kPropName_title] && useCalendarColorsForTitles)
+		// if no foreground color for title, use calendar color by default
+		if ([propName isEqualToString:kPropName_title]
+			&& useCalendarColorsForTitles
+			&& ![[[thisPropOutputValue attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
+			)
 			[thisPropOutputValue
 				addAttribute:NSForegroundColorAttributeName
 				value:getClosestAnsiColorForColor([[event calendar] color])
@@ -1846,7 +1850,11 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			range:NSMakeRange(0, [thisPropOutputValue length])
 			];
 		
-		if ([propName isEqualToString:kPropName_title] && useCalendarColorsForTitles)
+		// if no foreground color for title, use calendar color by default
+		if ([propName isEqualToString:kPropName_title]
+			&& useCalendarColorsForTitles
+			&& ![[[thisPropOutputValue attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
+			)
 			[thisPropOutputValue
 				addAttribute:NSForegroundColorAttributeName
 				value:getClosestAnsiColorForColor([[task calendar] color])
