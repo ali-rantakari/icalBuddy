@@ -7,7 +7,7 @@
 /*
 The MIT License
 
-Copyright (c) 2008-2009 Ali Rantakari
+Copyright (c) 2008-2010 Ali Rantakari
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -3402,7 +3402,7 @@ int main(int argc, char *argv[])
 		Printf(@"'man icalBuddy' into the terminal.)\n");
 		Printf(@"\n");
 		Printf(@"Version %@\n", versionNumberStr());
-		Printf(@"(c) 2008-2009 Ali Rantakari, http://hasseg.org/icalBuddy\n");
+		Printf(@"Copyright 2008-2010 Ali Rantakari, http://hasseg.org/icalBuddy\n");
 		Printf(@"\n");
 	}
 	
