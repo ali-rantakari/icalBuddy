@@ -1689,55 +1689,55 @@ void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay
 		
 		for (NSString *thisProp in propertyOrder)
 		{
-			if (shouldPrintProperty(thisProp, includedEventProperties, excludedEventProperties))
+			if (!shouldPrintProperty(thisProp, includedEventProperties, excludedEventProperties))
+				continue;
+			
+			NSMutableAttributedString *thisPropStr = getEventPropStr(thisProp, event, printOptions, contextDay);
+			if (thisPropStr == nil || [thisPropStr length] <= 0)
+				continue;
+			
+			NSMutableAttributedString *prefixStr;
+			if (numPrintedProps == 0)
+				prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
+			else
+				prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+			
+			// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
+			// with a number of whitespace characters ("indentation") that matches the
+			// length of prefixStr's contents after the last newline
+			NSRange prefixStrLastNewlineRange = [[prefixStr string]
+				rangeOfString:@"\n"
+				options:(NSLiteralSearch|NSBackwardsSearch)
+				range:NSMakeRange(0,[prefixStr length])
+				];
+			if (prefixStrLastNewlineRange.location != NSNotFound)
 			{
-				NSMutableAttributedString *thisPropStr = getEventPropStr(thisProp, event, printOptions, contextDay);
-				if (thisPropStr != nil && [thisPropStr length] > 0)
-				{
-					NSMutableAttributedString *prefixStr;
-					if (numPrintedProps == 0)
-						prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
-					else
-						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
-					
-					// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
-					// with a number of whitespace characters ("indentation") that matches the
-					// length of prefixStr's contents after the last newline
-					NSRange prefixStrLastNewlineRange = [[prefixStr string]
-						rangeOfString:@"\n"
-						options:(NSLiteralSearch|NSBackwardsSearch)
-						range:NSMakeRange(0,[prefixStr length])
-						];
-					if (prefixStrLastNewlineRange.location != NSNotFound)
-					{
-						replaceInMutableAttrStr(
-							thisPropStr,
+				replaceInMutableAttrStr(
+					thisPropStr,
+					@"\n",
+					ATTR_STR(
+						strConcat(
 							@"\n",
-							ATTR_STR(
-								strConcat(
-									@"\n",
-									WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
-									nil
-									)
-								)
-							);
-					}
-					
-					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
-					[thisOutput appendAttributedString:prefixStr];
-					[thisOutput appendAttributedString:thisPropStr];
-					
-					if (numPrintedProps == 0)
-						[thisOutput
-							addAttributes:getFirstLineStringAttributes()
-							range:NSMakeRange(0,[thisOutput length])
-							];
-					
-					addToOutputBuffer(thisOutput);
-					
-					numPrintedProps++;
-				}
+							WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
+							nil
+							)
+						)
+					);
 			}
+			
+			NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
+			[thisOutput appendAttributedString:prefixStr];
+			[thisOutput appendAttributedString:thisPropStr];
+			
+			if (numPrintedProps == 0)
+				[thisOutput
+					addAttributes:getFirstLineStringAttributes()
+					range:NSMakeRange(0,[thisOutput length])
+					];
+			
+			addToOutputBuffer(thisOutput);
+			
+			numPrintedProps++;
 		}
 		
 		if (numPrintedProps > 0)
@@ -1906,63 +1906,62 @@ void printCalTask(CalTask *task, int printOptions)
 		
 		for (NSString *thisProp in propertyOrder)
 		{
-			if (shouldPrintProperty(thisProp, includedTaskProperties, excludedTaskProperties))
+			if (!shouldPrintProperty(thisProp, includedTaskProperties, excludedTaskProperties))
+				continue;
+			
+			NSMutableAttributedString *thisPropStr = getTaskPropStr(thisProp, task, printOptions);
+			if (thisPropStr == nil || [thisPropStr length] <= 0)
+				continue;
+			
+			NSMutableAttributedString *prefixStr;
+			if (numPrintedProps == 0)
 			{
-				NSMutableAttributedString *thisPropStr = getTaskPropStr(thisProp, task, printOptions);
-				
-				if (thisPropStr != nil && [thisPropStr length] > 0)
-				{
-					NSMutableAttributedString *prefixStr;
-					if (numPrintedProps == 0)
-					{
-						BOOL useAlertBullet = 	([task dueDate] != nil &&
-												 [now compare:[task dueDate]] == NSOrderedDescending);
-						prefixStr = mutableAttrStrWithAttrs(
-							((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet),
-							getBulletStringAttributes(useAlertBullet)
-							);
-					}
-					else
-						prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
-					
-					// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
-					// with a number of whitespace characters ("indentation") that matches the
-					// length of prefixStr's contents after the last newline
-					NSRange prefixStrLastNewlineRange = [[prefixStr string]
-						rangeOfString:@"\n"
-						options:(NSLiteralSearch|NSBackwardsSearch)
-						range:NSMakeRange(0,[prefixStr length])
-						];
-					if (prefixStrLastNewlineRange.location != NSNotFound)
-					{
-						replaceInMutableAttrStr(
-							thisPropStr,
-							@"\n",
-							ATTR_STR(
-								strConcat(
-									@"\n",
-									WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
-									nil
-									)
-								)
-							);
-					}
-					
-					NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
-					[thisOutput appendAttributedString:prefixStr];
-					[thisOutput appendAttributedString:thisPropStr];
-					
-					if (numPrintedProps == 0)
-						[thisOutput
-							addAttributes:getFirstLineStringAttributes()
-							range:NSMakeRange(0,[thisOutput length])
-							];
-					
-					addToOutputBuffer(thisOutput);
-					
-					numPrintedProps++;
-				}
+				BOOL useAlertBullet = 	([task dueDate] != nil &&
+										 [now compare:[task dueDate]] == NSOrderedDescending);
+				prefixStr = mutableAttrStrWithAttrs(
+					((useAlertBullet)?prefixStrBulletAlert:prefixStrBullet),
+					getBulletStringAttributes(useAlertBullet)
+					);
 			}
+			else
+				prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+			
+			// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
+			// with a number of whitespace characters ("indentation") that matches the
+			// length of prefixStr's contents after the last newline
+			NSRange prefixStrLastNewlineRange = [[prefixStr string]
+				rangeOfString:@"\n"
+				options:(NSLiteralSearch|NSBackwardsSearch)
+				range:NSMakeRange(0,[prefixStr length])
+				];
+			if (prefixStrLastNewlineRange.location != NSNotFound)
+			{
+				replaceInMutableAttrStr(
+					thisPropStr,
+					@"\n",
+					ATTR_STR(
+						strConcat(
+							@"\n",
+							WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
+							nil
+							)
+						)
+					);
+			}
+			
+			NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
+			[thisOutput appendAttributedString:prefixStr];
+			[thisOutput appendAttributedString:thisPropStr];
+			
+			if (numPrintedProps == 0)
+				[thisOutput
+					addAttributes:getFirstLineStringAttributes()
+					range:NSMakeRange(0,[thisOutput length])
+					];
+			
+			addToOutputBuffer(thisOutput);
+			
+			numPrintedProps++;
 		}
 		
 		if (numPrintedProps > 0)
