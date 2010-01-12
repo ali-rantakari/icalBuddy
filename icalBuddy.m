@@ -413,14 +413,27 @@ NSString* strConcat(NSString *firstStr, ...)
 }
 
 
-// returns the closest ANSI color (from the colors used by
-// ansiEscapeHelper) to the given color, or nil if the given
-// color is nil.
-NSColor *getClosestAnsiColorForColor(NSColor *color)
+
+// helper struct typedef and a few functions for
+// getClosestAnsiColorForColor:
+
+typedef struct _HSB {
+	CGFloat hue;
+	CGFloat saturation;
+	CGFloat brightness;
+} HSB;
+
+HSB makeHSB(CGFloat hue, CGFloat saturation, CGFloat brightness)
 {
-	if (color == nil)
-		return nil;
-	
+	HSB outHSB;
+	outHSB.hue = hue;
+	outHSB.saturation = saturation;
+	outHSB.brightness = brightness;
+	return outHSB;
+}
+
+HSB getHSBFromColor(NSColor *color)
+{
 	CGFloat hue = 0.0;
 	CGFloat saturation = 0.0;
 	CGFloat brightness = 0.0;
@@ -430,6 +443,18 @@ NSColor *getClosestAnsiColorForColor(NSColor *color)
 		brightness:&brightness
 		alpha:NULL
 		];
+	return makeHSB(hue, saturation, brightness);
+}
+
+// returns the closest ANSI color (from the colors used by
+// ansiEscapeHelper) to the given color, or nil if the given
+// color is nil.
+NSColor *getClosestAnsiColorForColor(NSColor *color)
+{
+	if (color == nil)
+		return nil;
+	
+	HSB givenColorHSB = getHSBFromColor(color);
 	
 	NSColor *closestColor = nil;
 	CGFloat closestColorHueDiff = FLT_MAX;
@@ -453,24 +478,11 @@ NSColor *getClosestAnsiColorForColor(NSColor *color)
 		enum sgrCode thisSgrCode = [thisSgrCodeNumber intValue];
 		NSColor *thisColor = [ansiEscapeHelper colorForSGRCode:thisSgrCode];
 		
-		CGFloat thisHue = 0.0;
-		CGFloat thisSaturation = 0.0;
-		CGFloat thisBrightness = 0.0;
-		[[thisColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace]
-			getHue:&thisHue
-			saturation:&thisSaturation
-			brightness:&thisBrightness
-			alpha:NULL];
+		HSB thisColorHSB = getHSBFromColor(thisColor);
 		
-		CGFloat hueDiff = hue-thisHue;
-		if (hueDiff < 0)
-			hueDiff *= -1.0;
-		CGFloat saturationDiff = saturation-thisSaturation;
-		if (saturationDiff < 0)
-			saturationDiff *= -1.0;
-		CGFloat brightnessDiff = brightness-thisBrightness;
-		if (brightnessDiff < 0)
-			brightnessDiff *= -1.0;
+		CGFloat hueDiff = fabs(givenColorHSB.hue - thisColorHSB.hue);
+		CGFloat saturationDiff = fabs(givenColorHSB.saturation - thisColorHSB.saturation);
+		CGFloat brightnessDiff = fabs(givenColorHSB.brightness - thisColorHSB.brightness);
 		
 		// comparison depends on hue, saturation and brightness
 		// (strictly in that order):
