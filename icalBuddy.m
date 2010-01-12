@@ -205,7 +205,7 @@ NSArray *propertyOrder;
 NSArray *propertySeparators = nil;
 
 // the prefix strings
-NSString *prefixStrBullet = 			@"* ";
+NSString *prefixStrBullet = 			@"• ";
 NSString *prefixStrBulletAlert = 		@"! ";
 NSString *sectionSeparatorStr = 		@"\n------------------------";
 
