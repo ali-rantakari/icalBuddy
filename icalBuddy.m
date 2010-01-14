@@ -398,18 +398,17 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 // NOTE: MUST SEND nil AS THE LAST ARGUMENT
 NSString* strConcat(NSString *firstStr, ...)
 {
-	if (firstStr)
-	{
-		va_list argList;
-		NSMutableString *retVal = [firstStr mutableCopy];
-		NSString *str;
-		va_start(argList, firstStr);
-		while((str = va_arg(argList, NSString*)))
-			[retVal appendString:str];
-		va_end(argList);
-		return retVal;
-	}
-	return nil;
+	if (!firstStr)
+		return nil;
+	
+	va_list argList;
+	NSMutableString *retVal = [firstStr mutableCopy];
+	NSString *str;
+	va_start(argList, firstStr);
+	while((str = va_arg(argList, NSString*)))
+		[retVal appendString:str];
+	va_end(argList);
+	return retVal;
 }
 
 
@@ -449,7 +448,7 @@ HSB getHSBFromColor(NSColor *color)
 // returns the closest ANSI color (from the colors used by
 // ansiEscapeHelper) to the given color, or nil if the given
 // color is nil.
-NSColor *getClosestAnsiColorForColor(NSColor *color)
+NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 {
 	if (color == nil)
 		return nil;
@@ -461,16 +460,26 @@ NSColor *getClosestAnsiColorForColor(NSColor *color)
 	CGFloat closestColorSaturationDiff = FLT_MAX;
 	CGFloat closestColorBrightnessDiff = FLT_MAX;
 	
+	// (background SGR codes are +10 from foreground ones:)
+	NSUInteger sgrCodeShift = (foreground)?0:10;
 	NSArray *ansiFgColorCodes = [NSArray
 		arrayWithObjects:
-			[NSNumber numberWithInt:SGRCodeFgBlack],
-			[NSNumber numberWithInt:SGRCodeFgRed],
-			[NSNumber numberWithInt:SGRCodeFgGreen],
-			[NSNumber numberWithInt:SGRCodeFgYellow],
-			[NSNumber numberWithInt:SGRCodeFgBlue],
-			[NSNumber numberWithInt:SGRCodeFgMagenta],
-			[NSNumber numberWithInt:SGRCodeFgCyan],
-			[NSNumber numberWithInt:SGRCodeFgWhite],
+			[NSNumber numberWithInt:SGRCodeFgBlack+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgRed+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgGreen+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgYellow+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBlue+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgMagenta+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgCyan+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgWhite+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightBlack+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightRed+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightGreen+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightYellow+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightBlue+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightMagenta+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightCyan+sgrCodeShift],
+			[NSNumber numberWithInt:SGRCodeFgBrightWhite+sgrCodeShift],
 			nil
 		];
 	for (NSNumber *thisSgrCodeNumber in ansiFgColorCodes)
@@ -1652,7 +1661,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			)
 			[thisPropOutputValue
 				addAttribute:NSForegroundColorAttributeName
-				value:getClosestAnsiColorForColor([[event calendar] color])
+				value:getClosestAnsiColorForColor([[event calendar] color], YES)
 				range:NSMakeRange(0, [thisPropOutputValue length])
 				];
 		
@@ -1869,7 +1878,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			)
 			[thisPropOutputValue
 				addAttribute:NSForegroundColorAttributeName
-				value:getClosestAnsiColorForColor([[task calendar] color])
+				value:getClosestAnsiColorForColor([[task calendar] color], YES)
 				range:NSMakeRange(0, [thisPropOutputValue length])
 				];
 		
