@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 
 # install script for icalBuddy
-# (c) 2008-2009 Ali Rantakari
+# (c) 2008-2010 Ali Rantakari
 # 
 
 DN="`dirname \"$0\"`"
