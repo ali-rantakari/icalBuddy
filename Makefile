@@ -37,7 +37,7 @@ icalBuddy: icalBuddy.m
 	@echo
 	@echo ---- Compiling:
 	@echo ======================================
-	gcc -O2 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m icalBuddy.m
+	gcc -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch x86_64 -arch ppc -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m icalBuddy.m
 
 
 
