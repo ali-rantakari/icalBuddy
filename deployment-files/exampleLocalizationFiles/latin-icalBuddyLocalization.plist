@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>titulus</string>
+	<key>location</key>
+	<string>locus</string>
+	<key>notes</key>
+	<string>hypomnemata</string>
+	<key>url</key>
+	<string>nexus interretialis</string>
+	<key>dueDate</key>
+	<string>debitur</string>
+	<key>noDueDate</key>
+	<string>debitur quolibet die</string>
+	<key>priority</key>
+	<string>momenti</string>
+	<key>someonesBirthday</key>
+	<string>%@ hodie suum diem natalem celebrat</string>
+	<key>today</key>
+	<string>hodie</string>
+	<key>tomorrow</key>
+	<string>cras</string>
+	<key>yesterday</key>
+	<string>heri</string>
+	<key>dayBeforeYesterday</key>
+	<string>nudiustertius</string>
+	<key>dayAfterTomorrow</key>
+	<string>perendie</string>
+	<key>xDaysAgo</key>
+	<string>abhinc dies %d</string>
+	<key>xDaysFromNow</key>
+	<string>post dies %d</string>
+	<key>thisWeek</key>
+	<string>hac hebdomade</string>
+	<key>lastWeek</key>
+	<string>praeterita hebdomade</string>
+	<key>nextWeek</key>
+	<string>proxima hebdomade</string>
+	<key>xWeeksAgo</key>
+	<string>abhinc hebdomades %d</string>
+	<key>xWeeksFromNow</key>
+	<string>post habedomades %d</string>
+	<key>high</key>
+	<string>magni</string>
+	<key>medium</key>
+	<string>alicuius</string>
+	<key>low</key>
+	<string>parvi</string>
+	<key>dateTimeSeparator</key>
+	<string> </string>
+</dict>
+</plist>
