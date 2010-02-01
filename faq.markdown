@@ -69,16 +69,27 @@ You can use the `-ps` (or `--propertySeparators`) argument to specify the string
 
 ### Q: How can I keep all of the events/tasks in a section (e.g. a single day if separating by date, or a single calendar if separating by calendar) on the same line?
 
+icalBuddy doesn't support this out of the box, but it's possible to do with some shell trickery and regular expression magic.
+
 First you need to make sure that the properties of events/tasks are kept on the same line (see the previous question). Then we'll just specify a reasonably unique custom bullet point and use a small Perl script to replace all occurrences of a newline followed by an arbitrary number of ANSI escape sequences and our custom bullet point with whatever separator we want to show between different events/tasks (in the following example the separator is the bullet point symbol `•`):
 
     $ icalBuddy -sd -ps "|, |" -ss "\n-------------------------\n" -b "••BULLET•• " eventsToday+20 | perl -e 'while($s = <STDIN>) { $x .= $s; }; $x =~ s/\n((?:\e\[[0-9;]*m)*)••BULLET••/$1 •/sg; print $x;'
+    
     tomorrow:
     -------------------------
-     • LOST Premiere (Movie premieres etc.), notes: Kickass! • Archery practice (Hobbies), location: Anchorage, 14:00
+     • LOST Premiere (Movie premieres etc.), notes: Kickass! • Archery practice (Hobbies), location: Anchorage, 14:00 • Cooking class (Hobbies), location: Amsterdam, 19:30
     
     day after tomorrow:
     -------------------------
-     • Knitting practice (Hobbies), location: Paris, 14:00
+     • Knitting practice (Hobbies), location: Paris, 14:00 • Cooking class (Hobbies), location: Boston, 11:30
+
+Here is another example of a more terse listing where we only show the titles of events (as you can see, this requires some more regex magic and icalBuddy argument trickery as well as stripping of empty lines with grep):
+
+    $ icalBuddy -sd -iep "title" -nc -ss "••SECTION••" -b "••BULLET••" eventsToday+20 | perl -e 'while($s = <STDIN>) { $x .= $s; }; $x =~ s/••SECTION••\n((?:\e\[[0-9;]*m)*)••BULLET••/$1 /sg; $x =~ s/\n((?:\e\[[0-9;]*m)*)••BULLET••/$1, /sg; print $x;' | grep -v "^[[:space:]]*$"
+    
+    tomorrow: LOST Premiere, Archery practice, Cooking class
+    day after tomorrow: Knitting practice, Cooking class
+
 
 
 ### Q: Can I get the output in CSV format?
