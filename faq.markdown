@@ -48,7 +48,7 @@ You can use the `-b` (or `--bullet`) argument to change the normal bullet point 
 
 ### Q: Newlines (`"\n"`) and/or other escape sequences I'm adding to argument values don't seem to be interpreted correctly. How do I fix this?
 
-icalBuddy doesn't interpret escape sequences such as `\n` in the argument values. In the (I assume most common) case of the newline, you simply need to input an *actual newline* into the argument value, like this:
+Versions of icalBuddy earlier than 1.6.19 don't interpret escape sequences such as `\n` in the argument values. The easiest way to fix this is to __update icalBuddy__, but if you for some reason don't want to do that, in the (I assume most common) case of the newline you simply need to input an *actual newline* into the argument value, like this:
 
     icalBuddy -b "
     - " <other_arguments>
