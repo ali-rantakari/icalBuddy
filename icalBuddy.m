@@ -171,7 +171,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 6;
-const int VERSION_BUILD = 18;
+const int VERSION_BUILD = 19;
 
 
 
@@ -535,6 +535,18 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 
 
 
+NSString *translateEscapeSequences(NSString *str)
+{
+	if (str == nil)
+		return nil;
+	
+	NSMutableString *ms = [NSMutableString stringWithString:str];
+	[ms replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+	return ms;
+}
+
+
+
 // replaces all occurrences of searchStr in str with replaceStr
 void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr)
 {
@@ -724,7 +736,7 @@ NSArray* arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 // separated by an arbitrary character and this separator character
 // must be present as both the first and the last character
 // in the given string (e.g.: @"/first/second/third/")
-NSArray* arrayFromArbitrarilySeparatedString(NSString *str, NSError **error)
+NSArray* arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscapeSequences, NSError **error)
 {
 	if (str == nil)
 	{
@@ -776,6 +788,8 @@ NSArray* arrayFromArbitrarilySeparatedString(NSString *str, NSError **error)
 	if (separatorChar != nil)
 	{
 		NSString *trimmedStr = [str substringWithRange:NSMakeRange(1,([str length]-2))];
+		if (aTranslateEscapeSequences)
+			trimmedStr = translateEscapeSequences(trimmedStr);
 		return [trimmedStr componentsSeparatedByString:separatorChar];
 	}
 	
@@ -2763,7 +2777,7 @@ int main(int argc, char *argv[])
 	if (arg_propertySeparatorsStr != nil)
 	{
 		NSError *propertySeparatorsArgParseError = nil;
-		propertySeparators = arrayFromArbitrarilySeparatedString(arg_propertySeparatorsStr, &propertySeparatorsArgParseError);
+		propertySeparators = arrayFromArbitrarilySeparatedString(arg_propertySeparatorsStr, YES, &propertySeparatorsArgParseError);
 		if (propertySeparators == nil && propertySeparatorsArgParseError != nil)
 		{
 			PrintfErr(
@@ -2807,6 +2821,15 @@ int main(int argc, char *argv[])
 				);
 		}
 	}
+	
+	// interpret/translate escape sequences for values of arguments
+	// that take arbitrary strings
+	sectionSeparatorStr = translateEscapeSequences(sectionSeparatorStr);
+	timeFormatStr = translateEscapeSequences(timeFormatStr);
+	dateFormatStr = translateEscapeSequences(dateFormatStr);
+	prefixStrBullet = translateEscapeSequences(prefixStrBullet);
+	prefixStrBulletAlert = translateEscapeSequences(prefixStrBulletAlert);
+	notesNewlineReplacement = translateEscapeSequences(notesNewlineReplacement);
 	
 	
 	
