@@ -41,7 +41,7 @@ You can use the `-tf` (or `--timeFormat`) argument to specify the format in whic
 As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonline] for documentation on how to do this. If you think you have managed to write a nice general localization file for your language, please [contact me][hassegcontact] and I'll include it into the distribution package so that others who'd like to use a localized icalBuddy in your language wouldn't have to redo that work. Some finished localization files are included in the distribution package under the `exampleLocalizationFiles` folder.
 
 
-### Q: How can I change the bullet points used in the output? We don't like them asterisks around these here parts.
+### Q: How can I change the bullet points used in the output? We don't like them asterisks/bullet point symbols around these here parts.
 
 You can use the `-b` (or `--bullet`) argument to change the normal bullet point value (`"* "` by default) and `-ab` (or `--alertBullet`) to change the alert bullet point value (`"! "` by default, used for tasks that are late from their due date.) Also note that you can change indenting for non-bulleted lines with the `-i` (or `--indent`) argument. See [the manual page][manpageonline] for more info.
 
@@ -59,12 +59,26 @@ Versions of icalBuddy earlier than 1.6.19 don't interpret escape sequences such 
 You can use the `-ps` (or `--propertySeparators`) argument to specify the strings to use between the properties that get printed out. An example:
 
     $ icalBuddy eventsToday+2
-    * An Event (Work)
+    • An Event (Work)
         location: Meeting room A
         tomorrow at 13:00 - 14:15
     $
     $ icalBuddy -ps "| / | -- |" eventsToday+2
-    * An Event (Work) / location: Meeting room A -- tomorrow at 13:00 - 14:15
+    • An Event (Work) / location: Meeting room A -- tomorrow at 13:00 - 14:15
+
+
+### Q: How can I keep all of the events/tasks in a section (e.g. a single day if separating by date, or a single calendar if separating by calendar) on the same line?
+
+First you need to make sure that the properties of events/tasks are kept on the same line (see the previous question). Then we'll just specify a reasonably unique custom bullet point and use a small Perl script to replace all occurrences of a newline followed by an arbitrary number of ANSI escape sequences and our custom bullet point with whatever separator we want to show between different events/tasks (in the following example the separator is the bullet point symbol `•`):
+
+    $ icalBuddy -sd -ps "|, |" -ss "\n-------------------------\n" -b "••BULLET•• " eventsToday+20 | perl -e 'while($s = <STDIN>) { $x .= $s; }; $x =~ s/\n((?:\e\[[0-9;]*m)*)••BULLET••/$1 •/sg; print $x;'
+    tomorrow:
+    -------------------------
+     • LOST Premiere (Movie premieres etc.), notes: Kickass! • Archery practice (Hobbies), location: Anchorage, 14:00
+    
+    day after tomorrow:
+    -------------------------
+     • Knitting practice (Hobbies), location: Paris, 14:00
 
 
 ### Q: Can I get the output in CSV format?
@@ -72,10 +86,10 @@ You can use the `-ps` (or `--propertySeparators`) argument to specify the string
 Not really &mdash; this is not supported. If you'd still like to try, you could achieve some kind of a result with something like this:
 
     $ icalBuddy eventsToday+2
-    * An Event (Work)
+    • An Event (Work)
         location: Meeting room A
         13:00 - 14:15
-    * Second Event (Work)
+    • Second Event (Work)
         location: Meeting room B
         tomorrow at 11:00 - 12:00
     $
@@ -126,6 +140,8 @@ icalBuddy uses OS X's CalendarStore API to access the calendar data. The CalDAV 
 
 **Current workaround:** Note that as opposed to delegate calendars, *subscribed calendars are visible to icalBuddy*, so if you want events from your Google Calendar calendars to be visible in icalBuddy, one trick to do it is to add a subscription to that calendar's feed into iCal (please refer to [Google's documentation][gcal-feeds] for help on how to do it). If you're using CalDAV to sync your Google Calendar account with iCal and also add subscriptions to some of those calendars in order to get them to show up in icalBuddy's output, remember to uncheck the visibility checkboxes of these subscription calendars in iCal &mdash; otherwise their events would be shown twice there (once for the CalDAV "delegate" calendar entry and once for the calendar subscription). Also remember to set the *auto-refresh* value sufficiently high for the subscribed calendars.
 
+**My personal suggestion:** I use BusyMac's [BusyCal][busycal] application to synchronize my local Mac calendar with Google Calendar, and thus don't suffer from this problem at all. I am happy to recommend BusyCal to everyone; I prefer it to iCal.
+
 
 ### Q: The question I had in mind is not answered here. What should I do?
 
@@ -147,4 +163,4 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [hassegcontact]:        http://hasseg.org/
 [links]:                http://links.sourceforge.net/
 [gcal-feeds]:           http://www.google.com/support/calendar/bin/answer.py?hl=en&answer=37648
-
+[busycal]:              http://busymac.com/

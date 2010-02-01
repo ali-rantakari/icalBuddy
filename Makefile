@@ -123,7 +123,8 @@ docs: icalBuddy.1 faq.markdown icalBuddyLocalization.1 icalBuddyConfig.1 Manual-
 	@echo ---- Generating HTML from FAQ:
 	@echo ======================================
 	echo "<html><head><title>icalBuddy FAQ</title>" > $(TEMP_DEPLOYMENT_FAQFILE)
-	echo "<style type='text/css'>#main{width:600px; margin:30 auto 300 auto;} p{margin-bottom:30px;}</style>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<style type='text/css'>#main{width:600px; margin:30 auto 300 auto; word-wrap:break-word;} p{margin-bottom:30px;}</style>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 	echo "</head><body><div id='main'>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 	perl utils/markdown/Markdown.pl faq.markdown >> $(TEMP_DEPLOYMENT_FAQFILE)
 	echo "</div></body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
