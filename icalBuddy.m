@@ -542,6 +542,7 @@ NSString *translateEscapeSequences(NSString *str)
 	
 	NSMutableString *ms = [NSMutableString stringWithString:str];
 	[ms replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+	[ms replaceOccurrencesOfString:@"\\t" withString:@"\t" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
 	[ms replaceOccurrencesOfString:@"\\e" withString:@"\e" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
 	return ms;
 }
