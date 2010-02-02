@@ -122,6 +122,10 @@ The translation of "%d weeks from now", where %d is a number of weeks (the %d mu
 
 What to print between the date and the time (for example, in english: " at ".)
 
+=item B<C<noItems>>
+
+What to print under empty sections (i.e. dates, if separating by date and showing empty dates) (for example, in english: "Nothing.")
+
 =back
 
 =head1 EXAMPLES
