@@ -50,5 +50,7 @@
 	<string>niski</string>
 	<key>dateTimeSeparator</key>
 	<string>o</string>
+	<key>noItems</key>
+	<string>Brak Spotkań</string>
 </dict>
 </plist>

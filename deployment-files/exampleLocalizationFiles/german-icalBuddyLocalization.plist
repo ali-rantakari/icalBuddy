@@ -50,6 +50,8 @@
 	<string>Gering</string>
 	<key>dateTimeSeparator</key>
 	<string> um </string>
+	<key>noItems</key>
+	<string>Nichts</string>
 </dict>
 </plist>
 
