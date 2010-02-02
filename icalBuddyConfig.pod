@@ -125,6 +125,10 @@ The value "medium" for the priority property
 
 The value "low" for the priority property
 
+=item B<C<noItems>>
+
+The text to display under sections (e.g. dates) that have no items (e.g. tasks)
+
 =back
 
 

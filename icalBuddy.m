@@ -72,6 +72,7 @@ THE SOFTWARE.
 #define kFormatKeyFirstItemLine			@"firstItemLine"
 #define kFormatKeyBullet				@"bullet"
 #define kFormatKeyAlertBullet			@"alertBullet"
+#define kFormatKeyNoItems				@"noItems"
 #define kFormatKeyCalendarNameInTitle	@"calendarNameInTitle"
 #define kFormatKeyPriorityValueHigh		@"priorityValueHigh"
 #define kFormatKeyPriorityValueMedium	@"priorityValueMedium"
@@ -2015,7 +2016,7 @@ void printItemSections(NSArray *sections, int printOptions)
 		if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 			continue;
 		
-		// print title
+		// print section title
 		NSString *sectionTitle = [sectionDict objectForKey:kSectionDictKey_title];
 		if (!currentIsFirstPrintedSection)
 			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
@@ -2029,14 +2030,22 @@ void printItemSections(NSArray *sections, int printOptions)
 		addToOutputBuffer(thisOutput);
 		currentIsFirstPrintedSection = NO;
 		
-		// print items
 		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];
 		if (sectionItems == nil || [sectionItems count] == 0)
 		{
-			addToOutputBuffer(MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyNoItemsInSection), @"\n", nil)));
+			// print the "no items" text
+			NSMutableAttributedString *noItemsTextOutput = MUTABLE_ATTR_STR(
+				strConcat(localizedStr(kL10nKeyNoItemsInSection), @"\n", nil)
+				);
+			[noItemsTextOutput
+				addAttributes:getStringAttributesForKey(kFormatKeyNoItems)
+				range:NSMakeRange(0,[noItemsTextOutput length])
+				];
+			addToOutputBuffer(noItemsTextOutput);
 			continue;
 		}
 		
+		// print items in section
 		for (CalCalendarItem *item in sectionItems)
 		{
 			if ([item isKindOfClass:[CalEvent class]])
@@ -2413,13 +2422,14 @@ int main(int argc, char *argv[])
 		@"", 			 		@"dueDateValue",
 		kFormatColorCyan, 	 	@"priorityName",
 		@"", 		 			@"priorityValue",
-		kFormatColorRed,		@"priorityValueHigh",
-		kFormatColorYellow,	 	@"priorityValueMedium",
-		kFormatColorGreen,		@"priorityValueLow",
-		kFormatColorBlue, 		@"sectionTitle",
-		kFormatBold,			@"firstItemLine",
-		@"", 					@"bullet",
-		strConcat(kFormatColorRed, @",", kFormatBold, nil),		@"alertBullet",
+		kFormatColorRed,		kFormatKeyPriorityValueHigh,
+		kFormatColorYellow,	 	kFormatKeyPriorityValueMedium,
+		kFormatColorGreen,		kFormatKeyPriorityValueLow,
+		kFormatColorBlue, 		kFormatKeySectionTitle,
+		kFormatBold,			kFormatKeyFirstItemLine,
+		@"", 					kFormatKeyBullet,
+		strConcat(kFormatColorRed, @",", kFormatBold, nil),	kFormatKeyAlertBullet,
+		kFormatColorBrightBlack,kFormatKeyNoItems,
 		nil
 		];
 	
