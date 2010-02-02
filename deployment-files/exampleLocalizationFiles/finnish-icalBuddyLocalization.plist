@@ -50,5 +50,7 @@
 	<string>alhainen</string>
 	<key>dateTimeSeparator</key>
 	<string> klo </string>
+	<key>noItems</key>
+	<string>Ei mitään.</string>
 </dict>
 </plist>

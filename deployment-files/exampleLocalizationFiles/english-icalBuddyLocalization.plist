@@ -50,6 +50,8 @@
 	<string>low</string>
 	<key>dateTimeSeparator</key>
 	<string> at </string>
+	<key>noItems</key>
+	<string>Nothing.</string>
 </dict>
 </plist>
 
