@@ -139,6 +139,7 @@ THE SOFTWARE.
 #define kL10nKeySomeonesBirthday	@"someonesBirthday"
 #define kL10nKeyMyBirthday			@"myBirthday"
 #define kL10nKeyDateTimeSeparator	@"dateTimeSeparator"
+#define kL10nKeyNoItemsInSection	@"noItems"
 
 
 
@@ -170,8 +171,8 @@ THE SOFTWARE.
 
 
 const int VERSION_MAJOR = 1;
-const int VERSION_MINOR = 6;
-const int VERSION_BUILD = 19;
+const int VERSION_MINOR = 7;
+const int VERSION_BUILD = 0;
 
 
 
@@ -2006,7 +2007,6 @@ void printCalTask(CalTask *task, int printOptions)
 // sectionTitle (NSString) and sectionItems (NSArray of CalCalendarItems.)
 void printItemSections(NSArray *sections, int printOptions)
 {
-	BOOL titlePrintedForCurrentSection;
 	BOOL currentIsFirstPrintedSection = YES;
 	
 	NSDictionary *sectionDict;
@@ -2015,34 +2015,30 @@ void printItemSections(NSArray *sections, int printOptions)
 		if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 			continue;
 		
-		titlePrintedForCurrentSection = NO;
-		
+		// print title
 		NSString *sectionTitle = [sectionDict objectForKey:kSectionDictKey_title];
-		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];
+		if (!currentIsFirstPrintedSection)
+			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
+		NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(
+			strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil)
+			);
+		[thisOutput
+			addAttributes:getSectionTitleStringAttributes(sectionTitle)
+			range:NSMakeRange(0,[thisOutput length])
+			];
+		addToOutputBuffer(thisOutput);
+		currentIsFirstPrintedSection = NO;
 		
-		CalCalendarItem *item;
-		for (item in sectionItems)
+		// print items
+		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];
+		if (sectionItems == nil || [sectionItems count] == 0)
 		{
-			if (!titlePrintedForCurrentSection)
-			{
-				if (!currentIsFirstPrintedSection)
-					addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
-				
-				NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(
-					strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil)
-					);
-				
-				[thisOutput
-					addAttributes:getSectionTitleStringAttributes(sectionTitle)
-					range:NSMakeRange(0,[thisOutput length])
-					];
-				
-				addToOutputBuffer(thisOutput);
-				
-				titlePrintedForCurrentSection = YES;
-				currentIsFirstPrintedSection = NO;
-			}
-			
+			addToOutputBuffer(MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyNoItemsInSection), @"\n", nil)));
+			continue;
+		}
+		
+		for (CalCalendarItem *item in sectionItems)
+		{
 			if ([item isKindOfClass:[CalEvent class]])
 			{
 				NSCalendarDate *contextDay = [sectionDict objectForKey:kSectionDictKey_eventsContextDay];
@@ -2398,6 +2394,7 @@ int main(int argc, char *argv[])
 		@"medium",		kL10nKeyPriorityMedium,
 		@"low",			kL10nKeyPriorityLow,
 		@" at ",		kL10nKeyDateTimeSeparator,
+		@"Nothing.",	kL10nKeyNoItemsInSection,
 		nil
 		];
 	
@@ -2440,6 +2437,7 @@ int main(int argc, char *argv[])
 	BOOL arg_noCalendarNames = NO;
 	BOOL arg_sortTasksByDueDate = NO;
 	BOOL arg_sortTasksByDueDateAscending = NO;
+	BOOL arg_sectionsForEachDayInSpan = NO;
 	NSString *arg_strEncoding = nil;
 	NSString *arg_propertyOrderStr = nil;
 	NSString *arg_propertySeparatorsStr = nil;
@@ -2589,6 +2587,8 @@ int main(int argc, char *argv[])
 						arg_noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
 					if ([allArgKeys containsObject:@"noRelativeDates"])
 						displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
+					if ([allArgKeys containsObject:@"showEmptyDates"])
+						arg_sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
 					if ([allArgKeys containsObject:@"notesNewlineReplacement"])
 						notesNewlineReplacement = [constArgsDict objectForKey:@"notesNewlineReplacement"];
 					if ([allArgKeys containsObject:@"limitItems"])
@@ -2718,6 +2718,8 @@ int main(int argc, char *argv[])
 			arg_sortTasksByDueDate = YES;
 		else if ((strcmp(argv[i], "-stda") == 0) || (strcmp(argv[i], "--sortTasksByDateAscending") == 0))
 			arg_sortTasksByDueDateAscending = YES;
+		else if ((strcmp(argv[i], "-sed") == 0) || (strcmp(argv[i], "--showEmptyDates") == 0))
+			arg_sectionsForEachDayInSpan = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
@@ -3234,8 +3236,6 @@ int main(int argc, char *argv[])
 		}
 		else if (arg_separateByDate)
 		{
-			NSMutableArray *byDateSections = [NSMutableArray arrayWithCapacity:[eventsArr count]];
-			
 			// keys: NSDates (representing *days* to use as sections),
 			// values: NSArrays of CalCalendarItems that match those days
 			NSMutableDictionary *allDays = [NSMutableDictionary dictionaryWithCapacity:[eventsArr count]];
@@ -3340,19 +3340,47 @@ int main(int argc, char *argv[])
 				
 			}
 			
-			// sort the dates and leave NSNull ("no due date") at the bottom if it exists
+			// we'll fill this with dictionaries, each of which will represent a section
+			// to be printed, with a title and a list of CalCalendarItems (in the order
+			// we want to print them out).
+			NSMutableArray *byDateSections = [NSMutableArray arrayWithCapacity:[eventsArr count]];
+			
+			// remove NSNull ("no due date") if it exists and sort the dates
 			NSMutableArray *allDaysArr = [NSMutableArray arrayWithCapacity:[[allDays allKeys] count]];
 			[allDaysArr addObjectsFromArray:[allDays allKeys]];
 			[allDaysArr removeObjectIdenticalTo:[NSNull null]];
 			[allDaysArr sortUsingSelector:@selector(compare:)];
+			
+			if (arg_sectionsForEachDayInSpan && [allDaysArr count] > 1)
+			{
+				// fill the day span we have so that all days have an entry
+				NSCalendarDate *earliestDate = [[allDaysArr objectAtIndex:0] dateWithCalendarFormat:nil timeZone:nil];
+				NSCalendarDate *latestDate = [[allDaysArr lastObject] dateWithCalendarFormat:nil timeZone:nil];
+				
+				NSCalendarDate *iterDate = earliestDate;
+				do
+				{
+					iterDate = [iterDate dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0];
+					if ([allDaysArr containsObject:iterDate])
+						continue;
+					[allDaysArr addObject:iterDate];
+				}
+				while ([iterDate compare:latestDate] == NSOrderedAscending);
+				
+				[allDaysArr sortUsingSelector:@selector(compare:)];
+			}
+			
+			// reinsert NSNull ("no due date") at the bottom if needed
 			if ([allDays objectForKey:[NSNull null]] != nil)
 				[allDaysArr addObject:[NSNull null]];
 			
+			// set the section items and titles as dictionaries into the byDateSections array
 			id aDayKey;
 			for (aDayKey in allDaysArr)
 			{
 				NSArray *thisSectionItems = [allDays objectForKey:aDayKey];
-				NSCAssert((thisSectionItems != nil), @"thisSectionItems is nil");
+				if (thisSectionItems == nil)
+					thisSectionItems = [NSArray array];
 				NSMutableDictionary *thisSectionDict = [NSMutableDictionary
 					dictionaryWithObject:thisSectionItems
 					forKey:kSectionDictKey_items
@@ -3427,6 +3455,7 @@ int main(int argc, char *argv[])
 		Printf(@"-nc        No calendar names\n");
 		Printf(@"-nrd       No relative dates\n");
 		Printf(@"-n         Include only events from now on\n");
+		Printf(@"-sed       Show empty dates\n");
 		Printf(@"-eed       Exclude end datetimes\n");
 		Printf(@"-li        Limit items (value required)\n");
 		Printf(@"-std,-stda Sort tasks by due date (stda = ascending)\n");
