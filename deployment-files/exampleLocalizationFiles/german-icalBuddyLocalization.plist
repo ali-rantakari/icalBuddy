@@ -51,7 +51,7 @@
 	<key>dateTimeSeparator</key>
 	<string> um </string>
 	<key>noItems</key>
-	<string>Nichts</string>
+	<string>Keine</string>
 </dict>
 </plist>
 

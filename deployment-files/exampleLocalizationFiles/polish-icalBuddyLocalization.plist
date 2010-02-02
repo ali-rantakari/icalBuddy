@@ -51,6 +51,6 @@
 	<key>dateTimeSeparator</key>
 	<string>o</string>
 	<key>noItems</key>
-	<string>Brak Spotkań</string>
+	<string>Brak</string>
 </dict>
 </plist>
