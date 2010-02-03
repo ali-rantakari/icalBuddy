@@ -50,5 +50,7 @@
 	<string>basse</string>
 	<key>dateTimeSeparator</key>
 	<string> à </string>
+	<key>noItems</key>
+	<string>Vide</string>
 </dict>
 </plist>

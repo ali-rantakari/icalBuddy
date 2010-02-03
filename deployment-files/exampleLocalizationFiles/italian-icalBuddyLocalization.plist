@@ -50,5 +50,7 @@
 	<string>bassa</string>
 	<key>dateTimeSeparator</key>
 	<string> alle </string>
+	<key>noItems</key>
+	<string>Niente</string>
 </dict>
 </plist>
