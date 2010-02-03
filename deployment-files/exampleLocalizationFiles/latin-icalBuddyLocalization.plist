@@ -50,5 +50,7 @@
 	<string>parvi</string>
 	<key>dateTimeSeparator</key>
 	<string> </string>
+	<key>noItems</key>
+	<string>Nihilum</string>
 </dict>
 </plist>
