@@ -6,6 +6,9 @@ Icon*
 
 # jEdit temp files
 \#*#
+deployment-files/#*#
+deployment/#*#
+utils/#*#
 
 # generated files
 htmlEntitiesPHPCode.m
