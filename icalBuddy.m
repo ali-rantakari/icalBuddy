@@ -1589,7 +1589,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				{
 					if (excludeEndDates || [[event startDate] isEqualToDate:[event endDate]])
 					{
-						if (!(singleDayContext && !startsOnContextDay))
+						// -> we only want to show the start datetime
+						
+						if (singleDayContext && !startsOnContextDay)
+							thisPropOutputValue = MUTABLE_ATTR_STR(@"...");
+						else
 							thisPropOutputValue = MUTABLE_ATTR_STR(
 								dateStr(
 									[event startDate],
