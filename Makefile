@@ -18,7 +18,7 @@ VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
 SCP_TARGET=$(shell cat ./deploymentScpTarget)
 DEPLOYMENT_INCLUDES_DIR="./deployment-files"
-
+COMPILER="/Developer/usr/bin/clang"
 
 
 
@@ -37,7 +37,7 @@ icalBuddy: icalBuddy.m
 	@echo
 	@echo ---- Compiling:
 	@echo ======================================
-	gcc -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch x86_64 -arch ppc -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m icalBuddy.m
+	$(COMPILER) -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch x86_64 -arch ppc -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m icalBuddy.m
 
 
 
