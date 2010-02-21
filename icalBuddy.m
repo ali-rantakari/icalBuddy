@@ -173,7 +173,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 0;
+const int VERSION_BUILD = 1;
 
 
 
@@ -846,6 +846,18 @@ NSInteger prioritySort(id task1, id task2, void *context)
 
 
 
+NSCalendarDate* dateForStartOfDay(NSCalendarDate *date)
+{
+	return [NSCalendarDate
+		dateWithYear:[date yearOfCommonEra]
+		month:[date monthOfYear]
+		day:[date dayOfMonth]
+		hour:0
+		minute:0
+		second:0
+		timeZone:[date timeZone]
+		];
+}
 
 
 // whether the two specified dates represent the same calendar day
@@ -2364,13 +2376,7 @@ int main(int argc, char *argv[])
 	
 	// set current datetime and day representations into globals
 	now = [NSCalendarDate calendarDate];
-	today = [NSCalendarDate
-		dateWithYear:[now yearOfCommonEra]
-		month:[now monthOfYear]
-		day:[now dayOfMonth]
-		hour:0 minute:0 second:0
-		timeZone:[now timeZone]
-		];
+	today = dateForStartOfDay(now);
 	
 	
 	ansiEscapeHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
@@ -3093,15 +3099,7 @@ int main(int argc, char *argv[])
 			// get start and end dates for predicate
 			if (arg_output_is_eventsToday)
 			{
-				eventsDateRangeStart = [NSCalendarDate
-					dateWithYear:[now yearOfCommonEra]
-					month:[now monthOfYear]
-					day:[now dayOfMonth]
-					hour:0
-					minute:0
-					second:0
-					timeZone:[now timeZone]
-					];
+				eventsDateRangeStart = today;
 				eventsDateRangeEnd = [NSCalendarDate
 					dateWithYear:[now yearOfCommonEra]
 					month:[now monthOfYear]
@@ -3292,13 +3290,7 @@ int main(int argc, char *argv[])
 							dateByAddingYears:0 months:0 days:i hours:0 minutes:0 seconds:0
 							];
 						
-						NSCalendarDate *dayToAdd = [NSCalendarDate
-							dateWithYear:[thisEventStartDatePlusi yearOfCommonEra]
-							month:[thisEventStartDatePlusi monthOfYear]
-							day:[thisEventStartDatePlusi dayOfMonth]
-							hour:0 minute:0 second:0
-							timeZone:[thisEventStartDatePlusi timeZone]
-							];
+						NSCalendarDate *dayToAdd = dateForStartOfDay(thisEventStartDatePlusi);
 						
 						NSComparisonResult dayToAddToNowComparisonResult = [dayToAdd compare:today];
 						
@@ -3328,13 +3320,7 @@ int main(int argc, char *argv[])
 					if ([aTask dueDate] != nil)
 					{
 						NSCalendarDate *thisTaskDueDate = [[aTask dueDate] dateWithCalendarFormat:nil timeZone:nil];
-						NSCalendarDate *thisDueDay = [NSCalendarDate
-							dateWithYear:[thisTaskDueDate yearOfCommonEra]
-							month:[thisTaskDueDate monthOfYear]
-							day:[thisTaskDueDate dayOfMonth]
-							hour:0 minute:0 second:0
-							timeZone:[thisTaskDueDate timeZone]
-							];
+						NSCalendarDate *thisDueDay = dateForStartOfDay(thisTaskDueDate);
 						thisDayKey = thisDueDay;
 					}
 					else
@@ -3361,21 +3347,39 @@ int main(int argc, char *argv[])
 			[allDaysArr removeObjectIdenticalTo:[NSNull null]];
 			[allDaysArr sortUsingSelector:@selector(compare:)];
 			
-			if (arg_sectionsForEachDayInSpan && [allDaysArr count] > 1)
+			if (arg_sectionsForEachDayInSpan)
 			{
 				// fill the day span we have so that all days have an entry
-				NSCalendarDate *earliestDate = [[allDaysArr objectAtIndex:0] dateWithCalendarFormat:nil timeZone:nil];
-				NSCalendarDate *latestDate = [[allDaysArr lastObject] dateWithCalendarFormat:nil timeZone:nil];
+				NSCalendarDate *earliestDate = nil;
+				NSCalendarDate *latestDate = nil;
+				
+				if (arg_output_is_eventsFromTo || arg_output_is_eventsToday || arg_output_is_eventsNow)
+				{
+					earliestDate = dateForStartOfDay(eventsDateRangeStart);
+					latestDate = dateForStartOfDay(eventsDateRangeEnd);
+				}
+				else
+				{
+					if ([allDaysArr count] > 1)
+					{
+						earliestDate = [[allDaysArr objectAtIndex:0] dateWithCalendarFormat:nil timeZone:nil];
+						latestDate = [[allDaysArr lastObject] dateWithCalendarFormat:nil timeZone:nil];
+					}
+					else
+					{
+						earliestDate = today;
+						latestDate = today;
+					}
+				}
 				
 				NSCalendarDate *iterDate = earliestDate;
 				do
 				{
+					if (![allDaysArr containsObject:iterDate])
+						[allDaysArr addObject:iterDate];
 					iterDate = [iterDate dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0];
-					if ([allDaysArr containsObject:iterDate])
-						continue;
-					[allDaysArr addObject:iterDate];
 				}
-				while ([iterDate compare:latestDate] == NSOrderedAscending);
+				while ([iterDate compare:latestDate] != NSOrderedDescending);
 				
 				[allDaysArr sortUsingSelector:@selector(compare:)];
 			}
