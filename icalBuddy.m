@@ -1563,32 +1563,45 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			}
 			else
 			{
+				// TODO:
+				// fix the convoluted logic here.
+				// should probably determine the start and end datetime strings
+				// first (i.e. make them "..." if singleDayContext and the event
+				// doesn't start or end on context day) and then combine them together
+				// based on what we want to display.
+				
 				BOOL singleDayContext = (printOptions & PRINT_OPTION_SINGLE_DAY);
+				BOOL startsOnContextDay = false;
+				BOOL endsOnContextDay = false;
+				if (contextDay != nil)
+				{
+					startsOnContextDay = datesRepresentSameDay(
+						contextDay,
+						[[event startDate] dateWithCalendarFormat:nil timeZone:nil]
+						);
+					endsOnContextDay = datesRepresentSameDay(
+						contextDay,
+						[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
+						);
+				}
 				
 				if ( !singleDayContext || (singleDayContext && ![event isAllDay]) )
 				{
 					if (excludeEndDates || [[event startDate] isEqualToDate:[event endDate]])
 					{
-						thisPropOutputValue = MUTABLE_ATTR_STR(
-							dateStr(
-								[event startDate],
-								(!(printOptions & PRINT_OPTION_SINGLE_DAY)),
-								![event isAllDay]
-								)
-							);
+						if (!(singleDayContext && !startsOnContextDay))
+							thisPropOutputValue = MUTABLE_ATTR_STR(
+								dateStr(
+									[event startDate],
+									(!singleDayContext),
+									![event isAllDay]
+									)
+								);
 					}
 					else
 					{
-						if (printOptions & PRINT_OPTION_SINGLE_DAY)
+						if (singleDayContext)
 						{
-							BOOL startsOnContextDay = datesRepresentSameDay(
-								contextDay,
-								[[event startDate] dateWithCalendarFormat:nil timeZone:nil]
-								);
-							BOOL endsOnContextDay = datesRepresentSameDay(
-								contextDay,
-								[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
-								);
 							if (startsOnContextDay && endsOnContextDay)
 								thisPropOutputValue = MUTABLE_ATTR_STR((
 									[NSString
@@ -1611,6 +1624,8 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 											dateStr([event endDate], false, true)
 										]
 									));
+							else
+								thisPropOutputValue = MUTABLE_ATTR_STR(@"... - ...");
 						}
 						else
 						{
