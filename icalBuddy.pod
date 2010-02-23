@@ -128,7 +128,7 @@ Format times included in the output based on the I<format> formatting string. Se
 
 =item B<-df>, B<--dateFormat> I<format>
 
-Format dates included in the output based on the I<format> formatting string. See C<http://tinyurl.com/b9mgyp> [apple.com] for documentation on the syntax to use.
+Format dates included in the output based on the I<format> formatting string. See C<http://tinyurl.com/b9mgyp> [apple.com] for documentation on the syntax to use. (note: in addition to the standard datetime element specifiers, you can also use the S<C<%RW>> specifier, which stands for "relative week" (e.g. "next week"))
 
 =item B<-po>, B<--propertyOrder> I<value>
 
