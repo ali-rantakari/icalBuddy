@@ -414,6 +414,13 @@ NSString* strConcat(NSString *firstStr, ...)
 }
 
 
+// quick n dirty
+#define MAX_FLOAT_EQUALITY_ABS_ERROR 0.000001;
+BOOL floatsEqual(CGFloat first, CGFloat second)
+{
+	return (fabs(first-second)) < MAX_FLOAT_EQUALITY_ABS_ERROR;
+}
+
 
 // helper struct typedef and a few functions for
 // getClosestAnsiColorForColor:
@@ -484,10 +491,10 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 			[NSNumber numberWithInt:SGRCodeFgBrightWhite+sgrCodeShift],
 			nil
 		];
-	for (NSNumber *thisSgrCodeNumber in ansiFgColorCodes)
+	for (NSNumber *thisSGRCodeNumber in ansiFgColorCodes)
 	{
-		enum sgrCode thisSgrCode = [thisSgrCodeNumber intValue];
-		NSColor *thisColor = [ansiEscapeHelper colorForSGRCode:thisSgrCode];
+		enum sgrCode thisSGRCode = [thisSGRCodeNumber intValue];
+		NSColor *thisColor = [ansiEscapeHelper colorForSGRCode:thisSGRCode];
 		
 		HSB thisColorHSB = getHSBFromColor(thisColor);
 		
@@ -498,10 +505,10 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 		// comparison depends on hue, saturation and brightness
 		// (strictly in that order):
 		
-		if (hueDiff > closestColorHueDiff)
-			continue;
-		if (hueDiff < closestColorHueDiff)
+		if (!floatsEqual(hueDiff, closestColorHueDiff))
 		{
+			if (hueDiff > closestColorHueDiff)
+				continue;
 			closestColor = thisColor;
 			closestColorHueDiff = hueDiff;
 			closestColorSaturationDiff = saturationDiff;
@@ -509,10 +516,10 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 			continue;
 		}
 		
-		if (saturationDiff > closestColorSaturationDiff)
-			continue;
-		if (saturationDiff < closestColorSaturationDiff)
+		if (!floatsEqual(saturationDiff, closestColorSaturationDiff))
 		{
+			if (saturationDiff > closestColorSaturationDiff)
+				continue;
 			closestColor = thisColor;
 			closestColorHueDiff = hueDiff;
 			closestColorSaturationDiff = saturationDiff;
@@ -520,20 +527,53 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 			continue;
 		}
 		
-		if (brightnessDiff > closestColorBrightnessDiff)
-			continue;
-		if (brightnessDiff < closestColorBrightnessDiff)
+		if (!floatsEqual(brightnessDiff, closestColorBrightnessDiff))
 		{
+			if (brightnessDiff > closestColorBrightnessDiff)
+				continue;
 			closestColor = thisColor;
 			closestColorHueDiff = hueDiff;
 			closestColorSaturationDiff = saturationDiff;
 			closestColorBrightnessDiff = brightnessDiff;
 			continue;
+		}
+		
+		// If hue (especially hue!), saturation and brightness diffs all
+		// are equal to some other color, we need to prefer one or the
+		// other so we'll select the more 'distinctive' color of the
+		// two (this is *very* subjective, obviously). I basically just
+		// looked at the hue chart, went through all the points between
+		// our main ANSI colors and decided which side the middle point
+		// would lean on.
+		// 
+		// subjective ordering of colors from most to least distinctive:
+		int colorDistinctivenessOrder[6] = {
+			SGRCodeFgRed+sgrCodeShift,
+			SGRCodeFgMagenta+sgrCodeShift,
+			SGRCodeFgBlue+sgrCodeShift,
+			SGRCodeFgGreen+sgrCodeShift,
+			SGRCodeFgCyan+sgrCodeShift,
+			SGRCodeFgYellow+sgrCodeShift
+			};
+		enum sgrCode closestColorSGRCode = [ansiEscapeHelper sgrCodeForColor:closestColor isForegroundColor:foreground];
+		int i;
+		for (i = 0; i < 6; i++)
+		{
+			if (colorDistinctivenessOrder[i] == closestColorSGRCode)
+				break;
+			else if (colorDistinctivenessOrder[i] == thisSGRCode)
+			{
+				closestColor = thisColor;
+				closestColorHueDiff = hueDiff;
+				closestColorSaturationDiff = saturationDiff;
+				closestColorBrightnessDiff = brightnessDiff;
+			}
 		}
 	}
 	
 	return closestColor;
 }
+
 
 
 
