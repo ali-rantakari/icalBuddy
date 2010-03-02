@@ -1,5 +1,8 @@
 # ignored patterns
 
+# clang --analyze output (?)
+icalBuddy.plist
+
 # OS X junk
 Icon*
 .DS_Store
