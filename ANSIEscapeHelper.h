@@ -4,7 +4,7 @@
 //
 //  Created by Ali Rantakari on 18.3.09.
 //
-//  Version 0.9.2
+//  Version 0.9.3
 // 
 /*
 The MIT License
@@ -284,7 +284,7 @@ enum sgrCode
 /*!
  @method		sgrCodeForColor:isForegroundColor:
  
- @abstract		Returns an SGR code that corresponds to a given color.
+ @abstract		Returns a color SGR code that corresponds to a given color.
  
  @discussion	This method matches colors to their equivalent SGR codes
 				by going through the colors specified in the ansiColors
@@ -300,5 +300,24 @@ enum sgrCode
  @result		SGR code that corresponds with aColor.
  */
 - (enum sgrCode) sgrCodeForColor:(NSColor*)aColor isForegroundColor:(BOOL)aForeground;
+
+
+/*!
+ @method		closestSGRCodeForColor:isForegroundColor:
+ 
+ @abstract		Returns a color SGR code that represents the closest ANSI
+ 				color to a given color.
+ 
+ @discussion	This method attempts to find the closest ANSI color to
+ 				aColor and return its SGR code.
+ 
+ @param aColor			The color to get a closest color SGR code match for
+ @param aForeground		Whether you want a foreground or background color code
+ 
+ @result		SGR code for the ANSI color that is closest to aColor.
+ */
+- (enum sgrCode) closestSGRCodeForColor:(NSColor *)color isForegroundColor:(BOOL)foreground;
+
+
 
 @end
