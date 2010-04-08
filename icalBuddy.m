@@ -173,7 +173,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 1;
+const int VERSION_BUILD = 2;
 
 
 
@@ -1948,13 +1948,14 @@ void printItemSections(NSArray *sections, int printOptions)
 		if (!currentIsFirstPrintedSection)
 			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(
-			strConcat(sectionTitle, @":", sectionSeparatorStr, @"\n", nil)
+			strConcat(sectionTitle, @":", sectionSeparatorStr, nil)
 			);
 		[thisOutput
 			addAttributes:getSectionTitleStringAttributes(sectionTitle)
 			range:NSMakeRange(0,[thisOutput length])
 			];
 		addToOutputBuffer(thisOutput);
+		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		currentIsFirstPrintedSection = NO;
 		
 		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];

@@ -170,7 +170,7 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [l10nmanpageonline]:    http://hasseg.org/icalBuddy/localization-man.html
 [geektool]:             http://projects.tynsoe.org/en/geektool
 [custom-geektool]:      http://hasseg.org/blog/?p=350
-[datetimeformats]:      http://developer.apple.com/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW9
+[datetimeformats]:      http://developer.apple.com/mac/library/documentation/Cocoa/Conceptual/DataFormatting/Articles/df100103.html#//apple_ref/doc/uid/TP40007972-SW10
 [hassegcontact]:        http://hasseg.org/
 [links]:                http://links.sourceforge.net/
 [gcal-feeds]:           http://www.google.com/support/calendar/bin/answer.py?hl=en&answer=37648

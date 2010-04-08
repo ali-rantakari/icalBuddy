@@ -4,6 +4,12 @@ TODO:
 user requests:
 -------------------------
 
+- ability to use relative dates today and tomorrow but the rest as normal dates... I don't like the long "day after tomorrow" text it seems to defeat the purpose of the simple today and tomorrow scheme (user ref: Edward)
+
+- ability to use eventsTomorrow and eventsTomorrow+n to exclude today without having to resort to messy date range scripts... Although this is how i handled it for now (user ref: Edward)
+
+- ability to specify color for specific calendars not just specific words (user ref: Edward)
+
 - Add argument for seeing only recurring events (user ref: Jonathan)
 - Add support for date suffixes (e.g. 1st, 2nd...) (user ref: Sam)
 - Add argument -co (or: --calendarOrder) (user ref: Derek)
