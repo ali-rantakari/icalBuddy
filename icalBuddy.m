@@ -173,7 +173,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 2;
+const int VERSION_BUILD = 3;
 
 
 
