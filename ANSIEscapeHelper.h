@@ -4,7 +4,7 @@
 //
 //  Created by Ali Rantakari on 18.3.09.
 //
-//  Version 0.9.3
+//  Version 0.9.4
 // 
 /*
 The MIT License
@@ -40,6 +40,66 @@ THE SOFTWARE.
 // the end byte of an SGR (Select Graphic Rendition)
 // ANSI Escape Sequence
 #define kANSIEscapeSGREnd		@"m"
+
+
+// color definition helper macros
+#define kBrightColorBrightness	1.0
+#define kBrightColorSaturation	0.4
+#define kBrightColorAlpha		1.0
+#define kBrightColorWithHue(h)	[NSColor colorWithCalibratedHue:(h) saturation:kBrightColorSaturation brightness:kBrightColorBrightness alpha:kBrightColorAlpha]
+
+// default colors
+#define kDefaultANSIColorFgBlack	[NSColor blackColor]
+#define kDefaultANSIColorFgRed		[NSColor redColor]
+#define kDefaultANSIColorFgGreen	[NSColor greenColor]
+#define kDefaultANSIColorFgYellow	[NSColor yellowColor]
+#define kDefaultANSIColorFgBlue		[NSColor blueColor]
+#define kDefaultANSIColorFgMagenta	[NSColor magentaColor]
+#define kDefaultANSIColorFgCyan		[NSColor cyanColor]
+#define kDefaultANSIColorFgWhite	[NSColor whiteColor]
+
+#define kDefaultANSIColorFgBrightBlack		[NSColor colorWithCalibratedWhite:0.337 alpha:1.0]
+#define kDefaultANSIColorFgBrightRed		kBrightColorWithHue(1.0)
+#define kDefaultANSIColorFgBrightGreen		kBrightColorWithHue(1.0/3.0)
+#define kDefaultANSIColorFgBrightYellow		kBrightColorWithHue(1.0/6.0)
+#define kDefaultANSIColorFgBrightBlue		kBrightColorWithHue(2.0/3.0)
+#define kDefaultANSIColorFgBrightMagenta	kBrightColorWithHue(5.0/6.0)
+#define kDefaultANSIColorFgBrightCyan		kBrightColorWithHue(0.5)
+#define kDefaultANSIColorFgBrightWhite		[NSColor whiteColor]
+
+#define kDefaultANSIColorBgBlack	[NSColor blackColor]
+#define kDefaultANSIColorBgRed		[NSColor redColor]
+#define kDefaultANSIColorBgGreen	[NSColor greenColor]
+#define kDefaultANSIColorBgYellow	[NSColor yellowColor]
+#define kDefaultANSIColorBgBlue		[NSColor blueColor]
+#define kDefaultANSIColorBgMagenta	[NSColor magentaColor]
+#define kDefaultANSIColorBgCyan		[NSColor cyanColor]
+#define kDefaultANSIColorBgWhite	[NSColor whiteColor]
+
+#define kDefaultANSIColorBgBrightBlack		kDefaultANSIColorFgBrightBlack
+#define kDefaultANSIColorBgBrightRed		kDefaultANSIColorFgBrightRed
+#define kDefaultANSIColorBgBrightGreen		kDefaultANSIColorFgBrightGreen
+#define kDefaultANSIColorBgBrightYellow		kDefaultANSIColorFgBrightYellow
+#define kDefaultANSIColorBgBrightBlue		kDefaultANSIColorFgBrightBlue
+#define kDefaultANSIColorBgBrightMagenta	kDefaultANSIColorFgBrightMagenta
+#define kDefaultANSIColorBgBrightCyan		kDefaultANSIColorFgBrightCyan
+#define kDefaultANSIColorBgBrightWhite		kDefaultANSIColorFgBrightWhite
+
+// dictionary keys for the SGR code dictionaries that the array
+// escapeCodesForString:cleanString: returns contains
+#define kCodeDictKey_code			@"code"
+#define kCodeDictKey_location		@"location"
+
+// dictionary keys for the string formatting attribute
+// dictionaries that the array attributesForString:cleanString:
+// returns contains
+#define kAttrDictKey_range			@"range"
+#define kAttrDictKey_attrName		@"attributeName"
+#define kAttrDictKey_attrValue		@"attributeValue"
+
+// minimum weight for an NSFont for it to be considered bold
+#define kBoldFontMinWeight			9
+
 
 
 
