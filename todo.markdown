@@ -4,6 +4,10 @@ TODO:
 user requests:
 -------------------------
 
+- color calendar names _in section titles_ by calendar color (user ref: Matthias B.)
+
+- date ranges (e.g. today+N) for task queries (user ref: Daniel B.)
+
 - ability to use relative dates today and tomorrow but the rest as normal dates... I don't like the long "day after tomorrow" text it seems to defeat the purpose of the simple today and tomorrow scheme (user ref: Edward)
 
 - ability to use eventsTomorrow and eventsTomorrow+n to exclude today without having to resort to messy date range scripts... Although this is how i handled it for now (user ref: Edward)
