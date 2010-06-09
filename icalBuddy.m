@@ -187,7 +187,8 @@ enum calItemPrintOption
 	PRINT_OPTION_NONE = 				0,
 	PRINT_OPTION_SINGLE_DAY = 			(1 << 0),	// in the contex of a single day (for events) (i.e. don't print out full dates)
 	PRINT_OPTION_CALENDAR_AGNOSTIC = 	(1 << 1),	// calendar-agnostic (i.e. don't print out the calendar name)
-	PRINT_OPTION_WITHOUT_PROP_NAMES =	(1 << 2)	// without property names (i.e. print only the values)
+	PRINT_OPTION_WITHOUT_PROP_NAMES =	(1 << 2),	// without property names (i.e. print only the values)
+	PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES = (1 << 3)
 } CalItemPrintOption;
 
 
@@ -1944,6 +1945,8 @@ void printItemSections(NSArray *sections, int printOptions)
 		if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 			continue;
 		
+		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];
+		
 		// print section title
 		NSString *sectionTitle = [sectionDict objectForKey:kSectionDictKey_title];
 		if (!currentIsFirstPrintedSection)
@@ -1955,11 +1958,26 @@ void printItemSections(NSArray *sections, int printOptions)
 			addAttributes:getSectionTitleStringAttributes(sectionTitle)
 			range:NSMakeRange(0,[thisOutput length])
 			];
+		
+		// if the section title has no foreground color and we're told to
+		// use calendar colors for them, do so
+		if ((printOptions & PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES)
+			&& useCalendarColorsForTitles
+			&& ![[[thisOutput attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
+			&& sectionItems != nil && [sectionItems count] > 0
+			)
+		{
+			[thisOutput
+				addAttribute:NSForegroundColorAttributeName
+				value:getClosestAnsiColorForColor([[((CalCalendarItem *)[sectionItems objectAtIndex:0]) calendar] color], YES)
+				range:NSMakeRange(0, [thisOutput length])
+				];
+		}
+		
 		addToOutputBuffer(thisOutput);
 		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
 		currentIsFirstPrintedSection = NO;
 		
-		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];
 		if (sectionItems == nil || [sectionItems count] == 0)
 		{
 			// print the "no items" text
@@ -2355,7 +2373,7 @@ int main(int argc, char *argv[])
 		kFormatColorRed,		kFormatKeyPriorityValueHigh,
 		kFormatColorYellow,	 	kFormatKeyPriorityValueMedium,
 		kFormatColorGreen,		kFormatKeyPriorityValueLow,
-		kFormatColorBlue, 		kFormatKeySectionTitle,
+		@"", 					kFormatKeySectionTitle,
 		kFormatBold,			kFormatKeyFirstItemLine,
 		@"", 					kFormatKeyBullet,
 		strConcat(kFormatColorRed, @",", kFormatBold, nil),	kFormatKeyAlertBullet,
@@ -3140,6 +3158,11 @@ int main(int argc, char *argv[])
 		{
 			events_printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
 			tasks_printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
+		}
+		if (arg_separateByCalendar)
+		{
+			events_printOptions |= PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES;
+			tasks_printOptions |= PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES;
 		}
 		
 		
