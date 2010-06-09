@@ -173,7 +173,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 3;
+const int VERSION_BUILD = 4;
 
 
 
@@ -186,7 +186,8 @@ enum calItemPrintOption
 {
 	PRINT_OPTION_NONE = 				0,
 	PRINT_OPTION_SINGLE_DAY = 			(1 << 0),	// in the contex of a single day (for events) (i.e. don't print out full dates)
-	PRINT_OPTION_CALENDAR_AGNOSTIC = 	(1 << 1)	// calendar-agnostic (i.e. don't print out the calendar name)
+	PRINT_OPTION_CALENDAR_AGNOSTIC = 	(1 << 1),	// calendar-agnostic (i.e. don't print out the calendar name)
+	PRINT_OPTION_WITHOUT_PROP_NAMES =	(1 << 2)	// without property names (i.e. print only the values)
 } CalItemPrintOption;
 
 
@@ -1615,7 +1616,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		
 		NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 		
-		if (thisPropOutputName != nil)
+		if (thisPropOutputName != nil && !(printOptions & PRINT_OPTION_WITHOUT_PROP_NAMES))
 		{
 			[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
 			[retVal appendAttributedString:thisPropOutputName];
@@ -1832,7 +1833,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 		
 		NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 		
-		if (thisPropOutputName != nil)
+		if (thisPropOutputName != nil && !(printOptions & PRINT_OPTION_WITHOUT_PROP_NAMES))
 		{
 			[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
 			[retVal appendAttributedString:thisPropOutputName];
@@ -2267,7 +2268,14 @@ cleanup:
 
 
 
-
+NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals)
+{
+	if (includeCals != nil)
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", includeCals, includeCals]];
+	if (excludeCals != nil)
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", excludeCals, excludeCals]];
+	return cals;
+}
 
 
 
@@ -2370,6 +2378,7 @@ int main(int argc, char *argv[])
 	BOOL arg_sortTasksByDueDate = NO;
 	BOOL arg_sortTasksByDueDateAscending = NO;
 	BOOL arg_sectionsForEachDayInSpan = NO;
+	BOOL arg_noPropNames = NO;
 	NSString *arg_strEncoding = nil;
 	NSString *arg_propertyOrderStr = nil;
 	NSString *arg_propertySeparatorsStr = nil;
@@ -2533,6 +2542,8 @@ int main(int argc, char *argv[])
 						arg_sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
 					if ([allArgKeys containsObject:@"sortTasksByDateAscending"])
 						arg_sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
+					if ([allArgKeys containsObject:@"noPropNames"])
+						arg_noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
 				}
 			}
 		}
@@ -2652,6 +2663,8 @@ int main(int argc, char *argv[])
 			arg_sortTasksByDueDateAscending = YES;
 		else if ((strcmp(argv[i], "-sed") == 0) || (strcmp(argv[i], "--showEmptyDates") == 0))
 			arg_sectionsForEachDayInSpan = YES;
+		else if ((strcmp(argv[i], "-npn") == 0) || (strcmp(argv[i], "--noPropNames") == 0))
+			arg_noPropNames = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
@@ -2862,14 +2875,10 @@ int main(int argc, char *argv[])
 	else if ([arg_output isEqualToString:@"calendars"])
 	{
 		// get all calendars
-		NSMutableArray *allCalendars = [NSMutableArray arrayWithCapacity:10];
-		[allCalendars addObjectsFromArray: [[CalCalendarStore defaultCalendarStore] calendars]];
+		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
 		
 		// filter calendars based on arguments
-		if (arg_includeCals != nil)
-			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", arg_includeCals, arg_includeCals]];
-		if (arg_excludeCals != nil)
-			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", arg_excludeCals, arg_excludeCals]];
+		allCalendars = filterCalendars(allCalendars, arg_includeCals, arg_excludeCals);
 		
 		CalCalendar *cal;
 		for (cal in allCalendars)
@@ -2986,14 +2995,10 @@ int main(int argc, char *argv[])
 		BOOL printingTasks = arg_output_is_uncompletedTasks;
 		
 		// get all calendars
-		NSMutableArray *allCalendars = [NSMutableArray arrayWithCapacity:10];
-		[allCalendars addObjectsFromArray: [[CalCalendarStore defaultCalendarStore] calendars]];
+		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
 		
 		// filter calendars based on arguments
-		if (arg_includeCals != nil)
-			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", arg_includeCals, arg_includeCals]];
-		if (arg_excludeCals != nil)
-			[allCalendars filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", arg_excludeCals, arg_excludeCals]];
+		allCalendars = filterCalendars(allCalendars, arg_includeCals, arg_excludeCals);
 		
 		int tasks_printOptions = PRINT_OPTION_NONE;
 		int events_printOptions = PRINT_OPTION_NONE;
@@ -3127,6 +3132,14 @@ int main(int argc, char *argv[])
 			
 			// default print options
 			tasks_printOptions = (arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+		}
+		
+		
+		// append to print options
+		if (arg_noPropNames)
+		{
+			events_printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
+			tasks_printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
 		}
 		
 		
@@ -3384,6 +3397,7 @@ int main(int argc, char *argv[])
 		Printf(@"-f         Format output\n");
 		Printf(@"-nc        No calendar names\n");
 		Printf(@"-nrd       No relative dates\n");
+		Printf(@"-npn       No property names\n");
 		Printf(@"-n         Include only events from now on\n");
 		Printf(@"-sed       Show empty dates\n");
 		Printf(@"-eed       Exclude end datetimes\n");

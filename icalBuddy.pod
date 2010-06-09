@@ -9,7 +9,7 @@ B<icalBuddy> -- query the OS X calendar database for items
 
 =item B<icalBuddy>
 
-[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-n>] [B<-sed>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
+[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-npn>] [B<-n>] [B<-sed>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
 
 =back
 
@@ -93,6 +93,10 @@ Omit calendar names from the output. Does not apply if the B<-sc> argument is us
 =item B<-nrd>, B<--noRelativeDates>
 
 Do not use "natural language relative dates" when displaying dates (e.g. "today", "yesterday" or "day after tomorrow".)
+
+=item B<-npn>, B<--noPropertyNames>
+
+Omit property names from the output (i.e. only show property values -- e.g. "My house" instead of "location: My house").
 
 =item B<-n>, B<--includeOnlyEventsFromNowOn>
 
