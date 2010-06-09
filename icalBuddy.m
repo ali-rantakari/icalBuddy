@@ -173,7 +173,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 4;
+const int VERSION_BUILD = 5;
 
 
 
@@ -755,6 +755,11 @@ NSCalendarDate* dateForStartOfDay(NSCalendarDate *date)
 		second:0
 		timeZone:[date timeZone]
 		];
+}
+
+NSCalendarDate* dateByAddingDays(NSCalendarDate *date, NSInteger days)
+{
+	return [date dateByAddingYears:0 months:0 days:days hours:0 minutes:0 seconds:0];
 }
 
 
@@ -2405,6 +2410,7 @@ int main(int argc, char *argv[])
 	BOOL arg_output_is_eventsToday = NO;
 	BOOL arg_output_is_eventsNow = NO;
 	BOOL arg_output_is_eventsFromTo = NO;
+	BOOL arg_output_is_tasksDueBefore = NO;
 	NSString *arg_eventsFrom = nil;
 	NSString *arg_eventsTo = nil;
 	
@@ -2640,6 +2646,7 @@ int main(int argc, char *argv[])
 		arg_output_is_uncompletedTasks = [arg_output isEqualToString:@"uncompletedTasks"];
 		arg_output_is_eventsToday = [arg_output hasPrefix:@"eventsToday"];
 		arg_output_is_eventsNow = [arg_output isEqualToString:@"eventsNow"];
+		arg_output_is_tasksDueBefore = [arg_output hasPrefix:@"tasksDueBefore:"];
 		
 		if ([arg_output hasPrefix:@"to:"] && argc > 2)
 		{
@@ -3006,11 +3013,12 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print events or tasks
 	// ------------------------------------------------------------------
-	else if (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo || arg_output_is_uncompletedTasks)
+	else if (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo
+			 || arg_output_is_uncompletedTasks || arg_output_is_tasksDueBefore)
 	{
 		BOOL printingEvents = (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo);
 		BOOL printingAlsoPastEvents = (arg_output_is_eventsFromTo);
-		BOOL printingTasks = arg_output_is_uncompletedTasks;
+		BOOL printingTasks = (arg_output_is_uncompletedTasks || arg_output_is_tasksDueBefore);
 		
 		// get all calendars
 		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
@@ -3114,9 +3122,45 @@ int main(int argc, char *argv[])
 		// prepare to print tasks
 		else if (printingTasks)
 		{
-			// make predicate for uncompleted tasks in all calendars and use it to get the tasks
-			NSPredicate *uncompletedTasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasks:allCalendars];
-			uncompletedTasks = [[CalCalendarStore defaultCalendarStore] tasksWithPredicate:uncompletedTasksPredicate];
+			// make predicate for getting the desired tasks
+			NSPredicate *tasksPredicate = nil;
+			
+			if (arg_output_is_tasksDueBefore)
+			{
+				NSCalendarDate *dueBeforeDate = nil;
+				
+				if ([arg_output hasPrefix:@"tasksDueBefore:today+"])
+				{
+					// tasksDueBefore:today+NUM
+					NSRange arg_output_plusSymbolRange = [arg_output rangeOfString:@"+"];
+					NSInteger daysToAdd = [[arg_output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
+					dueBeforeDate = dateByAddingDays(today, daysToAdd);
+				}
+				else if ([arg_output hasPrefix:@"tasksDueBefore:tomorrow"])
+					// tasksDueBefore:tomorrow
+					dueBeforeDate = dateByAddingDays(today, 1);
+				else
+				{
+					// tasksDueBefore:"YYYY-MM-DD HH:MM:SS ±HHMM"
+					NSString *dueBeforeDateStr = [arg_output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
+					
+					dueBeforeDate = [NSCalendarDate dateWithString:dueBeforeDateStr];
+					
+					if (dueBeforeDate == nil)
+					{
+						PrintfErr(@"Error: invalid date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
+						return(0);
+					}
+				}
+				
+				tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:allCalendars];
+			}
+			else // all uncompleted tasks
+				tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasks:allCalendars];
+			
+			
+			// get tasks
+			uncompletedTasks = [[CalCalendarStore defaultCalendarStore] tasksWithPredicate:tasksPredicate];
 			
 			// sort the tasks
 			if (arg_sortTasksByDueDate || arg_sortTasksByDueDateAscending)
@@ -3407,6 +3451,10 @@ int main(int argc, char *argv[])
 		Printf(@"                     (START and END), where both are specified in the format:\n");
 		Printf(@"                     \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
 		Printf(@"  'uncompletedTasks' Print uncompleted tasks\n");
+		Printf(@"  'tasksDueBefore:DATE'\n");
+		Printf(@"                     Print uncompleted tasks that are due before the given\n");
+		Printf(@"                     date, which can be 'today+NUM', 'tomorrow' or a date in\n");
+		Printf(@"                     the format \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
 		Printf(@"  'calendars'        Print all calendars\n");
 		Printf(@"  'strEncodings'     Print all the possible string encodings\n");
 		Printf(@"  'editConfig'       Open the configuration file for editing in a GUI editor\n");

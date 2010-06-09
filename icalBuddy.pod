@@ -47,6 +47,10 @@ Print events occurring between the two specified dates (START and END), where bo
 
 Print uncompleted tasks
 
+=item B<C<tasksDueBefore:DATE>>
+
+Print uncompleted tasks that are due before the given date. DATE may be C<today>, C<tomorrow> or a date in the format C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
+
 =item B<C<calendars>>
 
 Print a list of all the calendars
