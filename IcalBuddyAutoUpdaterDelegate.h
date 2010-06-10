@@ -28,9 +28,11 @@ THE SOFTWARE.
 */
 
 #import <Cocoa/Cocoa.h>
+#import "HGCLIAutoUpdaterDelegate.h"
 
-@interface IcalBuddyAutoUpdaterDelegate : NSObject
+@interface IcalBuddyAutoUpdaterDelegate : HGCLIAutoUpdaterDelegate
 {
 }
+
 @end
 

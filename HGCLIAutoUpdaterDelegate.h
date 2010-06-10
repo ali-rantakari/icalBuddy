@@ -1,12 +1,12 @@
-// icalBuddy
+// CLI app auto-update code
 // 
-// http://hasseg.org/icalBuddy
+// http://hasseg.org/
 //
 
 /*
 The MIT License
 
-Copyright (c) 2008-2010 Ali Rantakari
+Copyright (c) 2010 Ali Rantakari
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,24 +27,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#import "IcalBuddyAutoUpdaterDelegate.h"
-#import "HGCLIAutoUpdater.h"
-#import "HGCLIUtils.h"
+#import <Cocoa/Cocoa.h>
 
-
-@implementation IcalBuddyAutoUpdaterDelegate
-
-- (id) init
+@interface HGCLIAutoUpdaterDelegate : NSObject
 {
-	if (!(self = [super initWithAppName:@"icalBuddy"]))
-		return nil;
-	
-	return self;
+	NSString *appName;
 }
 
-- (void) autoUpdater:(HGCLIAutoUpdater *)autoUpdater didInstallVersion:(NSString *)latestVersionStr
-{
-	Printf(@"You can run \"icalBuddy -V\" to confirm the update.\n\n");
-}
+- (id) initWithAppName:(NSString *)aAppName;
 
 @end
+
