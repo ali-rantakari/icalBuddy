@@ -79,5 +79,10 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second);
 - (NSURL *) latestVersionInfoWebURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr;
 - (NSURL *) releaseNotesHTMLURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr;
 - (NSURL *) latestVersionZIPURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr;
+- (NSString *) commandToRunInstaller;
+
+- (void) autoUpdater:(HGCLIAutoUpdater *)autoUpdater willInstallVersion:(NSString *)latestVersionStr;
+- (void) autoUpdater:(HGCLIAutoUpdater *)autoUpdater didInstallVersion:(NSString *)latestVersionStr;
+- (void) autoUpdater:(HGCLIAutoUpdater *)autoUpdater didFailToInstallVersion:(NSString *)latestVersionStr;
 
 @end

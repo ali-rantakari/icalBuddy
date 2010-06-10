@@ -28,6 +28,8 @@ THE SOFTWARE.
 */
 
 #import "IcalBuddyAutoUpdaterDelegate.h"
+#import "HGCLIAutoUpdater.h"
+#import "HGCLIUtils.h"
 
 #define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
 #define kVersionCheckURL 		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:@"?versioncheck=y"]]
@@ -68,6 +70,17 @@ THE SOFTWARE.
 			]
 		];
 }
+
+- (NSString *) commandToRunInstaller
+{
+	return @"./install.command -y";
+}
+
+- (void) autoUpdater:(HGCLIAutoUpdater *)autoUpdater didInstallVersion:(NSString *)latestVersionStr
+{
+	Printf(@"You can run \"icalBuddy -V\" to confirm the update.\n\n");
+}
+
 
 @end
 

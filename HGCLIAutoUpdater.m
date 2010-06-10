@@ -439,10 +439,20 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	Printf(@">> Running installation script...\n");
 	Printf(@"--------------------------------------------\n");
 	
+	// check if delegate gives us the command for running the installer
+	NSString *installCmd = @"./install.command"; // default
+	if (self.delegate != nil && [self.delegate respondsToSelector:@selector(commandToRunInstaller)])
+		installCmd = [self.delegate commandToRunInstaller];
+	
+	// notify delegate
+	if (self.delegate != nil && [self.delegate respondsToSelector:@selector(autoUpdater:willInstallVersion:)])
+		[self.delegate autoUpdater:self willInstallVersion:self.latestVersionStr];
+	
 	sprintf(
 		cmd,
-		"cd \"%s\" && ./install.command -y",
-		[archiveExtractPath UTF8String]
+		"cd \"%s\" && %s",
+		[archiveExtractPath UTF8String],
+		[installCmd UTF8String]
 		);
 	exitStatus = system(cmd);
 	
@@ -482,6 +492,16 @@ cleanup:
 		Printf(@"=======================\n");
 		Printf(@"%@ has been successfully updated to v%@!\n", self.appName, self.latestVersionStr);
 		Printf(@"\n");
+		
+		// notify delegate
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(autoUpdater:didInstallVersion:)])
+			[self.delegate autoUpdater:self didInstallVersion:self.latestVersionStr];
+	}
+	else
+	{
+		// notify delegate
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(autoUpdater:didFailToInstallVersion:)])
+			[self.delegate autoUpdater:self didFailToInstallVersion:self.latestVersionStr];
 	}
 }
 
