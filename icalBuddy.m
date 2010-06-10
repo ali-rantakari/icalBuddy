@@ -2929,7 +2929,7 @@ int main(int argc, char *argv[])
 				
 				NSString *cleanStdoutBuffer = [stdoutBuffer string];
 				NSRange searchRange = NSMakeRange(0,[stdoutBuffer length]);
-				NSRange foundRange = NSMakeRange(NSNotFound,0);
+				NSRange foundRange;
 				do
 				{
 					foundRange = [cleanStdoutBuffer rangeOfString:keyword options:NSLiteralSearch range:searchRange];

@@ -291,7 +291,11 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 
 
 
-
+// This function is subject to buffer overflows and quoting issues (see the
+// calls to system() and especially the snprintf() calls before them) but
+// this shouldn't be an issue as long as the URLs don't have double quotes
+// in them and they are not too long.
+// 
 - (void) autoUpdateSelfFromURL:(NSURL *)latestVersionZIPURL
 {
 	NSCAssert((self.currentVersionStr != nil), @"self.currentVersionStr is nil");
@@ -303,7 +307,8 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	
 	BOOL updateSuccess = NO;
 	int exitStatus = 0;
-	char cmd [1000];
+	size_t CMD_SIZE = 10000;
+	char cmd [CMD_SIZE];
 	NSString *archivePath = [tempDir stringByAppendingPathComponent:@"hasseg.org-autoUpdate-archive.zip"];
 	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:@"hasseg.org-autoUpdate-tempdir"];
 	
@@ -378,7 +383,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	Printf(@"Do you want to automatically download and\n");
 	Printf(@"install the latest version (%@) ?\n", latestVersionStr);
 	
-	char inputChar;
+	char inputChar = '\0';
 	while(inputChar != 'y' && inputChar != 'Y' &&
 		  inputChar != 'n' && inputChar != 'N' &&
 		  inputChar != '\n'
@@ -400,8 +405,8 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	Printf(@" - saving archive to: %@\n", archivePath);
 	Printf(@"\n");
 	
-	sprintf(
-		cmd,
+	snprintf(
+		cmd, CMD_SIZE,
 		"curl \"%s\" > \"%s\"",
 		[zipURLStr UTF8String],
 		[archivePath UTF8String]
@@ -420,8 +425,8 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	Printf(@" - extracting to: %@\n", archiveExtractPath);
 	Printf(@"\n");
 	
-	sprintf(
-		cmd,
+	snprintf(
+		cmd, CMD_SIZE,
 		"mkdir -p \"%s\" && unzip \"%s\" -d \"%s\"",
 		[archiveExtractPath UTF8String],
 		[archivePath UTF8String],
@@ -448,8 +453,8 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	if (self.delegate != nil && [self.delegate respondsToSelector:@selector(autoUpdater:willInstallVersion:)])
 		[self.delegate autoUpdater:self willInstallVersion:self.latestVersionStr];
 	
-	sprintf(
-		cmd,
+	snprintf(
+		cmd, CMD_SIZE,
 		"cd \"%s\" && %s",
 		[archiveExtractPath UTF8String],
 		[installCmd UTF8String]

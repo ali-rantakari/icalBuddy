@@ -248,6 +248,8 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
 		
 		strIndex++;
 	}
+	
+	[str release];
 }
 
 

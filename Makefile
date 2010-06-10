@@ -18,7 +18,10 @@ VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
 SCP_TARGET=$(shell cat ./deploymentScpTarget)
 DEPLOYMENT_INCLUDES_DIR="./deployment-files"
-COMPILER="/Developer/usr/bin/clang"
+
+COMPILER_GCC="gcc"
+COMPILER_CLANG="/Developer/usr/bin/clang"
+COMPILER=$(COMPILER_CLANG)
 
 ifdef 64BIT
 	ARCH_64BIT=-arch x86_64
@@ -26,6 +29,7 @@ else
 	ARCH_64BIT=
 endif
 
+SOURCE_FILES=icalBuddy.m ANSIEscapeHelper.m HGCLIUtils.m HGCLIAutoUpdater.m HGCLIAutoUpdaterDelegate.m IcalBuddyAutoUpdaterDelegate.m
 
 
 
@@ -37,11 +41,24 @@ all: icalBuddy
 #-------------------------------------------------------------------------
 # compile the binary itself
 #-------------------------------------------------------------------------
-icalBuddy: icalBuddy.m ANSIEscapeHelper.m HGCLIUtils.m HGCLIAutoUpdater.m HGCLIAutoUpdaterDelegate.m IcalBuddyAutoUpdaterDelegate.m
+icalBuddy: $(SOURCE_FILES)
 	@echo
 	@echo ---- Compiling:
 	@echo ======================================
-	$(COMPILER) -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m HGCLIUtils.m HGCLIAutoUpdater.m HGCLIAutoUpdaterDelegate.m IcalBuddyAutoUpdaterDelegate.m icalBuddy.m
+	$(COMPILER) -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ $(SOURCE_FILES)
+
+
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# run clang static analyzer
+#-------------------------------------------------------------------------
+analyze:
+	@echo
+	@echo ---- Analyzing:
+	@echo ======================================
+	$(COMPILER_CLANG) --analyze $(SOURCE_FILES)
 
 
 
