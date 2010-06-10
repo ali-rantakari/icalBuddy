@@ -37,14 +37,13 @@ all: icalBuddy
 #-------------------------------------------------------------------------
 # compile the binary itself
 #-------------------------------------------------------------------------
-icalBuddy: icalBuddy.m
+icalBuddy: icalBuddy.m ANSIEscapeHelper.m HGCLIUtils.m HGCLIAutoUpdater.m IcalBuddyAutoUpdaterDelegate.m
 	@echo
 	@echo ---- Compiling:
 	@echo ======================================
-	$(COMPILER) -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m icalBuddy.m
+	$(COMPILER) -O3 -Wall -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ ANSIEscapeHelper.m HGCLIUtils.m HGCLIAutoUpdater.m IcalBuddyAutoUpdaterDelegate.m icalBuddy.m
 
 
-64bit: i
 
 
 

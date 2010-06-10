@@ -1,7 +1,6 @@
-//  icalBuddy.m
-//
-//  Created by Ali Rantakari on 17 June 2008
-//  http://hasseg.org
+// icalBuddy
+// 
+// http://hasseg.org/icalBuddy
 //
 
 /*
@@ -29,19 +28,16 @@ THE SOFTWARE.
 */
 
 
-#include <Foundation/Foundation.h>
-#include <CalendarStore/CalendarStore.h>
-#include <AppKit/AppKit.h>
-#include <AddressBook/AddressBook.h>
-#include "ANSIEscapeHelper.h"
+#import <Foundation/Foundation.h>
+#import <CalendarStore/CalendarStore.h>
+#import <AppKit/AppKit.h>
+#import <AddressBook/AddressBook.h>
+#import "HGCLIUtils.h"
+#import "HGCLIAutoUpdater.h"
+#import "IcalBuddyAutoUpdaterDelegate.h"
+#import "ANSIEscapeHelper.h"
 
 
-#define kAppSiteURLPrefix 		@"http://hasseg.org/icalBuddy/"
-#define kVersionCheckURL 		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:@"?versioncheck=y"]]
-#define kWhatsChangedURL		[NSURL URLWithString:[kAppSiteURLPrefix stringByAppendingString:[@"?whatschanged=y&currentversion=" stringByAppendingString:versionNumberStr()]]]
-#define kDownloadURLFormat		[kAppSiteURLPrefix stringByAppendingString:@"%@/icalBuddy-v%@.zip"]
-#define kVersionCheckHeaderName	@"Orghassegsoftwarelatestversion"
-#define kServerConnectTimeout 	10.0
 
 
 #define kInternalErrorDomain @"org.hasseg.icalBuddy"
@@ -162,11 +158,6 @@ THE SOFTWARE.
 						 nil\
 						]
 
-// helper function macros
-#define kEmptyMutableAttributedString 	[[[NSMutableAttributedString alloc] init] autorelease]
-#define MUTABLE_ATTR_STR(x)				[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
-#define ATTR_STR(x)						[[[NSAttributedString alloc] initWithString:(x)] autorelease]
-#define WHITESPACE(x)					[@"" stringByPaddingToLength:(x) withString:@" " startingAtIndex:0]
 
 
 
@@ -199,8 +190,6 @@ enum calItemPrintOption
 
 
 
-// the string encoding to use for output
-NSStringEncoding outputStrEncoding = NSUTF8StringEncoding; // default
 
 // the order of properties in the output
 NSArray *propertyOrder;
@@ -256,6 +245,8 @@ NSDictionary *defaultStringsDict;
 NSMutableAttributedString *stdoutBuffer;
 
 ANSIEscapeHelper *ansiEscapeHelper;
+HGCLIAutoUpdater *autoUpdater;
+IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 
 
 
@@ -279,141 +270,6 @@ void addToOutputBuffer(NSAttributedString *aStr)
 	[stdoutBuffer appendAttributedString:aStr];
 }
 
-
-
-// helper methods for printing to stdout and stderr
-// 		from: http://www.sveinbjorn.org/objectivec_stdout
-// 		(modified to use non-deprecated version of writeToFile:...
-//       and allow for using the "string format" syntax)
-
-void Print(NSString *aStr)
-{
-	if (aStr == nil)
-		return;
-	[aStr writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
-}
-
-void Printf(NSString *aStr, ...)
-{
-	va_list argList;
-	va_start(argList, aStr);
-	NSString *str = [
-		[[NSString alloc]
-			initWithFormat:aStr
-			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			arguments:argList
-			] autorelease
-		];
-	va_end(argList);
-	
-	[str writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
-}
-
-void PrintfErr(NSString *aStr, ...)
-{
-	va_list argList;
-	va_start(argList, aStr);
-	NSString *str = [
-		[[NSString alloc]
-			initWithFormat:aStr
-			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			arguments:argList
-			] autorelease
-		];
-	va_end(argList);
-	
-	[str writeToFile:@"/dev/stderr" atomically:NO encoding:outputStrEncoding error:NULL];
-}
-
-
-// returns YES if success, NO if failure
-BOOL moveFileToTrash(NSString *filePath)
-{
-	if (filePath == nil)
-		return NO;
-	
-	NSString *fileDir = [filePath stringByDeletingLastPathComponent];
-	NSString *fileName = [filePath lastPathComponent];
-	
-	return [[NSWorkspace sharedWorkspace]
-		performFileOperation:NSWorkspaceRecycleOperation
-		source:fileDir
-		destination:@""
-		files:[NSArray arrayWithObject:fileName]
-		tag:nil
-		];
-}
-
-
-
-// helper method: compare three-part version number strings (e.g. "1.12.3")
-NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
-{
-	if (first != nil && second != nil)
-	{
-		int i;
-		
-		NSMutableArray *firstComponents = [NSMutableArray arrayWithCapacity:3];
-		[firstComponents addObjectsFromArray:[first componentsSeparatedByString:@"."]];
-		
-		NSMutableArray *secondComponents = [NSMutableArray arrayWithCapacity:3];
-		[secondComponents addObjectsFromArray:[second componentsSeparatedByString:@"."]];
-		
-		if ([firstComponents count] != [secondComponents count])
-		{
-			NSMutableArray *shorter;
-			NSMutableArray *longer;
-			if ([firstComponents count] > [secondComponents count])
-			{
-				shorter = secondComponents;
-				longer = firstComponents;
-			}
-			else
-			{
-				shorter = firstComponents;
-				longer = secondComponents;
-			}
-			
-			NSUInteger countDiff = [longer count] - [shorter count];
-			
-			for (i = 0; i < countDiff; i++)
-				[shorter addObject:@"0"];
-		}
-		
-		for (i = 0; i < [firstComponents count]; i++)
-		{
-			int firstComponentIntVal = [[firstComponents objectAtIndex:i] intValue];
-			int secondComponentIntVal = [[secondComponents objectAtIndex:i] intValue];
-			if (firstComponentIntVal < secondComponentIntVal)
-				return NSOrderedAscending;
-			else if (firstComponentIntVal > secondComponentIntVal)
-				return NSOrderedDescending;
-		}
-		return NSOrderedSame;
-	}
-	else
-		return NSOrderedSame;
-}
-
-
-
-// convenience function: concatenates strings (yes, I hate the
-// verbosity of -stringByAppendingString:.)
-// NOTE: MUST SEND nil AS THE LAST ARGUMENT
-NSString* strConcat(NSString *firstStr, ...)
-{
-	if (!firstStr)
-		return nil;
-	
-	va_list argList;
-	NSMutableString *retVal = [firstStr mutableCopy];
-	NSString *str;
-	va_start(argList, firstStr);
-	while((str = va_arg(argList, NSString*)))
-		[retVal appendString:str];
-	va_end(argList);
-	return retVal;
-}
 
 
 
@@ -447,134 +303,6 @@ NSString *translateEscapeSequences(NSString *str)
 	return ms;
 }
 
-
-
-// replaces all occurrences of searchStr in str with replaceStr
-void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr)
-{
-	if (str == nil || searchStr == nil || replaceStr == nil)
-		return;
-	
-	NSUInteger replaceStrLength = [replaceStr length];
-	NSString *strRegularString = [str string];
-	NSRange searchRange = NSMakeRange(0, [strRegularString length]);
-	NSRange foundRange;
-	do
-	{
-		foundRange = [strRegularString rangeOfString:searchStr options:NSLiteralSearch range:searchRange];
-		if (foundRange.location != NSNotFound)
-		{
-			[str replaceCharactersInRange:foundRange withAttributedString:replaceStr];
-			
-			strRegularString = [str string];
-			searchRange.location = foundRange.location + replaceStrLength;
-			searchRange.length = [strRegularString length] - searchRange.location;
-		}
-	}
-	while (foundRange.location != NSNotFound);
-}
-
-
-#define UNICHAR_NEWLINE 10
-#define UNICHAR_TAB 9
-#define UNICHAR_SPACE 32
-#define TAB_STOP_LENGTH 4
-
-void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUInteger width)
-{
-	// replace tabs with spaces to avoid problems with different programs
-	// (that would display our output) using different tab stop lengths:
-	replaceInMutableAttrStr(mutableAttrStr, @"\t", ATTR_STR(WHITESPACE(TAB_STOP_LENGTH)));
-	
-	NSString *str = [[mutableAttrStr string] copy];
-	
-	NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
-	
-	// characters we'll consider as indentation:
-	NSCharacterSet *indentChars = [NSCharacterSet characterSetWithCharactersInString:@" •"];
-	
-	// find all input string indices where we want to
-	// wrap the line
-	NSUInteger strLength = [str length];
-	NSUInteger strIndex = 0;
-	NSUInteger currentLineLength = 0;
-	NSUInteger lastWhitespaceIndex = 0;
-	unichar currentUnichar = 0;
-	BOOL lastCharWasWhitespace = NO;
-	BOOL lastCharWasIndentation = NO;
-	NSUInteger numAddedChars = 0;
-	NSUInteger currentLineIndentAmount = 0;
-	while(strIndex < strLength)
-	{
-		if (width <= currentLineLength)
-		{
-			// insert newline at the wrap index, eating one whitespace
-			// *if* we're wrapping at a whitespace (i.e. don't eat characters
-			// if we've been forced to wrap in the middle of a word)
-			
-			NSUInteger indexToWrapAt = ((0 < lastWhitespaceIndex) ? lastWhitespaceIndex : strIndex) + numAddedChars;
-			NSUInteger lengthToReplace = ((lastWhitespaceIndex != 0)?1:0);
-			NSRange replaceRange = NSMakeRange(indexToWrapAt, lengthToReplace);
-			
-			NSAttributedString *replaceStr = nil;
-			if (currentLineIndentAmount == 0)
-				replaceStr = newlineAttrStr;
-			else
-				replaceStr = ATTR_STR(strConcat(@"\n", WHITESPACE(currentLineIndentAmount), nil));
-			
-			[mutableAttrStr
-				replaceCharactersInRange:replaceRange
-				withAttributedString:replaceStr
-				];
-			
-			numAddedChars += [replaceStr length] - lengthToReplace;
-			
-			lastWhitespaceIndex = 0;
-			currentLineLength = (strIndex-(indexToWrapAt-numAddedChars));
-		}
-		else
-		{
-			currentUnichar = [str characterAtIndex:strIndex];
-			
-			if ((lastCharWasIndentation || currentLineLength == 0) &&
-				[indentChars characterIsMember:currentUnichar]
-				)
-			{
-				lastCharWasIndentation = YES;
-				currentLineIndentAmount++;
-			}
-			else
-				lastCharWasIndentation = NO;
-			
-			if (currentUnichar == UNICHAR_NEWLINE)
-			{
-				lastWhitespaceIndex = 0;
-				currentLineLength = 0;
-				currentLineIndentAmount = 0;
-			}
-			// we want to wrap at the beginning of the last
-			// whitespace run of the current line, excluding the
-			// beginning of the line (doesn't make sense to wrap
-			// there):
-			else if (!lastCharWasWhitespace &&
-					 0 < currentLineLength &&
-					 currentUnichar == UNICHAR_SPACE
-					 )
-			{
-				lastWhitespaceIndex = strIndex;
-				currentLineLength++;
-			}
-			else
-			{
-				currentLineLength++;
-			}
-			
-			lastCharWasWhitespace = (currentUnichar == UNICHAR_SPACE);
-		}
-		
-		strIndex++;
-	}
-}
 
 
 
@@ -2020,275 +1748,6 @@ void printItemSections(NSArray *sections, int printOptions)
 
 
 
-// returns latest version number (as string) if an update is found online,
-// or nil if no update was found. on error, errorStr will contain
-// an error message.
-NSString* latestUpdateVersionOnServer(NSString** errorStr)
-{
-	NSURL *url = kVersionCheckURL;
-	NSURLRequest *request = [NSURLRequest
-		requestWithURL:url
-		cachePolicy:NSURLRequestReloadIgnoringCacheData
-		timeoutInterval:kServerConnectTimeout
-		];
-	
-	NSHTTPURLResponse *response = nil;
-	NSError *error = nil;
-	[NSURLConnection
-		sendSynchronousRequest:request
-		returningResponse:&response
-		error:&error
-		];
-	
-	if (error == nil && response != nil)
-	{
-		NSInteger statusCode = [response statusCode];
-		if (statusCode >= 400)
-		{
-			if (errorStr != NULL)
-				*errorStr = [
-					NSString
-					stringWithFormat:@"HTTP connection failed. Status code %d: \"%@\"",
-						statusCode,
-						[NSHTTPURLResponse localizedStringForStatusCode:statusCode]
-					];
-			return nil;
-		}
-		else
-		{
-			NSString *latestVersionString = [[response allHeaderFields] valueForKey:kVersionCheckHeaderName];
-			NSString *currentVersionString = versionNumberStr();
-			
-			if (latestVersionString == nil)
-			{
-				if (errorStr != NULL)
-					*errorStr = @"Error reading latest version number from HTTP header field.";
-				return nil;
-			}
-			else
-			{
-				if (versionNumberCompare(currentVersionString, latestVersionString) == NSOrderedAscending)
-					return latestVersionString;
-			}
-		}
-	}
-	else
-	{
-		if (errorStr != NULL)
-		{
-			if (error != nil)
-			{
-				*errorStr = [
-					NSString
-					stringWithFormat:@"Connection failed. Error: - %@ %@",
-						[error localizedDescription],
-						[[error userInfo] objectForKey:NSErrorFailingURLStringKey]
-					];
-			}
-			else
-				*errorStr = @"Connection failed.";
-		}
-		return nil;
-	}
-	
-	return nil;
-}
-
-
-
-
-
-
-
-
-void autoUpdateSelf(NSString *currentVersionStr, NSString *latestVersionStr)
-{
-	NSCAssert((currentVersionStr != nil), @"currentVersionStr is nil");
-	NSCAssert((latestVersionStr != nil), @"latestVersionStr is nil");
-	
-	NSString *tempDir = NSTemporaryDirectory();
-	if (tempDir == nil)
-		tempDir = @"/tmp";
-	
-	BOOL updateSuccess = NO;
-	int exitStatus = 0;
-	char cmd [1000];
-	NSString *archivePath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-archive.zip"];
-	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:@"icalBuddy-autoUpdate-tempdir"];
-	
-	
-	Printf(@"\n\n");
-	Printf(@"CHANGES SINCE THE CURRENT VERSION (%@):\n", currentVersionStr);
-	Printf(@"=============================================\n");
-	Printf(@"\n");
-	
-	NSURLRequest *whatsChangedRequest = [NSURLRequest
-		requestWithURL:kWhatsChangedURL
-		cachePolicy:NSURLRequestReloadIgnoringCacheData
-		timeoutInterval:kServerConnectTimeout
-		];
-	
-	NSHTTPURLResponse *whatsChangedResponse = nil;
-	NSError *whatsChangedError = nil;
-	NSData *whatsChangedData = [NSURLConnection
-		sendSynchronousRequest:whatsChangedRequest
-		returningResponse:&whatsChangedResponse
-		error:&whatsChangedError
-		];
-	
-	if (whatsChangedError == nil && whatsChangedResponse != nil && whatsChangedData != nil)
-	{
-		NSInteger statusCode = [whatsChangedResponse statusCode];
-		if (statusCode >= 400)
-		{
-			PrintfErr(@"\n\nFailed to load list of changes from server (HTTP status code: %d \"%@\")\n\n",
-				statusCode,
-				[NSHTTPURLResponse localizedStringForStatusCode:statusCode]
-				);
-			return;
-		}
-		else
-		{
-			NSAttributedString *whatsChangedAttrStr = [[[NSAttributedString alloc]
-				initWithHTML:whatsChangedData
-				documentAttributes:NULL
-				] autorelease];
-			NSMutableAttributedString *whatsChangedMAttrStr = [[[NSMutableAttributedString alloc] init] autorelease];
-			[whatsChangedMAttrStr appendAttributedString:whatsChangedAttrStr];
-			
-			// fix bullet points (replace tabs after bullets with spaces)
-			replaceInMutableAttrStr(whatsChangedMAttrStr, @"•\t", ATTR_STR(@"• "));
-			
-			wordWrapMutableAttrStr(whatsChangedMAttrStr, 80);
-			
-			NSString *whatsChangedFinalOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:whatsChangedMAttrStr];
-			
-			Print(whatsChangedFinalOutput);
-		}
-	}
-	else
-	{
-		PrintfErr(@"\n\nFailed to load list of changes from server (error: %@)\n\n",
-			(whatsChangedError != nil)?[whatsChangedError localizedDescription]:@"?"
-			);
-		goto cleanup;
-	}
-	
-	Printf(@"\n\n");
-	Printf(@"=============================================\n");
-	Printf(@"Do you want to automatically download and\n");
-	Printf(@"install the latest version (%@) ?\n", latestVersionStr);
-	
-	char inputChar;
-	while(inputChar != 'y' && inputChar != 'Y' &&
-		  inputChar != 'n' && inputChar != 'N' &&
-		  inputChar != '\n'
-		  )
-	{
-		Printf(@"[y/n]: ");
-		scanf("%s&*c",&inputChar);
-	}
-	
-	if (inputChar != 'y' && inputChar != 'Y')
-		goto cleanup;
-	
-	Printf(@"\n\n");
-	Printf(@">> Downloading distribution archive...\n");
-	Printf(@"--------------------------------------------\n");
-	Printf(@" - saving archive to: %@\n", archivePath);
-	Printf(@"\n");
-	
-	sprintf(
-		cmd,
-		"curl \"%s\" > \"%s\"",
-		[[NSString stringWithFormat:kDownloadURLFormat, latestVersionStr, latestVersionStr]
-			cStringUsingEncoding:NSASCIIStringEncoding
-			],
-		[archivePath UTF8String]
-		);
-	exitStatus = system(cmd);
-	
-	if (exitStatus != 0)
-	{
-		PrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		goto cleanup;
-	}
-	
-	Printf(@"\n\n");
-	Printf(@">> Extracting distribution archive...\n");
-	Printf(@"--------------------------------------------\n");
-	Printf(@" - extracting to: %@\n", archiveExtractPath);
-	Printf(@"\n");
-	
-	sprintf(
-		cmd,
-		"mkdir -p \"%s\" && unzip \"%s\" -d \"%s\"",
-		[archiveExtractPath UTF8String],
-		[archivePath UTF8String],
-		[archiveExtractPath UTF8String]
-		);
-	exitStatus = system(cmd);
-	
-	if (exitStatus != 0)
-	{
-		PrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		goto cleanup;
-	}
-	
-	Printf(@"\n\n");
-	Printf(@">> Running installation script...\n");
-	Printf(@"--------------------------------------------\n");
-	
-	sprintf(
-		cmd,
-		"cd \"%s\" && ./install.command -y",
-		[archiveExtractPath UTF8String]
-		);
-	exitStatus = system(cmd);
-	
-	if (exitStatus != 0)
-	{
-		PrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
-		goto cleanup;
-	}
-	
-	updateSuccess = YES;
-	
-cleanup:
-	Printf(@"\n\n");
-	Printf(@">> Cleaning up...\n");
-	Printf(@"--------------------------------------------\n");
-	
-	BOOL fileDeleteSuccess = NO;
-	if (archivePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archivePath])
-	{
-		Printf(@" - Moving distribution archive to trash\n");
-		fileDeleteSuccess = moveFileToTrash(archivePath);
-		if (!fileDeleteSuccess)
-			PrintfErr(@"   Could not move to trash.\n");
-	}
-	
-	if (archiveExtractPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archiveExtractPath])
-	{
-		Printf(@" - Moving temporary extract folder for distribution archive to trash\n");
-		fileDeleteSuccess = moveFileToTrash(archiveExtractPath);
-		if (!fileDeleteSuccess)
-			PrintfErr(@"   Could not move to trash.\n");
-	}
-	
-	if (updateSuccess)
-	{
-		Printf(@"\n\n");
-		Printf(@"=======================\n");
-		Printf(@"icalBuddy has been successfully updated to v%@!\n", latestVersionStr);
-		Printf(@"Run \"icalBuddy -V\" to confirm this.\n");
-		Printf(@"\n");
-	}
-}
-
-
-
-
 
 
 NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals)
@@ -2299,6 +1758,8 @@ NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSAr
 		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", excludeCals, excludeCals]];
 	return cals;
 }
+
+
 
 
 
@@ -2326,7 +1787,14 @@ int main(int argc, char *argv[])
 	today = dateForStartOfDay(now);
 	
 	
-	ansiEscapeHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
+	ansiEscapeHelper = [[ANSIEscapeHelper alloc] init];
+	
+	autoUpdater = [[HGCLIAutoUpdater alloc]
+		initWithAppName:@"icalBuddy"
+		currentVersionStr:versionNumberStr()
+		];
+	autoUpdaterDelegate = [[IcalBuddyAutoUpdaterDelegate alloc] init];
+	autoUpdater.delegate = autoUpdaterDelegate;
 	
 	
 	// default localization strings (english)
@@ -2821,62 +2289,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if (arg_updatesCheck)
 	{
-		Printf(@"Checking for updates... ");
-		
-		NSString *versionCheckErrorStr = nil;
-		NSString *latestVersionStr = latestUpdateVersionOnServer(&versionCheckErrorStr);
-		NSString *currentVersionStr = versionNumberStr();
-		
-		if (latestVersionStr == nil && versionCheckErrorStr != nil)
-			PrintfErr(@"...%@", versionCheckErrorStr);
-		else
-		{
-			if (latestVersionStr == nil)
-				Printf(@"...you're up to date! (current & latest: %@)\n\n", currentVersionStr);
-			else
-			{
-				Printf(@"...update found! (latest: %@  current: %@)\n\n", latestVersionStr, currentVersionStr);
-				Printf(
-					@"Navigate to the following URL to see the release notes and download the latest version:\n\n%@?currentversion=%@\n\n",
-					kAppSiteURLPrefix, currentVersionStr
-					);
-				Printf(@"Do you want to navigate to this URL now?\n");
-				Printf(@"  y = yes, go to the icalBuddy website\n");
-				Printf(@"  n = no, just quit\n");
-				Printf(@"  a = show a list of what's changed since the current\n");
-				Printf(@"      version and then choose whether to automatically\n");
-				Printf(@"      download and install the latest version\n");
-				
-				char inputChar;
-				while(inputChar != 'y' && inputChar != 'Y' &&
-					  inputChar != 'n' && inputChar != 'N' &&
-				  	  inputChar != 'a' && inputChar != 'A' &&
-				  	  inputChar != '\n'
-					  )
-				{
-					Printf(@"[y/n/a]: ");
-					scanf("%s&*c",&inputChar);
-				}
-				
-				if (inputChar == 'y' || inputChar == 'Y')
-				{
-					[[NSWorkspace sharedWorkspace]
-						openURL:[
-							NSURL
-							URLWithString:[
-								NSString
-								stringWithFormat: @"%@?currentversion=%@",
-									kAppSiteURLPrefix, currentVersionStr
-							]
-						]
-						];
-				}
-				else if (inputChar == 'a' || inputChar == 'A')
-				{
-					autoUpdateSelf(currentVersionStr, latestVersionStr);
-				}
-			}
-		}
+		[autoUpdater checkForUpdatesWithUI];
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
