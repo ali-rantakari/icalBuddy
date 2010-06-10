@@ -1,7 +1,10 @@
 # ignored patterns
 
-# clang --analyze output (?)
+# clang --analyze plist files
 icalBuddy.plist
+ANSIEscapeHelper.plist
+HGCLI*.plist
+IcalBuddyAutoUpdaterDelegate.plist
 
 # OS X junk
 Icon*
@@ -23,6 +26,8 @@ Manual-*.pdf
 # temp files
 test.m
 a.out
+testConfig.plist
+log.txt
 
 # other
 deploymentScpTarget
