@@ -63,33 +63,26 @@ THE SOFTWARE.
 
 - (NSURL *) latestVersionCheckURLWithCurrentVersion:(NSString *)currentVersionStr
 {
-	return [NSURL URLWithString:[[self appSiteURLPrefix] stringByAppendingString:@"?versioncheck=y"]];
+	return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?versioncheck=y", nil)];
 }
 
 - (NSURL *) latestVersionInfoWebURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr
 {
-	return [NSURL
-		URLWithString:[[self appSiteURLPrefix]
-			stringByAppendingString:[@"?currentversion=" stringByAppendingString:currentVersionStr]
-			]
-		];
+	return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?currentversion=", currentVersionStr, nil)];
 }
 
 - (NSURL *) releaseNotesHTMLURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr
 {
-	return [NSURL
-		URLWithString:[[self appSiteURLPrefix]
-			stringByAppendingString:[@"?whatschanged=y&currentversion=" stringByAppendingString:currentVersionStr]
-			]
-		];
+	return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?whatschanged=y&currentversion=", currentVersionStr, nil)];
 }
 
 - (NSURL *) latestVersionZIPURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr
 {
-	NSString *urlStr = [NSString
-		stringWithFormat:[[self appSiteURLPrefix] stringByAppendingString:@"%@/%@-v%@.zip"],
-			latestVersionStr, appName, latestVersionStr
-		];
+	NSString *urlStr = strConcat(
+		[self appSiteURLPrefix],
+		[NSString stringWithFormat:@"%@/%@-v%@.zip", latestVersionStr, appName, latestVersionStr],
+		nil
+		);
 	return [NSURL URLWithString:urlStr];
 }
 
