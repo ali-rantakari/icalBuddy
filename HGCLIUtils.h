@@ -45,10 +45,10 @@ void Print(NSString *aStr);
 void Printf(NSString *aStr, ...);
 void PrintfErr(NSString *aStr, ...);
 
-NSString* strConcat(NSString *firstStr, ...);
+NSString *strConcat(NSString *firstStr, ...);
+NSString *escapeDoubleQuotes(NSString *str);
 
 void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr);
-
 void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUInteger width);
 
 BOOL moveFileToTrash(NSString *filePath);

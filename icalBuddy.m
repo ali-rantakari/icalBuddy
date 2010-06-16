@@ -362,6 +362,19 @@ NSArray* arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 }
 
 
+NSError *internalError(NSInteger code, NSString *description)
+{
+	return [NSError
+		errorWithDomain:kInternalErrorDomain
+		code:code
+		userInfo:[NSDictionary
+			dictionaryWithObject:description
+			forKey:NSLocalizedDescriptionKey
+			]
+		];
+}
+
+
 // create an NSArray from a string where components are
 // separated by an arbitrary character and this separator character
 // must be present as both the first and the last character
@@ -371,27 +384,13 @@ NSArray* arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
 	if (str == nil)
 	{
 		if (error != NULL)
-			*error = [NSError
-				errorWithDomain:kInternalErrorDomain
-				code:0
-				userInfo:[NSDictionary
-					dictionaryWithObject:@"Given string is null"
-					forKey:NSLocalizedDescriptionKey
-					]
-				];
+			*error = internalError(0, @"Given string is null");
 		return nil;
 	}
 	if ([str length] < 2)
 	{
 		if (error != NULL)
-			*error = [NSError
-				errorWithDomain:kInternalErrorDomain
-				code:0
-				userInfo:[NSDictionary
-					dictionaryWithObject:@"Given string has less than two characters"
-					forKey:NSLocalizedDescriptionKey
-					]
-				];
+			*error = internalError(0, @"Given string has less than two characters");
 		return nil;
 	}
 	
@@ -404,14 +403,7 @@ NSArray* arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
 	else
 	{
 		if (error != NULL)
-			*error = [NSError
-				errorWithDomain:kInternalErrorDomain
-				code:0
-				userInfo:[NSDictionary
-					dictionaryWithObject:@"Given string must start and end with the separator character"
-					forKey:NSLocalizedDescriptionKey
-					]
-				];
+			*error = internalError(0, @"Given string must start and end with the separator character");
 		return nil;
 	}
 	

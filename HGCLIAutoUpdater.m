@@ -298,6 +298,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 // 
 - (void) autoUpdateSelfFromURL:(NSURL *)latestVersionZIPURL
 {
+	NSCAssert((self.appName != nil), @"self.appName is nil");
 	NSCAssert((self.currentVersionStr != nil), @"self.currentVersionStr is nil");
 	NSCAssert((self.latestVersionStr != nil), @"self.latestVersionStr is nil");
 	
@@ -309,8 +310,10 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	int exitStatus = 0;
 	size_t CMD_SIZE = 10000;
 	char cmd [CMD_SIZE];
-	NSString *archivePath = [tempDir stringByAppendingPathComponent:@"hasseg.org-autoUpdate-archive.zip"];
-	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:@"hasseg.org-autoUpdate-tempdir"];
+	NSString *archiveFilename = [NSString stringWithFormat:@"%@-autoUpdate-archive.zip", escapeDoubleQuotes(self.appName)];
+	NSString *archivePath = [tempDir stringByAppendingPathComponent:archiveFilename];
+	NSString *archiveExtractDirname = [NSString stringWithFormat:@"%@-autoUpdate-tempdir", escapeDoubleQuotes(self.appName)];
+	NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:archiveExtractDirname];
 	
 	
 	// check if delegate gives us the URL for changelog HTML data
@@ -396,7 +399,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	if (inputChar != 'y' && inputChar != 'Y')
 		goto cleanup;
 	
-	NSString *zipURLStr = [NSString stringWithFormat:@"%@", latestVersionZIPURL];
+	NSString *zipURLStr = [latestVersionZIPURL absoluteString];
 	
 	Printf(@"\n\n");
 	Printf(@">> Downloading distribution archive...\n");
@@ -408,7 +411,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 	snprintf(
 		cmd, CMD_SIZE,
 		"curl \"%s\" > \"%s\"",
-		[zipURLStr UTF8String],
+		[escapeDoubleQuotes(zipURLStr) UTF8String],
 		[archivePath UTF8String]
 		);
 	exitStatus = system(cmd);

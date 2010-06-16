@@ -105,7 +105,7 @@ BOOL moveFileToTrash(NSString *filePath)
 // convenience function: concatenates strings (yes, I hate the
 // verbosity of -stringByAppendingString:.)
 // NOTE: MUST SEND nil AS THE LAST ARGUMENT
-NSString* strConcat(NSString *firstStr, ...)
+NSString *strConcat(NSString *firstStr, ...)
 {
 	if (!firstStr)
 		return nil;
@@ -120,6 +120,10 @@ NSString* strConcat(NSString *firstStr, ...)
 	return retVal;
 }
 
+NSString *escapeDoubleQuotes(NSString *str)
+{
+	return [str stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
+}
 
 
 
