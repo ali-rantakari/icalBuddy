@@ -1887,7 +1887,7 @@ int main(int argc, char *argv[])
 	// ride (it's good friends with the config stuff and I don't
 	// have the heart to separate them))
 	int i;
-	for (i = 0; i < argc; i++)
+	for (i = 1; i < argc; i++)
 	{
 		if (((strcmp(argv[i], "-cf") == 0) || (strcmp(argv[i], "--configFile") == 0)) && (i+1 < argc))
 		{
@@ -2122,7 +2122,7 @@ int main(int argc, char *argv[])
 	
 	
 	
-	for (i = 0; i < argc; i++)
+	for (i = 1; i < argc; i++)
 	{
 		if ((strcmp(argv[i], "-sc") == 0) || (strcmp(argv[i], "--separateByCalendar") == 0))
 			arg_separateByCalendar = YES;
