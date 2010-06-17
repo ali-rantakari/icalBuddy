@@ -129,27 +129,37 @@ Manual-icalBuddyLocalization.pdf: icalBuddyLocalization.1
 
 
 
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# generate FAQ HTML
+#-------------------------------------------------------------------------
+deployment/faq.html: faq.markdown faq-style.css
+	@echo
+	@echo ---- Generating HTML from FAQ:
+	@echo ======================================
+	echo "<html><head><title>icalBuddy FAQ</title>" > $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<style type='text/css'>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	cat faq-style.css >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "</style>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "</head><body><div id='main'>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	utils/discount -T -f +toc faq.markdown >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "</div></body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+
+
+
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 # generate documentation
 #-------------------------------------------------------------------------
-docs: icalBuddy.1 faq.markdown icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyConfig.pdf Manual-icalBuddyLocalization.pdf
+docs: icalBuddy.1 deployment/faq.html icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyConfig.pdf Manual-icalBuddyLocalization.pdf
 	@echo
 	@echo ---- Generating HTML from manpages:
 	@echo ======================================
 	utils/manserver.pl icalBuddy.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_MANFILE)
 	utils/manserver.pl icalBuddyLocalization.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_L10NMANFILE)
 	utils/manserver.pl icalBuddyConfig.1 | sed -e 's/<BODY .*>/<BODY>/' > $(TEMP_DEPLOYMENT_CONFIGMANFILE)
-	
-	@echo
-	@echo ---- Generating HTML from FAQ:
-	@echo ======================================
-	echo "<html><head><title>icalBuddy FAQ</title>" > $(TEMP_DEPLOYMENT_FAQFILE)
-	echo "<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />" >> $(TEMP_DEPLOYMENT_FAQFILE)
-	echo "<style type='text/css'>#main{width:600px; margin:30 auto 300 auto; word-wrap:break-word;} p{margin-bottom:30px;}</style>" >> $(TEMP_DEPLOYMENT_FAQFILE)
-	echo "</head><body><div id='main'>" >> $(TEMP_DEPLOYMENT_FAQFILE)
-	perl utils/markdown/Markdown.pl faq.markdown >> $(TEMP_DEPLOYMENT_FAQFILE)
-	echo "</div></body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 
 
 

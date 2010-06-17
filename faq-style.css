@@ -1,0 +1,24 @@
+
+#main {
+	width: 600px;
+	margin: 30 auto 300 auto;
+	word-wrap: break-word;
+	}
+
+/* TOC: */
+#main > ul {
+	border: 1px solid black;
+	background: #eee;
+	padding: 10px 10px 10px 30px;
+	margin-left: 0;
+	line-height: 120%;
+	}
+
+p {
+	margin-bottom: 30px;
+	}
+
+h1 {
+	font-size: 18px;
+	}
+
