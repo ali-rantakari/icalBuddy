@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 
 # install script for icalBuddy
-# (c) 2008-2010 Ali Rantakari
+# Copyright 2008-2010 Ali Rantakari
 # 
 
 DN="`dirname \"$0\"`"
@@ -16,7 +16,7 @@ L10NMANFILE="${THISDIR}/icalBuddyLocalization.1"
 CONFIGMANFILE="${THISDIR}/icalBuddyConfig.1"
 
 
-
+# check that the required (installable) files can be found
 if [ ! -e "${BINFILE}" ];then
 	echo "Error: can not find \"${BINFILE}\". Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.) If you already are, run 'make' to build icalBuddy and then try running this script again."
 	exit 1
@@ -33,6 +33,11 @@ if [ ! -e "${L10NMANFILE}" ];then
 	echo "Error: can not find \"${CONFIGMANFILE}\" (the configuration man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
 	exit 1
 fi
+
+
+# TODO: adjust install paths if icalBuddy seems to be installed already
+
+
 echo "================================="
 echo
 echo "This script will install:"
