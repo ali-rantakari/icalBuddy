@@ -44,8 +44,9 @@ THE SOFTWARE.
 
 #define kPropertyListEditorAppName @"Property List Editor"
 
-// custom date-formatting specifier ("relative week")
+// custom date-formatting specifiers
 #define kRelativeWeekFormatSpecifier @"%RW"
+#define kDayDiffFormatSpecifier @"%RD"
 
 
 // property names
@@ -166,7 +167,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 6;
+const int VERSION_BUILD = 7;
 
 
 
@@ -601,6 +602,19 @@ NSInteger getWeekDiff(NSDate *date1, NSDate *date2)
 }
 
 
+NSInteger getDayDiff(NSDate *date1, NSDate *date2)
+{
+	if (date1 == nil || date2 == nil)
+		return 0;
+	
+	NSCalendarDate *d1 = dateForStartOfDay([date1 dateWithCalendarFormat:nil timeZone:nil]);
+	NSCalendarDate *d2 = dateForStartOfDay([date2 dateWithCalendarFormat:nil timeZone:nil]);
+	
+	NSTimeInterval ti = [d2 timeIntervalSinceDate:d1];
+	return abs(ti / (60*60*24));
+}
+
+
 
 
 
@@ -702,6 +716,34 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 						withString:weekDiffStr
 						];
 			}
+			
+			// implement the "x days from now" date format specifier
+			NSRange dayDiffFormatSpecifierRange = [useDateFormatStr rangeOfString:kDayDiffFormatSpecifier];
+			if (dayDiffFormatSpecifierRange.location != NSNotFound)
+			{
+				NSInteger dayDiff = getDayDiff(now, date);
+				if ([now compare:date] == NSOrderedDescending)
+					dayDiff *= -1; // in the past
+				
+				NSString *dayDiffStr = nil;
+				if (dayDiff < -1)
+					dayDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXDaysAgo), abs(dayDiff)];
+				else if (dayDiff == -1)
+					dayDiffStr = localizedStr(kL10nKeyYesterday);
+				else if (dayDiff == 0)
+					dayDiffStr = localizedStr(kL10nKeyToday);
+				else if (dayDiff == 1)
+					dayDiffStr = localizedStr(kL10nKeyTomorrow);
+				else if (dayDiff > 1)
+					dayDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXDaysFromNow), dayDiff];
+				
+				if (dayDiffStr != nil)
+					useDateFormatStr = [useDateFormatStr
+						stringByReplacingCharactersInRange:dayDiffFormatSpecifierRange
+						withString:dayDiffStr
+						];
+			}
+			
 			
 			outputDate = [date
 				descriptionWithCalendarFormat:useDateFormatStr
@@ -1277,15 +1319,10 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							{
 								// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
 								// we want them displayed as only spanning from <start day> to <end day>
-								NSCalendarDate *endDateMinusOneDay = [
-									[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
-									dateByAddingYears:0
-									months:0
-									days:-1
-									hours:0
-									minutes:0
-									seconds:0
-									];
+								NSCalendarDate *endDateMinusOneDay = dateByAddingDays(
+									[[event endDate] dateWithCalendarFormat:nil timeZone:nil],
+									-1
+									);
 								thisPropOutputValue = MUTABLE_ATTR_STR((
 									[NSString
 										stringWithFormat: @"%@ - %@",
