@@ -3,12 +3,22 @@
 # install script for icalBuddy
 # Copyright 2008-2010 Ali Rantakari
 # 
+# --------------------------------------
+# 
+# You can use the --prefix=/path
+# argument to specify the prefix where
+# the program should be installed.
+# 
+# 
 
 DN="`dirname \"$0\"`"
 THISDIR="`cd \"$DN\"; pwd`"
 
-BINDIR=/usr/local/bin
-MANDIR=/usr/local/share/man/man1
+# default prefix:
+PREFIX=/usr/local
+
+BINDIR=bin
+MANDIR=share/man/man1
 
 BINFILE="${THISDIR}/icalBuddy"
 MANFILE="${THISDIR}/icalBuddy.1"
@@ -35,15 +45,34 @@ if [ ! -e "${L10NMANFILE}" ];then
 fi
 
 
-# TODO: adjust install paths if icalBuddy seems to be installed already
+# check --prefix=path argument
+if [[ "${1:0:9}" == "--prefix=" ]]; then
+	PREFIX="${1:9}"
+else
+	# (no prefix argument -> ) check if installed already; adjust prefix if so
+	which icalBuddy >/dev/null
+	if [[ $? -eq 0 ]]; then
+		if [[ "`which icalBuddy | xargs -0 dirname | xargs -0 basename | tr -d '\n'`" == "bin" ]]; then
+			PREFIX="`which icalBuddy | xargs -0 dirname | xargs -0 dirname | tr -d '\n'`"
+		fi
+	fi
+fi
+
+
+
+BINPATH="${PREFIX}/${BINDIR}"
+MANPATH="${PREFIX}/${MANDIR}"
 
 
 echo "================================="
 echo
 echo "This script will install:"
 echo
-printf "icalBuddy executable to: \e[36m${BINDIR}\e[m\n"
-printf "man pages (icalBuddy, icalBuddyConfig, icalBuddyLocalization) to: \e[36m${MANDIR}\e[m\n"
+printf "icalBuddy executable to: \e[36m${BINPATH}\e[m\n"
+printf "man pages (icalBuddy, icalBuddyConfig, icalBuddyLocalization) to: \e[36m${MANPATH}\e[m\n"
+echo
+echo "(If you'd like to specify an installation prefix other than the current (${PREFIX}), you can"
+echo "do it with the prefix argument: --prefix=/my/path)"
 echo
 echo $'We\'ll need administrator rights to install to these locations so \e[33mplease enter your admin password when asked\e[m.'
 echo $'\e[1mPress any key to continue installing or Ctrl-C to cancel.\e[m'
@@ -54,21 +83,21 @@ if [ ! $? -eq 0 ];then echo "error! aborting." >&2; exit 10; fi
 echo
 
 echo -n "Creating directories..."
-sudo mkdir -p ${BINDIR}
+sudo mkdir -p ${BINPATH}
 if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
-sudo mkdir -p ${MANDIR}
+sudo mkdir -p ${MANPATH}
 if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 echo "done."
 
 echo -n "Installing the binary executable..."
-sudo cp -f "${BINFILE}" "${BINDIR}"
+sudo cp -f "${BINFILE}" "${BINPATH}"
 if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 echo "done."
 
 echo -n "Installing the man pages..."
-sudo cp -f "${MANFILE}" "${MANDIR}"
-sudo cp -f "${L10NMANFILE}" "${MANDIR}"
-sudo cp -f "${CONFIGMANFILE}" "${MANDIR}"
+sudo cp -f "${MANFILE}" "${MANPATH}"
+sudo cp -f "${L10NMANFILE}" "${MANPATH}"
+sudo cp -f "${CONFIGMANFILE}" "${MANPATH}"
 if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
 echo "done."
 
