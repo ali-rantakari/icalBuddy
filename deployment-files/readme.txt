@@ -2,11 +2,10 @@
 DESCRIPTION:
 --------------------------------
 
-icalBuddy is a command-line utility that can be used
-to query the OS X calendar database for items. It
-requires Mac OS 10.5 or later.
+icalBuddy is a command-line utility that can be used to query the OS X
+calendar database for items. It requires Mac OS 10.5 or later.
 
-(c) 2008-2009 Ali Rantakari
+Copyright 2008-2010 Ali Rantakari
 http://hasseg.org/icalBuddy
 
 
@@ -59,7 +58,7 @@ LICENSE:
 
 The MIT License
 
-Copyright (c) 2008-2009 Ali Rantakari
+Copyright (c) 2008-2010 Ali Rantakari
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
