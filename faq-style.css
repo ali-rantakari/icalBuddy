@@ -6,19 +6,30 @@
 	}
 
 /* TOC: */
-#main > ul {
+#main > * > ul {
 	border: 1px solid black;
 	background: #eee;
 	padding: 10px 10px 10px 30px;
 	margin-left: 0;
-	line-height: 120%;
+	}
+#main > * > ul li {
+	margin-bottom: 4px;
 	}
 
 p {
-	margin-bottom: 30px;
 	}
 
 h1 {
-	font-size: 18px;
+	font-size: 28px;
 	}
 
+h2 {
+	font-size: 18px;
+	margin-top: 30px;
+	}
+
+pre {
+	border: 1px dotted black;
+	background: #eee;
+	padding: 10px;
+	}

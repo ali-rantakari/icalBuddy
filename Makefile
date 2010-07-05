@@ -144,6 +144,7 @@ deployment/faq.html: faq.markdown faq-style.css
 	cat faq-style.css >> $(TEMP_DEPLOYMENT_FAQFILE)
 	echo "</style>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 	echo "</head><body><div id='main'>" >> $(TEMP_DEPLOYMENT_FAQFILE)
+	echo "<h1>icalBuddy FAQ</h1> <hr /> <h2>Table Of Contents</h2>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 	utils/discount -T -f +toc faq.markdown >> $(TEMP_DEPLOYMENT_FAQFILE)
 	echo "</div></body></html>" >> $(TEMP_DEPLOYMENT_FAQFILE)
 
