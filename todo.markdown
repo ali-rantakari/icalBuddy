@@ -11,8 +11,6 @@ important:
 user requests:
 -------------------------
 
-- date ranges (e.g. today+N) for task queries (user ref: Daniel B.)
-
 - ability to use relative dates today and tomorrow but the rest as normal
   dates... I don't like the long "day after tomorrow" text it seems to defeat
   the purpose of the simple today and tomorrow scheme (user ref: Edward)
