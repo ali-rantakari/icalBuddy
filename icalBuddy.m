@@ -2899,8 +2899,7 @@ int main(int argc, char *argv[])
 		Printf(@"\n");
 		Printf(@"USAGE: %@ [options] <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
 		Printf(@"\n");
-		Printf(@"<command> specifies the general action icalBuddy should take. Possible values\n");
-		Printf(@"for it are:\n");
+		Printf(@"<command> specifies the general action icalBuddy should take:\n");
 		Printf(@"\n");
 		Printf(@"  'eventsToday'      Print events occurring today\n");
 		Printf(@"  'eventsToday+NUM'  Print events occurring between today and NUM days into\n");
@@ -2947,9 +2946,7 @@ int main(int argc, char *argv[])
 		Printf(@"-cf,-lf    Set config or localization file path (value required)\n");
 		Printf(@"-nnr       Set replacement for newlines within notes (value required)\n");
 		Printf(@"\n");
-		Printf(@"See the icalBuddy manual page for a more complete list of\n");
-		Printf(@"all the possible arguments and their descriptions (just type\n");
-		Printf(@"'man icalBuddy' into the terminal.)\n");
+		Printf(@"See the icalBuddy man page for more info.\n");
 		Printf(@"\n");
 		Printf(@"Version %@\n", versionNumberStr());
 		Printf(@"Copyright 2008-2010 Ali Rantakari, http://hasseg.org/icalBuddy\n");
