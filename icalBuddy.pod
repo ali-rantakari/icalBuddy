@@ -9,7 +9,7 @@ B<icalBuddy> -- query the OS X calendar database for items
 
 =item B<icalBuddy>
 
-[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-npn>] [B<-n>] [B<-sed>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
+[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-npn>] [B<-n>] [B<-sed>] [B<-uid>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
 
 =back
 
@@ -109,6 +109,10 @@ If the I<command> value C<eventsToday> is used, only output events that occur be
 =item B<-sed>, B<--showEmptyDates>
 
 Display sections for empty dates (i.e. dates that have no items) that fall within the specified range as well. Applies only if the B<-sd> argument is used.
+
+=item B<-uid>, B<--showUIDs>
+
+Display event/task UIDs (unique identifiers).
 
 =item B<-eed>, B<--excludeEndDates>
 
