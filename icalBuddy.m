@@ -217,6 +217,7 @@ BOOL displayRelativeDates = YES;
 BOOL excludeEndDates = NO;
 BOOL useCalendarColorsForTitles = YES;
 BOOL showUIDs = NO;
+BOOL debugMode = NO;
 NSUInteger maxNumPrintedItems = 0; // 0 = no limit
 NSUInteger numPrintedItems = 0;
 
@@ -275,6 +276,25 @@ void addToOutputBuffer(NSAttributedString *aStr)
 }
 
 
+
+void DebugPrintf(NSString *aStr, ...)
+{
+	if (!debugMode)
+		return;
+	
+	va_list argList;
+	va_start(argList, aStr);
+	NSString *str = [
+		[[NSString alloc]
+			initWithFormat:aStr
+			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
+			arguments:argList
+			] autorelease
+		];
+	va_end(argList);
+	
+	[str writeToFile:@"/dev/stderr" atomically:NO encoding:outputStrEncoding error:NULL];
+}
 
 
 // returns the closest ANSI color (from the colors used by
@@ -621,11 +641,11 @@ NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 	if (result == nil)
 		result = [NSDate dateWithNaturalLanguageString:input];
 	
+	NSString *inputDateName = (inputName == nil) ? @"date" : inputName;
 	if (result == nil)
-	{
-		NSString *inputDateName = (inputName == nil) ? @"date" : inputName;
 		PrintfErr(@"Error: invalid %@: '%@'\n", inputDateName, input);
-	}
+	else
+		DebugPrintf(@"icalBuddy: %@ interpreted as: %@\n", inputDateName, result);
 	
 	return result;
 }
@@ -2105,6 +2125,8 @@ int main(int argc, char *argv[])
 						arg_noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
 					if ([allArgKeys containsObject:@"showUIDs"])
 						showUIDs = [[constArgsDict objectForKey:@"showUIDs"] boolValue];
+					if ([allArgKeys containsObject:@"debug"])
+						debugMode = [[constArgsDict objectForKey:@"debug"] boolValue];
 				}
 			}
 		}
@@ -2209,6 +2231,8 @@ int main(int argc, char *argv[])
 			arg_updatesCheck = YES;
 		else if ((strcmp(argv[i], "-V") == 0) || (strcmp(argv[i], "--version") == 0))
 			arg_printVersion = YES;
+		else if ((strcmp(argv[i], "-d") == 0) || (strcmp(argv[i], "--debug") == 0))
+			debugMode = YES;
 		else if ((strcmp(argv[i], "-n") == 0) || (strcmp(argv[i], "--includeOnlyEventsFromNowOn") == 0))
 			arg_includeOnlyEventsFromNowOn = YES;
 		else if ((strcmp(argv[i], "-f") == 0) || (strcmp(argv[i], "--formatOutput") == 0))
