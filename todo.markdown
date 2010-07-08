@@ -4,8 +4,11 @@ TODO:
 important:
 -------------------------
 
+- simplify handling of "relative dates" -- there's a special case (with the
+  -nrd argument and all) and there's the %RD specifier. if we need both, their
+  coexistence should be clearer.
 - completely phase out `NSCalendarDate` (check for other legacy APIs)
-- add smarter input date parsing
+- add way to see how input dates are interpreted! (-d switch?)
 
 
 user requests:
