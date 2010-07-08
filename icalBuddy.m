@@ -222,8 +222,8 @@ NSUInteger maxNumPrintedItems = 0; // 0 = no limit
 NSUInteger numPrintedItems = 0;
 
 
-NSCalendarDate *now;
-NSCalendarDate *today;
+NSDate *now;
+NSDate *today;
 
 
 // dictionary for configuration values
@@ -416,7 +416,6 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 		return @"";
 	
 	NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
-	NSCalendarDate *calDate = [date dateWithCalendarFormat:nil timeZone:nil];
 	
 	NSString *outputDateStr = nil;
 	NSString *outputTimeStr = nil;
@@ -424,23 +423,23 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 	if (includeDate)
 	{
 		if (displayRelativeDates &&
-			datesRepresentSameDay(calDate, now)
+			datesRepresentSameDay(date, now)
 			)
 			outputDateStr = localizedStr(kL10nKeyToday);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, dateByAddingDays(now, 1))
+				datesRepresentSameDay(date, dateByAddingDays(now, 1))
 				)
 			outputDateStr = localizedStr(kL10nKeyTomorrow);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, dateByAddingDays(now, 2))
+				datesRepresentSameDay(date, dateByAddingDays(now, 2))
 				)
 			outputDateStr = localizedStr(kL10nKeyDayAfterTomorrow);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, dateByAddingDays(now, -1))
+				datesRepresentSameDay(date, dateByAddingDays(now, -1))
 				)
 			outputDateStr = localizedStr(kL10nKeyYesterday);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, dateByAddingDays(now, -2))
+				datesRepresentSameDay(date, dateByAddingDays(now, -2))
 				)
 			outputDateStr = localizedStr(kL10nKeyDayBeforeYesterday);
 		else
@@ -894,7 +893,7 @@ NSString* getPropSeparatorStr(NSUInteger propertyNumber)
 
 
 // returns a pretty-printed string representation of the specified event property
-NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions, NSCalendarDate *contextDay)
+NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions, NSDate *contextDay)
 {
 	if (event == nil)
 		return nil;
@@ -1028,14 +1027,8 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			BOOL endsOnContextDay = false;
 			if (contextDay != nil)
 			{
-				startsOnContextDay = datesRepresentSameDay(
-					contextDay,
-					[[event startDate] dateWithCalendarFormat:nil timeZone:nil]
-					);
-				endsOnContextDay = datesRepresentSameDay(
-					contextDay,
-					[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
-					);
+				startsOnContextDay = datesRepresentSameDay(contextDay, [event startDate]);
+				endsOnContextDay = datesRepresentSameDay(contextDay, [event endDate]);
 			}
 			
 			if ( !singleDayContext || (singleDayContext && ![event isAllDay]) )
@@ -1088,20 +1081,13 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					{
 						if ([event isAllDay])
 						{
-							NSInteger daysDiff;
-							[[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
-								years:NULL months:NULL days:&daysDiff hours:NULL minutes:NULL seconds:NULL
-								sinceDate:[[event startDate] dateWithCalendarFormat:nil timeZone:nil]
-								];
+							NSInteger daysDiff = getDayDiff([event startDate], [event endDate]);
 							
 							if (daysDiff > 1)
 							{
 								// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
 								// we want them displayed as only spanning from <start day> to <end day>
-								NSCalendarDate *endDateMinusOneDay = dateByAddingDays(
-									[[event endDate] dateWithCalendarFormat:nil timeZone:nil],
-									-1
-									);
+								NSDate *endDateMinusOneDay = dateByAddingDays([event endDate], -1);
 								thisPropOutputValue = MUTABLE_ATTR_STR((
 									[NSString
 										stringWithFormat: @"%@ - %@",
@@ -1117,11 +1103,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 						{
 							NSString *startDateFormattedStr = dateStr([event startDate], true, true);
 							NSString *endDateFormattedStr;
-							if (datesRepresentSameDay(
-									[[event startDate] dateWithCalendarFormat:nil timeZone:nil],
-									[[event endDate] dateWithCalendarFormat:nil timeZone:nil]
-									)
-								)
+							if (datesRepresentSameDay([event startDate], [event endDate]))
 								endDateFormattedStr = dateStr([event endDate], false, true);
 							else
 								endDateFormattedStr = dateStr([event endDate], true, true);
@@ -1182,7 +1164,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 
 
 // pretty-prints out the specified event
-void printCalEvent(CalEvent *event, int printOptions, NSCalendarDate *contextDay)
+void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay)
 {
 	if (maxNumPrintedItems > 0 && maxNumPrintedItems <= numPrintedItems)
 		return;
@@ -1549,7 +1531,7 @@ void printItemSections(NSArray *sections, int printOptions)
 		{
 			if ([item isKindOfClass:[CalEvent class]])
 			{
-				NSCalendarDate *contextDay = [sectionDict objectForKey:kSectionDictKey_eventsContextDay];
+				NSDate *contextDay = [sectionDict objectForKey:kSectionDictKey_eventsContextDay];
 				if (contextDay == nil)
 					contextDay = now;
 				printCalEvent((CalEvent*)item, printOptions, contextDay);
@@ -1602,7 +1584,7 @@ int main(int argc, char *argv[])
 	
 	
 	// set current datetime and day representations into globals
-	now = [NSCalendarDate calendarDate];
+	now = [NSDate date];
 	today = dateForStartOfDay(now);
 	
 	
@@ -2268,8 +2250,8 @@ int main(int argc, char *argv[])
 		NSArray *uncompletedTasks = nil;
 		NSArray *eventsArr = nil;
 		
-		NSCalendarDate *eventsDateRangeStart = nil;
-		NSCalendarDate *eventsDateRangeEnd = nil;
+		NSDate *eventsDateRangeStart = nil;
+		NSDate *eventsDateRangeEnd = nil;
 		NSUInteger eventsDateRangeDaysSpan = 0;
 		
 		// prepare to print events
@@ -2284,15 +2266,7 @@ int main(int argc, char *argv[])
 			if (arg_output_is_eventsToday)
 			{
 				eventsDateRangeStart = today;
-				eventsDateRangeEnd = [NSCalendarDate
-					dateWithYear:[now yearOfCommonEra]
-					month:[now monthOfYear]
-					day:[now dayOfMonth]
-					hour:23
-					minute:59
-					second:59
-					timeZone:[now timeZone]
-					];
+				eventsDateRangeEnd = dateForEndOfDay(now);
 			}
 			else if (arg_output_is_eventsNow)
 			{
@@ -2301,8 +2275,8 @@ int main(int argc, char *argv[])
 			}
 			else if (arg_output_is_eventsFromTo)
 			{
-				eventsDateRangeStart = calDateFromUserInput(arg_eventsFrom, @"start date");
-				eventsDateRangeEnd = calDateFromUserInput(arg_eventsTo, @"end date");
+				eventsDateRangeStart = dateFromUserInput(arg_eventsFrom, @"start date");
+				eventsDateRangeEnd = dateFromUserInput(arg_eventsTo, @"end date");
 				
 				if (eventsDateRangeStart == nil || eventsDateRangeEnd == nil)
 				{
@@ -2313,7 +2287,7 @@ int main(int argc, char *argv[])
 				if ([eventsDateRangeStart compare:eventsDateRangeEnd] == NSOrderedDescending)
 				{
 					// start date occurs before end date --> swap them
-					NSCalendarDate *tempSwapDate = eventsDateRangeStart;
+					NSDate *tempSwapDate = eventsDateRangeStart;
 					eventsDateRangeStart = eventsDateRangeEnd;
 					eventsDateRangeEnd = tempSwapDate;
 				}
@@ -2329,7 +2303,7 @@ int main(int argc, char *argv[])
 				if (arg_output_plusSymbolRange.location != NSNotFound)
 				{
 					NSInteger daysToAddToRange = [[arg_output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] intValue];
-					eventsDateRangeEnd = [eventsDateRangeEnd dateByAddingYears:0 months:0 days:daysToAddToRange hours:0 minutes:0 seconds:0];
+					eventsDateRangeEnd = dateByAddingDays(eventsDateRangeEnd, daysToAddToRange);
 					events_printOptions &= ~PRINT_OPTION_SINGLE_DAY;
 				}
 			}
@@ -2364,7 +2338,7 @@ int main(int argc, char *argv[])
 			
 			if (arg_output_is_tasksDueBefore)
 			{
-				NSCalendarDate *dueBeforeDate = nil;
+				NSDate *dueBeforeDate = nil;
 				
 				if ([arg_output hasPrefix:@"tasksDueBefore:today+"])
 				{
@@ -2381,7 +2355,7 @@ int main(int argc, char *argv[])
 					// tasksDueBefore:"YYYY-MM-DD HH:MM:SS ±HHMM"
 					NSString *dueBeforeDateStr = [arg_output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
 					
-					dueBeforeDate = calDateFromUserInput(dueBeforeDateStr, @"due date");
+					dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date");
 					
 					if (dueBeforeDate == nil)
 					{
@@ -2515,23 +2489,21 @@ int main(int argc, char *argv[])
 					NSUInteger anEventDaysSpanToConsider = MIN(daySpanLeftInRange, anEventDaysSpan);
 					
 					
-					NSCalendarDate *thisEventStartDate = [[anEvent startDate] dateWithCalendarFormat:nil timeZone:nil];
+					NSDate *thisEventStartDate = [anEvent startDate];
 					
 					NSUInteger i;
 					for (i = 0; i <= anEventDaysSpanToConsider; i++)
 					{
-						NSCalendarDate *thisEventStartDatePlusi = [thisEventStartDate
-							dateByAddingYears:0 months:0 days:i hours:0 minutes:0 seconds:0
-							];
+						NSDate *thisEventStartDatePlusi = dateByAddingDays(thisEventStartDate, i);
 						
-						NSCalendarDate *dayToAdd = dateForStartOfDay(thisEventStartDatePlusi);
+						NSDate *dayToAdd = dateForStartOfDay(thisEventStartDatePlusi);
 						
 						NSComparisonResult dayToAddToNowComparisonResult = [dayToAdd compare:today];
 						
-						if (printingAlsoPastEvents ||
-							dayToAddToNowComparisonResult == NSOrderedDescending ||
-							dayToAddToNowComparisonResult == NSOrderedSame ||
-							datesRepresentSameDay(now, dayToAdd)
+						if (printingAlsoPastEvents
+							|| dayToAddToNowComparisonResult == NSOrderedDescending
+							|| dayToAddToNowComparisonResult == NSOrderedSame
+							|| datesRepresentSameDay(now, dayToAdd)
 							)
 						{
 							if (![[allDays allKeys] containsObject:dayToAdd])
@@ -2553,8 +2525,8 @@ int main(int argc, char *argv[])
 					id thisDayKey = nil;
 					if ([aTask dueDate] != nil)
 					{
-						NSCalendarDate *thisTaskDueDate = [[aTask dueDate] dateWithCalendarFormat:nil timeZone:nil];
-						NSCalendarDate *thisDueDay = dateForStartOfDay(thisTaskDueDate);
+						NSDate *thisTaskDueDate = [aTask dueDate];
+						NSDate *thisDueDay = dateForStartOfDay(thisTaskDueDate);
 						thisDayKey = thisDueDay;
 					}
 					else
@@ -2584,8 +2556,8 @@ int main(int argc, char *argv[])
 			if (arg_sectionsForEachDayInSpan)
 			{
 				// fill the day span we have so that all days have an entry
-				NSCalendarDate *earliestDate = nil;
-				NSCalendarDate *latestDate = nil;
+				NSDate *earliestDate = nil;
+				NSDate *latestDate = nil;
 				
 				if (arg_output_is_eventsFromTo || arg_output_is_eventsToday || arg_output_is_eventsNow)
 				{
@@ -2596,8 +2568,8 @@ int main(int argc, char *argv[])
 				{
 					if ([allDaysArr count] > 1)
 					{
-						earliestDate = [[allDaysArr objectAtIndex:0] dateWithCalendarFormat:nil timeZone:nil];
-						latestDate = [[allDaysArr lastObject] dateWithCalendarFormat:nil timeZone:nil];
+						earliestDate = [allDaysArr objectAtIndex:0];
+						latestDate = [allDaysArr lastObject];
 					}
 					else
 					{
@@ -2606,12 +2578,12 @@ int main(int argc, char *argv[])
 					}
 				}
 				
-				NSCalendarDate *iterDate = earliestDate;
+				NSDate *iterDate = earliestDate;
 				do
 				{
 					if (![allDaysArr containsObject:iterDate])
 						[allDaysArr addObject:iterDate];
-					iterDate = [iterDate dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0];
+					iterDate = dateByAddingDays(iterDate, 1);
 				}
 				while ([iterDate compare:latestDate] != NSOrderedDescending);
 				
@@ -2634,11 +2606,11 @@ int main(int argc, char *argv[])
 					forKey:kSectionDictKey_items
 					];
 				
-				if (printingEvents && [aDayKey isKindOfClass:[NSCalendarDate class]])
+				if (printingEvents && [aDayKey isKindOfClass:[NSDate class]])
 					[thisSectionDict setObject:aDayKey forKey:kSectionDictKey_eventsContextDay];
 				
 				NSString *thisSectionTitle = nil;
-				if ([aDayKey isKindOfClass:[NSCalendarDate class]])
+				if ([aDayKey isKindOfClass:[NSDate class]])
 					thisSectionTitle = dateStr(aDayKey, true, false);
 				else if ([aDayKey isEqual:[NSNull null]])
 					thisSectionTitle = strConcat(@"(", localizedStr(kL10nKeyNoDueDate), @")", nil);

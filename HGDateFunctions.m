@@ -1,3 +1,31 @@
+// Date utility functions
+// 
+// http://hasseg.org/
+//
+
+/*
+The MIT License
+
+Copyright (c) 2010 Ali Rantakari
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
 
 
 
@@ -5,31 +33,44 @@
 #import "HGCLIUtils.h"
 
 
-NSCalendarDate *dateForStartOfDay(NSCalendarDate *date)
+NSDate *dateForStartOfDay(NSDate *date)
 {
-	return [NSCalendarDate
-		dateWithYear:[date yearOfCommonEra]
-		month:[date monthOfYear]
-		day:[date dayOfMonth]
-		hour:0
-		minute:0
-		second:0
-		timeZone:[date timeZone]
-		];
+	NSDateComponents *comps = [[NSCalendar currentCalendar] components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit fromDate:date];
+	return [[NSCalendar currentCalendar] dateFromComponents:comps];
 }
 
-NSCalendarDate *dateByAddingDays(NSCalendarDate *date, NSInteger days)
+NSDate *dateForEndOfDay(NSDate *date)
 {
-	return [date dateByAddingYears:0 months:0 days:days hours:0 minutes:0 seconds:0];
+	NSDateComponents *comps = [[NSCalendar currentCalendar] components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit fromDate:date];
+	[comps setHour:23];
+	[comps setMinute:59];
+	[comps setSecond:59];
+	return [[NSCalendar currentCalendar] dateFromComponents:comps];
+}
+
+
+NSDate *dateByAddingDays(NSDate *date, NSInteger days)
+{
+	NSDateComponents *addDaysComponents = [[[NSDateComponents alloc] init] autorelease];
+    [addDaysComponents setDay:days];
+    return [[NSCalendar currentCalendar]
+		dateByAddingComponents:addDaysComponents
+		toDate:date
+		options:0
+		];
 }
 
 
 // whether the two specified dates represent the same calendar day
-BOOL datesRepresentSameDay(NSCalendarDate *date1, NSCalendarDate *date2)
+BOOL datesRepresentSameDay(NSDate *date1, NSDate *date2)
 {
-	return ([date1 yearOfCommonEra] == [date2 yearOfCommonEra] &&
-			[date1 monthOfYear] == [date2 monthOfYear] &&
-			[date1 dayOfMonth] == [date2 dayOfMonth]
+	NSUInteger dateUnitFlags = NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit;
+	NSDateComponents *comps1 = [[NSCalendar currentCalendar] components:dateUnitFlags fromDate:date1];
+	NSDateComponents *comps2 = [[NSCalendar currentCalendar] components:dateUnitFlags fromDate:date2];
+	
+	return ([comps1 year] == [comps2 year]
+			&& [comps1 month] == [comps2 month]
+			&& [comps1 day] == [comps2 day]
 			);
 }
 
@@ -144,8 +185,8 @@ NSInteger getDayDiff(NSDate *date1, NSDate *date2)
 	if (date1 == nil || date2 == nil)
 		return 0;
 	
-	NSCalendarDate *d1 = dateForStartOfDay([date1 dateWithCalendarFormat:nil timeZone:nil]);
-	NSCalendarDate *d2 = dateForStartOfDay([date2 dateWithCalendarFormat:nil timeZone:nil]);
+	NSDate *d1 = dateForStartOfDay([date1 dateWithCalendarFormat:nil timeZone:nil]);
+	NSDate *d2 = dateForStartOfDay([date2 dateWithCalendarFormat:nil timeZone:nil]);
 	
 	NSTimeInterval ti = [d2 timeIntervalSinceDate:d1];
 	return abs(ti / (60*60*24));
@@ -165,11 +206,6 @@ NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 		DebugPrintf(@"%@ interpreted as: %@\n", inputDateName, result);
 	
 	return result;
-}
-
-NSCalendarDate *calDateFromUserInput(NSString *input, NSString *inputName)
-{
-	return [dateFromUserInput(input, inputName) dateWithCalendarFormat:nil timeZone:nil];
 }
 
 void printDateFormatInfo()
