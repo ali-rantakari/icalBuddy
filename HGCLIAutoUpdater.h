@@ -34,6 +34,15 @@ THE SOFTWARE.
 #define kHGCLIAutoUpdateErrorDomain @"org.hasseg.autoUpdate"
 #define kServerConnectTimeout 10.0
 
+
+#define NS_ERROR(c,d)	[NSError\
+						errorWithDomain:kHGCLIAutoUpdateErrorDomain\
+						code:(c)\
+						userInfo:[NSDictionary\
+							dictionaryWithObject:(d)\
+							forKey:NSLocalizedDescriptionKey]]
+
+
 // helper method: compare three-part version number strings (e.g. "1.12.3")
 NSComparisonResult versionNumberCompare(NSString *first, NSString *second);
 

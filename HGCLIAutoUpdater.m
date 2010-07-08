@@ -149,17 +149,10 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 		if (statusCode >= 400)
 		{
 			if (error != NULL)
-				*error = [NSError
-					errorWithDomain:kHGCLIAutoUpdateErrorDomain
-					code:0
-					userInfo:[NSDictionary
-						dictionaryWithObject:[NSString
+				*error = NS_ERROR(0, ([NSString
 							stringWithFormat:@"HTTP connection failed. Status code %d: \"%@\"",
 							statusCode,
-							[NSHTTPURLResponse localizedStringForStatusCode:statusCode]]
-						forKey:NSLocalizedDescriptionKey
-						]
-					];
+							[NSHTTPURLResponse localizedStringForStatusCode:statusCode]]));
 			return nil;
 		}
 		else
@@ -169,14 +162,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 			if (thisLatestVersionString == nil)
 			{
 				if (error != NULL)
-					*error = [NSError
-						errorWithDomain:kHGCLIAutoUpdateErrorDomain
-						code:0
-						userInfo:[NSDictionary
-							dictionaryWithObject:@"Error reading latest version number from HTTP header field."
-							forKey:NSLocalizedDescriptionKey
-							]
-						];
+					*error = NS_ERROR(0, @"Error reading latest version number from HTTP header field.");
 				return nil;
 			}
 			else
@@ -193,14 +179,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 			if (connError != nil)
 				*error = connError;
 			else
-				*error = [NSError
-					errorWithDomain:kHGCLIAutoUpdateErrorDomain
-					code:0
-					userInfo:[NSDictionary
-						dictionaryWithObject:@"No response from server."
-						forKey:NSLocalizedDescriptionKey
-						]
-					];
+				*error = NS_ERROR(0, @"No response from server.");
 		}
 		return nil;
 	}
