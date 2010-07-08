@@ -8,7 +8,6 @@ important:
   -nrd argument and all) and there's the %RD specifier. if we need both, their
   coexistence should be clearer.
 - completely phase out `NSCalendarDate` (check for other legacy APIs)
-- add way to see how input dates are interpreted! (-d switch?)
 
 
 user requests:
