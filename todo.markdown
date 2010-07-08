@@ -4,6 +4,9 @@ TODO:
 important:
 -------------------------
 
+- use default date format from user's preferences if none is specified
+    - preference for specifying short/medium/long/full format?
+
 - simplify handling of "relative dates" -- there's a special case (with the
   -nrd argument and all) and there's the %RD specifier. if we need both, their
   coexistence should be clearer.

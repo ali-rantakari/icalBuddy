@@ -3,7 +3,7 @@
 # clang --analyze plist files
 icalBuddy.plist
 ANSIEscapeHelper.plist
-HGCLI*.plist
+HG*.plist
 IcalBuddyAutoUpdaterDelegate.plist
 
 # OS X junk

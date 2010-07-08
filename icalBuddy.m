@@ -206,8 +206,8 @@ NSString *prefixStrBullet = 			@"• ";
 NSString *prefixStrBulletAlert = 		@"! ";
 NSString *sectionSeparatorStr = 		@"\n------------------------";
 
-NSString *timeFormatStr = 				@"%H:%M";
-NSString *dateFormatStr = 				@"%Y-%m-%d";
+NSString *timeFormatStr = 				nil;
+NSString *dateFormatStr = 				nil;
 NSSet *includedEventProperties = 		nil;
 NSSet *excludedEventProperties = 		nil;
 NSSet *includedTaskProperties = 		nil;
@@ -415,120 +415,147 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 	if (date == nil || (!includeDate && !includeTime))
 		return @"";
 	
+	NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
 	NSCalendarDate *calDate = [date dateWithCalendarFormat:nil timeZone:nil];
 	
-	NSString *outputDate = nil;
-	NSString *outputTime = nil;
+	NSString *outputDateStr = nil;
+	NSString *outputTimeStr = nil;
 	
 	if (includeDate)
 	{
 		if (displayRelativeDates &&
 			datesRepresentSameDay(calDate, now)
 			)
-			outputDate = localizedStr(kL10nKeyToday);
+			outputDateStr = localizedStr(kL10nKeyToday);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:1 hours:0 minutes:0 seconds:0])
+				datesRepresentSameDay(calDate, dateByAddingDays(now, 1))
 				)
-			outputDate = localizedStr(kL10nKeyTomorrow);
+			outputDateStr = localizedStr(kL10nKeyTomorrow);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:2 hours:0 minutes:0 seconds:0])
+				datesRepresentSameDay(calDate, dateByAddingDays(now, 2))
 				)
-			outputDate = localizedStr(kL10nKeyDayAfterTomorrow);
+			outputDateStr = localizedStr(kL10nKeyDayAfterTomorrow);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-1 hours:0 minutes:0 seconds:0])
+				datesRepresentSameDay(calDate, dateByAddingDays(now, -1))
 				)
-			outputDate = localizedStr(kL10nKeyYesterday);
+			outputDateStr = localizedStr(kL10nKeyYesterday);
 		else if (displayRelativeDates &&
-				datesRepresentSameDay(calDate, [now dateByAddingYears:0 months:0 days:-2 hours:0 minutes:0 seconds:0])
+				datesRepresentSameDay(calDate, dateByAddingDays(now, -2))
 				)
-			outputDate = localizedStr(kL10nKeyDayBeforeYesterday);
+			outputDateStr = localizedStr(kL10nKeyDayBeforeYesterday);
 		else
 		{
 			NSString *useDateFormatStr = dateFormatStr;
 			
-			// implement the "relative week" date format specifier
-			NSRange relativeWeekFormatSpecifierRange = [useDateFormatStr rangeOfString:kRelativeWeekFormatSpecifier];
-			if (relativeWeekFormatSpecifierRange.location != NSNotFound)
+			if (useDateFormatStr != nil)
 			{
-				NSInteger weekDiff = getWeekDiff(now, date);
-				if ([now compare:date] == NSOrderedDescending)
-					weekDiff *= -1; // in the past
+				// use user-specified date format
 				
-				NSString *weekDiffStr = nil;
-				if (weekDiff < -1)
-					weekDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXWeeksAgo), abs(weekDiff)];
-				else if (weekDiff == -1)
-					weekDiffStr = localizedStr(kL10nKeyLastWeek);
-				else if (weekDiff == 0)
-					weekDiffStr = localizedStr(kL10nKeyThisWeek);
-				else if (weekDiff == 1)
-					weekDiffStr = localizedStr(kL10nKeyNextWeek);
-				else if (weekDiff > 1)
-					weekDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXWeeksFromNow), weekDiff];
+				// implement the "relative week" date format specifier
+				NSRange relativeWeekFormatSpecifierRange = [useDateFormatStr rangeOfString:kRelativeWeekFormatSpecifier];
+				if (relativeWeekFormatSpecifierRange.location != NSNotFound)
+				{
+					NSInteger weekDiff = getWeekDiff(now, date);
+					if ([now compare:date] == NSOrderedDescending)
+						weekDiff *= -1; // in the past
+					
+					NSString *weekDiffStr = nil;
+					if (weekDiff < -1)
+						weekDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXWeeksAgo), abs(weekDiff)];
+					else if (weekDiff == -1)
+						weekDiffStr = localizedStr(kL10nKeyLastWeek);
+					else if (weekDiff == 0)
+						weekDiffStr = localizedStr(kL10nKeyThisWeek);
+					else if (weekDiff == 1)
+						weekDiffStr = localizedStr(kL10nKeyNextWeek);
+					else if (weekDiff > 1)
+						weekDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXWeeksFromNow), weekDiff];
+					
+					if (weekDiffStr != nil)
+						useDateFormatStr = [useDateFormatStr
+							stringByReplacingCharactersInRange:relativeWeekFormatSpecifierRange
+							withString:weekDiffStr
+							];
+				}
 				
-				if (weekDiffStr != nil)
-					useDateFormatStr = [useDateFormatStr
-						stringByReplacingCharactersInRange:relativeWeekFormatSpecifierRange
-						withString:weekDiffStr
-						];
+				// implement the "x days from now" date format specifier
+				NSRange dayDiffFormatSpecifierRange = [useDateFormatStr rangeOfString:kDayDiffFormatSpecifier];
+				if (dayDiffFormatSpecifierRange.location != NSNotFound)
+				{
+					NSInteger dayDiff = getDayDiff(now, date);
+					if ([now compare:date] == NSOrderedDescending)
+						dayDiff *= -1; // in the past
+					
+					NSString *dayDiffStr = nil;
+					if (dayDiff < -1)
+						dayDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXDaysAgo), abs(dayDiff)];
+					else if (dayDiff == -1)
+						dayDiffStr = localizedStr(kL10nKeyYesterday);
+					else if (dayDiff == 0)
+						dayDiffStr = localizedStr(kL10nKeyToday);
+					else if (dayDiff == 1)
+						dayDiffStr = localizedStr(kL10nKeyTomorrow);
+					else if (dayDiff > 1)
+						dayDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXDaysFromNow), dayDiff];
+					
+					if (dayDiffStr != nil)
+						useDateFormatStr = [useDateFormatStr
+							stringByReplacingCharactersInRange:dayDiffFormatSpecifierRange
+							withString:dayDiffStr
+							];
+				}
+				
+				outputDateStr = [date
+					descriptionWithCalendarFormat:useDateFormatStr
+					timeZone:nil
+					locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
+					];
 			}
-			
-			// implement the "x days from now" date format specifier
-			NSRange dayDiffFormatSpecifierRange = [useDateFormatStr rangeOfString:kDayDiffFormatSpecifier];
-			if (dayDiffFormatSpecifierRange.location != NSNotFound)
+			else
 			{
-				NSInteger dayDiff = getDayDiff(now, date);
-				if ([now compare:date] == NSOrderedDescending)
-					dayDiff *= -1; // in the past
+				// use date formats from system preferences
 				
-				NSString *dayDiffStr = nil;
-				if (dayDiff < -1)
-					dayDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXDaysAgo), abs(dayDiff)];
-				else if (dayDiff == -1)
-					dayDiffStr = localizedStr(kL10nKeyYesterday);
-				else if (dayDiff == 0)
-					dayDiffStr = localizedStr(kL10nKeyToday);
-				else if (dayDiff == 1)
-					dayDiffStr = localizedStr(kL10nKeyTomorrow);
-				else if (dayDiff > 1)
-					dayDiffStr = [NSString stringWithFormat:localizedStr(kL10nKeyXDaysFromNow), dayDiff];
-				
-				if (dayDiffStr != nil)
-					useDateFormatStr = [useDateFormatStr
-						stringByReplacingCharactersInRange:dayDiffFormatSpecifierRange
-						withString:dayDiffStr
-						];
+				[dateFormatter setTimeStyle:NSDateFormatterNoStyle];
+				[dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+				outputDateStr = [dateFormatter stringFromDate:date];
 			}
-			
-			
-			outputDate = [date
-				descriptionWithCalendarFormat:useDateFormatStr
-				timeZone:nil
-				locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-				];
 		}
 	}
 	
 	if (includeTime)
-		outputTime = [date
-			descriptionWithCalendarFormat:timeFormatStr
-			timeZone:nil
-			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			];
+	{
+		if (timeFormatStr != nil)
+		{
+			// use user-specified time format
+			outputTimeStr = [date
+				descriptionWithCalendarFormat:timeFormatStr
+				timeZone:nil
+				locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
+				];
+		}
+		else
+		{
+			// use time formats from system preferences
+			
+			[dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+			[dateFormatter setDateStyle:NSDateFormatterNoStyle];
+			outputTimeStr = [dateFormatter stringFromDate:date];
+		}
+	}
 	
-	if ([outputDate length] == 0)
-		outputDate = nil;
-	if ([outputTime length] == 0)
-		outputTime = nil;
+	if ([outputDateStr length] == 0)
+		outputDateStr = nil;
+	if ([outputTimeStr length] == 0)
+		outputTimeStr = nil;
 	
-	if (outputDate == nil && outputTime == nil)
+	if (outputDateStr == nil && outputTimeStr == nil)
 		return @"";
-	else if (outputDate != nil && outputTime == nil)
-		return outputDate;
-	else if (outputDate == nil && outputTime != nil)
-		return outputTime;
+	else if (outputDateStr != nil && outputTimeStr == nil)
+		return outputDateStr;
+	else if (outputDateStr == nil && outputTimeStr != nil)
+		return outputTimeStr;
 	else
-		return strConcat(outputDate, localizedStr(kL10nKeyDateTimeSeparator), outputTime, nil);
+		return strConcat(outputDateStr, localizedStr(kL10nKeyDateTimeSeparator), outputTimeStr, nil);
 }
 
 
