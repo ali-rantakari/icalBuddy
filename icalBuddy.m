@@ -2958,13 +2958,10 @@ int main(int argc, char *argv[])
 		Printf(@"  'eventsNow'        Print events occurring at present time\n");
 		Printf(@"  'eventsFrom:START to:END'\n");
 		Printf(@"                     Print events occurring between the two specified dates\n");
-		Printf(@"                     (START and END), where both are specified in the format:\n");
-		Printf(@"                     \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
 		Printf(@"  'uncompletedTasks' Print uncompleted tasks\n");
 		Printf(@"  'tasksDueBefore:DATE'\n");
 		Printf(@"                     Print uncompleted tasks that are due before the given\n");
-		Printf(@"                     date, which can be 'today+NUM', 'tomorrow' or a date in\n");
-		Printf(@"                     the format \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n");
+		Printf(@"                     date, which can be 'today+NUM' or any regular date\n");
 		Printf(@"  'calendars'        Print all calendars\n");
 		Printf(@"  'strEncodings'     Print all the possible string encodings\n");
 		Printf(@"  'editConfig'       Open the configuration file for editing in a GUI editor\n");
