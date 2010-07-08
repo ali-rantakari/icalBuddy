@@ -282,11 +282,13 @@ void DebugPrintf(NSString *aStr, ...)
 	if (!debugMode)
 		return;
 	
+	NSString *in_str = strConcat(@"icalBuddy: ", aStr, nil);
+	
 	va_list argList;
 	va_start(argList, aStr);
 	NSString *str = [
 		[[NSString alloc]
-			initWithFormat:aStr
+			initWithFormat:in_str
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
 			arguments:argList
 			] autorelease
@@ -645,7 +647,7 @@ NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 	if (result == nil)
 		PrintfErr(@"Error: invalid %@: '%@'\n", inputDateName, input);
 	else
-		DebugPrintf(@"icalBuddy: %@ interpreted as: %@\n", inputDateName, result);
+		DebugPrintf(@"%@ interpreted as: %@\n", inputDateName, result);
 	
 	return result;
 }
@@ -2614,10 +2616,15 @@ int main(int argc, char *argv[])
 				] day];
 			
 			
+			NSDate *predicateDateStart = ((arg_includeOnlyEventsFromNowOn)?now:eventsDateRangeStart);
+			NSDate *predicateDateEnd = eventsDateRangeEnd;
+			DebugPrintf(@"effective query start date: %@\n", predicateDateStart);
+			DebugPrintf(@"effective query end date:   %@\n", predicateDateEnd);
+			
 			// make predicate for getting all events between start and end dates + use it to get the events
 			NSPredicate *eventsPredicate = [CalCalendarStore
-				eventPredicateWithStartDate:((arg_includeOnlyEventsFromNowOn)?now:eventsDateRangeStart)
-				endDate:eventsDateRangeEnd
+				eventPredicateWithStartDate:predicateDateStart
+				endDate:predicateDateEnd
 				calendars:allCalendars
 				];
 			eventsArr = [[CalCalendarStore defaultCalendarStore] eventsWithPredicate:eventsPredicate];
@@ -2656,6 +2663,7 @@ int main(int argc, char *argv[])
 					}
 				}
 				
+				DebugPrintf(@"effective query 'due before' date: %@\n", dueBeforeDate);
 				tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:allCalendars];
 			}
 			else // all uncompleted tasks
