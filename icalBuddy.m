@@ -32,11 +32,12 @@ THE SOFTWARE.
 #import <CalendarStore/CalendarStore.h>
 #import <AppKit/AppKit.h>
 #import <AddressBook/AddressBook.h>
+#import "HGUtils.h"
 #import "HGCLIUtils.h"
 #import "HGCLIAutoUpdater.h"
+#import "HGDateFunctions.h"
 #import "IcalBuddyAutoUpdaterDelegate.h"
 #import "ANSIEscapeHelper.h"
-
 
 
 
@@ -217,7 +218,6 @@ BOOL displayRelativeDates = YES;
 BOOL excludeEndDates = NO;
 BOOL useCalendarColorsForTitles = YES;
 BOOL showUIDs = NO;
-BOOL debugMode = NO;
 NSUInteger maxNumPrintedItems = 0; // 0 = no limit
 NSUInteger numPrintedItems = 0;
 
@@ -277,28 +277,6 @@ void addToOutputBuffer(NSAttributedString *aStr)
 
 
 
-void DebugPrintf(NSString *aStr, ...)
-{
-	if (!debugMode)
-		return;
-	
-	NSString *in_str = strConcat(@"icalBuddy: ", aStr, nil);
-	
-	va_list argList;
-	va_start(argList, aStr);
-	NSString *str = [
-		[[NSString alloc]
-			initWithFormat:in_str
-			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			arguments:argList
-			] autorelease
-		];
-	va_end(argList);
-	
-	[str writeToFile:@"/dev/stderr" atomically:NO encoding:outputStrEncoding error:NULL];
-}
-
-
 // returns the closest ANSI color (from the colors used by
 // ansiEscapeHelper) to the given color, or nil if the given
 // color is nil.
@@ -313,22 +291,6 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 	
 	return [ansiEscapeHelper colorForSGRCode:closestSGRCode];
 }
-
-
-
-
-NSString *translateEscapeSequences(NSString *str)
-{
-	if (str == nil)
-		return nil;
-	
-	NSMutableString *ms = [NSMutableString stringWithString:str];
-	[ms replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\\t" withString:@"\t" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\\e" withString:@"\e" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
-	return ms;
-}
-
 
 
 
@@ -353,41 +315,6 @@ NSString* localizedStr(NSString *str)
 
 
 
-
-// create an NSSet from a comma-separated string,
-// trimming whitespace from around each string component
-NSSet* setFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
-{
-	if (str != nil)
-	{
-		NSMutableSet *set = [NSMutableSet setWithCapacity:10];
-		NSArray *arr = [str componentsSeparatedByString:@","];
-		NSString *component;
-		for (component in arr)
-			[set addObject:[component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-		return set;
-	}
-	return [NSSet set];
-}
-
-
-// create an NSArray from a comma-separated string,
-// trimming whitespace from around each string component
-NSArray* arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
-{
-	if (str != nil)
-	{
-		NSMutableArray *retArr = [NSMutableArray arrayWithCapacity:10];
-		NSArray *arr = [str componentsSeparatedByString:@","];
-		NSString *component;
-		for (component in arr)
-			[retArr addObject:[component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-		return retArr;
-	}
-	return [NSArray array];
-}
-
-
 NSError *internalError(NSInteger code, NSString *description)
 {
 	return [NSError
@@ -401,48 +328,6 @@ NSError *internalError(NSInteger code, NSString *description)
 }
 
 
-// create an NSArray from a string where components are
-// separated by an arbitrary character and this separator character
-// must be present as both the first and the last character
-// in the given string (e.g.: @"/first/second/third/")
-NSArray* arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscapeSequences, NSError **error)
-{
-	if (str == nil)
-	{
-		if (error != NULL)
-			*error = internalError(0, @"Given string is null");
-		return nil;
-	}
-	if ([str length] < 2)
-	{
-		if (error != NULL)
-			*error = internalError(0, @"Given string has less than two characters");
-		return nil;
-	}
-	
-	NSString *separatorChar = nil;
-	
-	NSString *firstChar = [str substringToIndex:1];
-	NSString *lastChar = [str substringFromIndex:[str length]-1];
-	if ([firstChar isEqualToString:lastChar])
-		separatorChar = firstChar;
-	else
-	{
-		if (error != NULL)
-			*error = internalError(0, @"Given string must start and end with the separator character");
-		return nil;
-	}
-	
-	if (separatorChar != nil)
-	{
-		NSString *trimmedStr = [str substringWithRange:NSMakeRange(1,([str length]-2))];
-		if (aTranslateEscapeSequences)
-			trimmedStr = translateEscapeSequences(trimmedStr);
-		return [trimmedStr componentsSeparatedByString:separatorChar];
-	}
-	
-	return [NSArray array];
-}
 
 
 
@@ -486,181 +371,6 @@ NSInteger prioritySort(id task1, id task2, void *context)
 		// neither task is, or both tasks are late -> order alphabetically by title
         return [[task1 title] compare:[task2 title]];
 	}
-}
-
-
-
-NSCalendarDate* dateForStartOfDay(NSCalendarDate *date)
-{
-	return [NSCalendarDate
-		dateWithYear:[date yearOfCommonEra]
-		month:[date monthOfYear]
-		day:[date dayOfMonth]
-		hour:0
-		minute:0
-		second:0
-		timeZone:[date timeZone]
-		];
-}
-
-NSCalendarDate* dateByAddingDays(NSCalendarDate *date, NSInteger days)
-{
-	return [date dateByAddingYears:0 months:0 days:days hours:0 minutes:0 seconds:0];
-}
-
-
-// whether the two specified dates represent the same calendar day
-BOOL datesRepresentSameDay(NSCalendarDate *date1, NSCalendarDate *date2)
-{
-	return ([date1 yearOfCommonEra] == [date2 yearOfCommonEra] &&
-			[date1 monthOfYear] == [date2 monthOfYear] &&
-			[date1 dayOfMonth] == [date2 dayOfMonth]
-			);
-}
-
-
-
-
-
-
-// returns the total number of ISO weeks in a given year
-NSInteger getNumWeeksInYear(NSInteger year)
-{
-	// have to check both December 31 and December 24 (a week before the 31st)
-	// because the 31st may have week n:o 1 (of the following year) and the 24th
-	// may have week n:o (max-1) -- we want whichever is higher
-	
-	NSDateComponents *lastDayOfYearComponents = [[[NSDateComponents alloc] init] autorelease];
-	[lastDayOfYearComponents setYear:year];
-	[lastDayOfYearComponents setMonth:12];
-	[lastDayOfYearComponents setDay:31];
-	NSDate *lastDayOfYear = [[NSCalendar currentCalendar] dateFromComponents:lastDayOfYearComponents];
-	
-	NSInteger lastDayWeek = [[[NSCalendar currentCalendar]
-		components:NSWeekCalendarUnit
-		fromDate:lastDayOfYear
-		] week];
-	
-	NSDateComponents *weekBeforeLastDayOfYearComponents = [[[NSDateComponents alloc] init] autorelease];
-	[weekBeforeLastDayOfYearComponents setYear:year];
-	[weekBeforeLastDayOfYearComponents setMonth:12];
-	[weekBeforeLastDayOfYearComponents setDay:24];
-	NSDate *weekBeforeLastDayOfYear = [[NSCalendar currentCalendar] dateFromComponents:weekBeforeLastDayOfYearComponents];
-	
-	NSInteger weekBeforeLastDayWeek = [[[NSCalendar currentCalendar]
-		components:NSWeekCalendarUnit
-		fromDate:weekBeforeLastDayOfYear
-		] week];
-	
-	return (lastDayWeek > weekBeforeLastDayWeek) ? lastDayWeek : weekBeforeLastDayWeek;
-}
-
-
-// get number representing the absolute value of the
-// difference between two dates in logical weeks (e.g. would
-// return 1 if given this sunday and next week's monday,
-// assuming (for the sake of this example) that the week
-// starts on monday)
-NSInteger getWeekDiff(NSDate *date1, NSDate *date2)
-{
-	if (date1 == nil || date2 == nil)
-		return 0;
-	
-	NSDateComponents *components1 = [[NSCalendar currentCalendar]
-		components:NSWeekCalendarUnit|NSYearCalendarUnit
-		fromDate:date1
-		];
-	NSDateComponents *components2 = [[NSCalendar currentCalendar]
-		components:NSWeekCalendarUnit|NSYearCalendarUnit
-		fromDate:date2
-		];
-	
-	NSInteger week1 = [components1 week];
-	NSInteger week2 = [components2 week];
-	NSInteger year1 = [components1 year];
-	NSInteger year2 = [components2 year];
-	
-	NSInteger earlierDateYear;
-	NSInteger earlierDateWeek;
-	NSInteger laterDateYear;
-	NSInteger laterDateWeek;
-	if (year1 < year2)
-	{
-		earlierDateYear = year1;
-		earlierDateWeek = week1;
-		laterDateYear = year2;
-		laterDateWeek = week2;
-	}
-	else
-	{
-		earlierDateYear = year2;
-		earlierDateWeek = week2;
-		laterDateYear = year1;
-		laterDateWeek = week1;
-	}
-	
-	// check if week numbers are from the same year (the week number
-	// of the last days in a year is often week #1 of the next
-	// year) -- if so, they are directly comparable
-	if ((year1 == year2) ||
-		(abs(year1-year2)==1 && earlierDateWeek==1))
-		return abs(week2-week1);
-	
-	// if there is more than one year between the dates, get the
-	// total number of weeks in the years between
-	NSInteger numWeeksInYearsBetween = 0;
-	if (abs(year1-year2) > 1)
-	{
-		NSInteger i;
-		for (i = earlierDateYear+1; i < laterDateYear; i++)
-		{
-			numWeeksInYearsBetween += getNumWeeksInYear(i);
-		}
-	}
-	
-	NSInteger numWeeksInEarlierDatesYear = getNumWeeksInYear(earlierDateYear);
-	
-	return (laterDateWeek+(numWeeksInEarlierDatesYear-earlierDateWeek))+numWeeksInYearsBetween;
-}
-
-
-NSInteger getDayDiff(NSDate *date1, NSDate *date2)
-{
-	if (date1 == nil || date2 == nil)
-		return 0;
-	
-	NSCalendarDate *d1 = dateForStartOfDay([date1 dateWithCalendarFormat:nil timeZone:nil]);
-	NSCalendarDate *d2 = dateForStartOfDay([date2 dateWithCalendarFormat:nil timeZone:nil]);
-	
-	NSTimeInterval ti = [d2 timeIntervalSinceDate:d1];
-	return abs(ti / (60*60*24));
-}
-
-NSDate *dateFromUserInput(NSString *input, NSString *inputName)
-{
-	NSDate *result = [NSDate dateWithString:input];
-	
-	if (result == nil)
-		result = [NSDate dateWithNaturalLanguageString:input];
-	
-	NSString *inputDateName = (inputName == nil) ? @"date" : inputName;
-	if (result == nil)
-		PrintfErr(@"Error: invalid %@: '%@'\n", inputDateName, input);
-	else
-		DebugPrintf(@"%@ interpreted as: %@\n", inputDateName, result);
-	
-	return result;
-}
-
-NSCalendarDate *calDateFromUserInput(NSString *input, NSString *inputName)
-{
-	return [dateFromUserInput(input, inputName) dateWithCalendarFormat:nil timeZone:nil];
-}
-
-void printDateFormatInfo()
-{
-	PrintfErr(@"You can use some natural language (primarily english) and common date formats when\n");
-	PrintfErr(@"specifying dates but the safest format is: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n");
 }
 
 
@@ -823,10 +533,6 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 
 
 
-NSMutableAttributedString* mutableAttrStrWithAttrs(NSString *string, NSDictionary *attrs)
-{
-	return [[[NSMutableAttributedString alloc] initWithString:string attributes:attrs] autorelease];
-}
 
 
 
@@ -2128,7 +1834,7 @@ int main(int argc, char *argv[])
 					if ([allArgKeys containsObject:@"showUIDs"])
 						showUIDs = [[constArgsDict objectForKey:@"showUIDs"] boolValue];
 					if ([allArgKeys containsObject:@"debug"])
-						debugMode = [[constArgsDict objectForKey:@"debug"] boolValue];
+						debugPrintEnabled = [[constArgsDict objectForKey:@"debug"] boolValue];
 				}
 			}
 		}
@@ -2154,8 +1860,8 @@ int main(int argc, char *argv[])
 			if (L10nStringsDict == nil)
 			{
 				PrintfErr(@"* Error in localization file \"%@\":\n", L10nFilePath);
-				PrintfErr(@"can not recognize file format -- must be a valid property list\n");
-				PrintfErr(@"with a structure specified in the icalBuddyLocalization man page.\n");
+				PrintfErr(@"  can not recognize file format -- must be a valid property list\n");
+				PrintfErr(@"  with a structure specified in the icalBuddyLocalization man page.\n");
 				L10nFileIsValid = NO;
 			}
 			
@@ -2180,8 +1886,8 @@ int main(int argc, char *argv[])
 					if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
 					{
 						PrintfErr(@"* Error in localization file \"%@\"\n", L10nFilePath);
-						PrintfErr(@"(key: \"%@\", value: \"%@\"):\n", thisKey, thisVal);
-						PrintfErr(@"value must include %@ to indicate position for a variable.\n", requiredSubstring);
+						PrintfErr(@"  (key: \"%@\", value: \"%@\"):\n", thisKey, thisVal);
+						PrintfErr(@"  value must include %@ to indicate position for a variable.\n", requiredSubstring);
 						L10nFileIsValid = NO;
 					}
 				}
@@ -2234,7 +1940,7 @@ int main(int argc, char *argv[])
 		else if ((strcmp(argv[i], "-V") == 0) || (strcmp(argv[i], "--version") == 0))
 			arg_printVersion = YES;
 		else if ((strcmp(argv[i], "-d") == 0) || (strcmp(argv[i], "--debug") == 0))
-			debugMode = YES;
+			debugPrintEnabled = YES;
 		else if ((strcmp(argv[i], "-n") == 0) || (strcmp(argv[i], "--includeOnlyEventsFromNowOn") == 0))
 			arg_includeOnlyEventsFromNowOn = YES;
 		else if ((strcmp(argv[i], "-f") == 0) || (strcmp(argv[i], "--formatOutput") == 0))
@@ -2320,7 +2026,7 @@ int main(int argc, char *argv[])
 		if (propertySeparators == nil && propertySeparatorsArgParseError != nil)
 		{
 			PrintfErr(
-				@"* Invalid value for argument -ps (or --propertySeparators):\n  \"%@\".\n",
+				@"* Error: invalid value for argument -ps (or --propertySeparators):\n  \"%@\".\n",
 				[propertySeparatorsArgParseError localizedDescription]
 				);
 			PrintfErr(@"  Make sure you start and end the value with the separator character\n  (like this: -ps \"|first|second|third|\")\n");
@@ -2349,15 +2055,9 @@ int main(int argc, char *argv[])
 			outputStrEncoding = matchedEncoding;
 		else
 		{
-			PrintfErr(
-				@"\nError: Invalid string encoding argument: \"%@\".\n",
-				arg_strEncoding
-				);
-			PrintfErr(@"Run \"icalBuddy strEncodings\" to see all the possible values.");
-			PrintfErr(
-				@"Using default encoding \"%@\".\n\n",
-				[NSString localizedNameOfStringEncoding: outputStrEncoding]
-				);
+			PrintfErr(@"* Error: Invalid string encoding argument: \"%@\".\n", arg_strEncoding);
+			PrintfErr(@"  Run \"icalBuddy strEncodings\" to see all the possible values.\n");
+			PrintfErr(@"  Using default encoding \"%@\".\n\n", [NSString localizedNameOfStringEncoding: outputStrEncoding]);
 		}
 	}
 	
@@ -2440,7 +2140,7 @@ int main(int argc, char *argv[])
 		if (configFileIsDir)
 		{
 			PrintfErr(
-				@"There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n",
+				@"Error: There seems to be a directory where the configuration\nfile should be: %@\nCan not open configuration file.\n",
 				configFilePath
 				);
 		}

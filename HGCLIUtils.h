@@ -28,28 +28,18 @@ THE SOFTWARE.
 */
 
 #import <Cocoa/Cocoa.h>
+#import "HGUtils.h"
 
 
 extern NSStringEncoding outputStrEncoding;
-
-
-// helper function macros
-#define kEmptyMutableAttributedString 	[[[NSMutableAttributedString alloc] init] autorelease]
-#define MUTABLE_ATTR_STR(x)				[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
-#define ATTR_STR(x)						[[[NSAttributedString alloc] initWithString:(x)] autorelease]
-#define WHITESPACE(x)					[@"" stringByPaddingToLength:(x) withString:@" " startingAtIndex:0]
-
+extern BOOL debugPrintEnabled;
 
 
 void Print(NSString *aStr);
 void Printf(NSString *aStr, ...);
 void PrintfErr(NSString *aStr, ...);
+void DebugPrintf(NSString *aStr, ...);
 
-NSString *strConcat(NSString *firstStr, ...);
-NSString *escapeDoubleQuotes(NSString *str);
-
-void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr);
 void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUInteger width);
 
-BOOL moveFileToTrash(NSString *filePath);
 

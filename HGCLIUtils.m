@@ -33,6 +33,7 @@ THE SOFTWARE.
 // the string encoding to use for output
 NSStringEncoding outputStrEncoding = NSUTF8StringEncoding; // default
 
+BOOL debugPrintEnabled = NO;
 
 
 
@@ -41,116 +42,57 @@ NSStringEncoding outputStrEncoding = NSUTF8StringEncoding; // default
 // 		(modified to use non-deprecated version of writeToFile:...
 //       and allow for using the "string format" syntax)
 
+
+
 void Print(NSString *aStr)
 {
-	if (aStr == nil)
-		return;
-	[aStr writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
+	[aStr writeToFile:@"/dev/stdout" atomically:NO encoding:NSUTF8StringEncoding error:NULL];
+}
+
+// other Printf functions call this, and you call them
+void RealPrintf(NSString *aStr, NSString *aFile, va_list args)
+{
+	NSString *str = [
+		[[NSString alloc]
+			initWithFormat:aStr
+			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
+			arguments:args
+			] autorelease
+		];
+	
+	[str writeToFile:aFile atomically:NO encoding:NSUTF8StringEncoding error:NULL];
 }
 
 void Printf(NSString *aStr, ...)
 {
 	va_list argList;
 	va_start(argList, aStr);
-	NSString *str = [
-		[[NSString alloc]
-			initWithFormat:aStr
-			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			arguments:argList
-			] autorelease
-		];
+	RealPrintf(aStr, @"/dev/stdout", argList);
 	va_end(argList);
-	
-	[str writeToFile:@"/dev/stdout" atomically:NO encoding:outputStrEncoding error:NULL];
 }
 
 void PrintfErr(NSString *aStr, ...)
 {
 	va_list argList;
 	va_start(argList, aStr);
-	NSString *str = [
-		[[NSString alloc]
-			initWithFormat:aStr
-			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			arguments:argList
-			] autorelease
-		];
+	RealPrintf(aStr, @"/dev/stderr", argList);
 	va_end(argList);
-	
-	[str writeToFile:@"/dev/stderr" atomically:NO encoding:outputStrEncoding error:NULL];
 }
 
-
-// returns YES if success, NO if failure
-BOOL moveFileToTrash(NSString *filePath)
+void DebugPrintf(NSString *aStr, ...)
 {
-	if (filePath == nil)
-		return NO;
-	
-	NSString *fileDir = [filePath stringByDeletingLastPathComponent];
-	NSString *fileName = [filePath lastPathComponent];
-	
-	return [[NSWorkspace sharedWorkspace]
-		performFileOperation:NSWorkspaceRecycleOperation
-		source:fileDir
-		destination:@""
-		files:[NSArray arrayWithObject:fileName]
-		tag:nil
-		];
-}
-
-
-
-
-// convenience function: concatenates strings (yes, I hate the
-// verbosity of -stringByAppendingString:.)
-// NOTE: MUST SEND nil AS THE LAST ARGUMENT
-NSString *strConcat(NSString *firstStr, ...)
-{
-	if (!firstStr)
-		return nil;
-	
-	va_list argList;
-	NSMutableString *retVal = [firstStr mutableCopy];
-	NSString *str;
-	va_start(argList, firstStr);
-	while((str = va_arg(argList, NSString*)))
-		[retVal appendString:str];
-	va_end(argList);
-	return retVal;
-}
-
-NSString *escapeDoubleQuotes(NSString *str)
-{
-	return [str stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
-}
-
-
-
-// replaces all occurrences of searchStr in str with replaceStr
-void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr)
-{
-	if (str == nil || searchStr == nil || replaceStr == nil)
+	if (!debugPrintEnabled)
 		return;
 	
-	NSUInteger replaceStrLength = [replaceStr length];
-	NSString *strRegularString = [str string];
-	NSRange searchRange = NSMakeRange(0, [strRegularString length]);
-	NSRange foundRange;
-	do
-	{
-		foundRange = [strRegularString rangeOfString:searchStr options:NSLiteralSearch range:searchRange];
-		if (foundRange.location != NSNotFound)
-		{
-			[str replaceCharactersInRange:foundRange withAttributedString:replaceStr];
-			
-			strRegularString = [str string];
-			searchRange.location = foundRange.location + replaceStrLength;
-			searchRange.length = [strRegularString length] - searchRange.location;
-		}
-	}
-	while (foundRange.location != NSNotFound);
+	NSString *str = strConcat(@"icalBuddy: ", aStr, nil);
+	
+	va_list argList;
+	va_start(argList, aStr);
+	RealPrintf(str, @"/dev/stderr", argList);
+	va_end(argList);
 }
+
+
 
 
 #define UNICHAR_NEWLINE 10
