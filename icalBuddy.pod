@@ -9,7 +9,7 @@ B<icalBuddy> -- query the OS X calendar database for items
 
 =item B<icalBuddy>
 
-[B<-Vufn>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-npn>] [B<-n>] [B<-sed>] [B<-uid>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
+[B<-Vufnd>] [B<--strEncoding> I<encoding>] [B<-sc>] [B<-sd>] [B<-nc>] [B<-nrd>] [B<-npn>] [B<-n>] [B<-sed>] [B<-uid>] [B<-eed>] [B<-li> I<num>] [B<-std>] [B<-stda>] [B<-tf> I<format>] [B<-df> I<format>] [B<-po> I<value>] [B<-ps> I<value>] [B<-b> I<value>] [B<-ab> I<value>] [B<-ss> I<value>] [B<-ic> I<value>] [B<-ec> I<value>] [B<-iep> I<value>] [B<-eep> I<value>] [B<-itp> I<value>] [B<-etp> I<value>] [B<-cf> I<path>] [B<-lf> I<path>] [B<-nnr> I<value>] I<command>
 
 =back
 
@@ -41,7 +41,7 @@ Print events occurring at present time
 
 =item B<C<eventsFrom:START to:END>>
 
-Print events occurring between the two specified dates (START and END), where both are specified in the format C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
+Print events occurring between the two specified dates. The dates (START and END) may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
 
 =item B<C<uncompletedTasks>>
 
@@ -49,7 +49,7 @@ Print uncompleted tasks
 
 =item B<C<tasksDueBefore:DATE>>
 
-Print uncompleted tasks that are due before the given date. DATE may be C<today>, C<tomorrow> or a date in the format C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
+Print uncompleted tasks that are due before the given date. DATE may be C<today+NUM> (where C<NUM> is an integer) or it may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
 
 =item B<C<calendars>>
 
@@ -77,6 +77,10 @@ Print version number and exit.
 =item B<-u>, B<--checkForUpdates>
 
 Check for updates to self. Also allows for automatic updating of self (with minimal user interaction, straight from the command line.)
+
+=item B<-d>, B<--debug>
+
+Print diagnostic information into the standard error stream (for example, how input dates are interpreted).
 
 =item B<-sc>, B<--separateByCalendar>
 
