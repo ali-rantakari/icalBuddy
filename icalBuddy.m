@@ -614,8 +614,32 @@ NSInteger getDayDiff(NSDate *date1, NSDate *date2)
 	return abs(ti / (60*60*24));
 }
 
+NSDate *dateFromUserInput(NSString *input, NSString *inputName)
+{
+	NSDate *result = [NSDate dateWithString:input];
+	
+	if (result == nil)
+		result = [NSDate dateWithNaturalLanguageString:input];
+	
+	if (result == nil)
+	{
+		NSString *inputDateName = (inputName == nil) ? @"date" : inputName;
+		PrintfErr(@"Error: invalid %@: '%@'\n", inputDateName, input);
+	}
+	
+	return result;
+}
 
+NSCalendarDate *calDateFromUserInput(NSString *input, NSString *inputName)
+{
+	return [dateFromUserInput(input, inputName) dateWithCalendarFormat:nil timeZone:nil];
+}
 
+void printDateFormatInfo()
+{
+	PrintfErr(@"You can use some natural language (primarily english) and common date formats when\n");
+	PrintfErr(@"specifying dates but the safest format is: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n");
+}
 
 
 
@@ -2524,17 +2548,12 @@ int main(int argc, char *argv[])
 			}
 			else if (arg_output_is_eventsFromTo)
 			{
-				eventsDateRangeStart = [NSCalendarDate dateWithString:arg_eventsFrom];
-				eventsDateRangeEnd = [NSCalendarDate dateWithString:arg_eventsTo];
+				eventsDateRangeStart = calDateFromUserInput(arg_eventsFrom, @"start date");
+				eventsDateRangeEnd = calDateFromUserInput(arg_eventsTo, @"end date");
 				
-				if (eventsDateRangeStart == nil)
+				if (eventsDateRangeStart == nil || eventsDateRangeEnd == nil)
 				{
-					PrintfErr(@"Error: invalid start date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
-					return(0);
-				}
-				else if (eventsDateRangeEnd == nil)
-				{
-					PrintfErr(@"Error: invalid end date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsTo);
+					printDateFormatInfo();
 					return(0);
 				}
 				
@@ -2604,11 +2623,11 @@ int main(int argc, char *argv[])
 					// tasksDueBefore:"YYYY-MM-DD HH:MM:SS ±HHMM"
 					NSString *dueBeforeDateStr = [arg_output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
 					
-					dueBeforeDate = [NSCalendarDate dateWithString:dueBeforeDateStr];
+					dueBeforeDate = calDateFromUserInput(dueBeforeDateStr, @"due date");
 					
 					if (dueBeforeDate == nil)
 					{
-						PrintfErr(@"Error: invalid date: '%@'\nDates must be specified in the format: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n", arg_eventsFrom);
+						printDateFormatInfo();
 						return(0);
 					}
 				}
