@@ -100,7 +100,7 @@ Omit calendar names from the output. Does not apply if the B<-sc> argument is us
 
 =item B<-nrd>, B<--noRelativeDates>
 
-Do not use "natural language relative dates" when displaying dates (e.g. "today", "yesterday" or "day after tomorrow".)
+Never use "natural language relative dates" (e.g. "today", "yesterday" or "day after tomorrow") instead of the default date format presentation (see the B<-df> argument).
 
 =item B<-npn>, B<--noPropertyNames>
 
