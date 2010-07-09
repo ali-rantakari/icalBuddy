@@ -6,7 +6,6 @@
 #import "HGCLIUtils.h"
 
 
-
 ANSIEscapeHelper *ansiHelper;
 
 
@@ -37,6 +36,36 @@ NSString *runTask(NSString *path, NSArray *args)
 	return [string autorelease];
 }
 
+
+NSString *toHTMLEntities(NSString *str)
+{
+	if (str == nil)
+		return nil;
+	
+	// escape special chars
+	NSString *eStr = [((NSString *)CFXMLCreateStringByEscapingEntities(kCFAllocatorDefault, (CFStringRef)str, NULL)) autorelease];
+	
+	NSMutableString *ms = [NSMutableString string];
+	
+	// deal with line indentation & newlines
+	NSArray *lines = [eStr componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+	for (NSString *line in lines)
+	{
+		int i = 0;
+		while (i < [line length] && [line characterAtIndex:i] == 32) // 32 is the space unichar
+		{
+			[ms appendString:@"&nbsp;"];
+			i++;
+		}
+		[ms appendString:[line substringFromIndex:i]];
+		[ms appendString:@"<br />"];
+	}
+	
+	// tabs
+	[ms replaceOccurrencesOfString:@"\t" withString:@"&nbsp;&nbsp;&nbsp;&nbsp;" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+	
+	return ms;
+}
 
 
 NSString *cssClassNameForSGRCode(enum sgrCode aSGRCode)
@@ -201,6 +230,7 @@ int main(int argc, char *argv[])
 	}
 	
 	NSString *output = runTask(@"/bin/bash", [NSArray arrayWithObjects: @"-c", command, nil]);
+	output = toHTMLEntities(output);
 	
 	Print(htmlFromAttributedString([ansiHelper attributedStringWithANSIEscapedString:output]));
 	

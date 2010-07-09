@@ -61,17 +61,30 @@ analyze:
 	$(COMPILER_CLANG) --analyze $(SOURCE_FILES)
 
 
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# compile tool for generating HTML from command output
+#-------------------------------------------------------------------------
 cmdStdoutToHTML: cmdStdoutToHTML.m
 	@echo
 	@echo ---- Compiling cmdStdoutToHTML:
 	@echo ======================================
 	$(COMPILER) -Wall -std=c99 -arch i386 -framework Cocoa -o $@ cmdStdoutToHTML.m ANSIEscapeHelper.m HGCLIUtils.m HGUtils.m
 
-examples: cmdStdoutToHTML examples.txt
-	#@echo
-	#@echo ---- Running example generator:
-	#@echo ======================================
 
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# generate usage examples HTML
+#-------------------------------------------------------------------------
+examples.html: cmdStdoutToHTML
+	@echo
+	@echo ---- Running example generator:
+	@echo ======================================
+	./generateExamples.py > examples.html
+
+examples: examples.html
 
 
 #-------------------------------------------------------------------------

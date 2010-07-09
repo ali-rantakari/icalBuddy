@@ -26,6 +26,7 @@ usage.txt
 cmdStdoutToPNG
 cmdStdoutToHTML
 cmdStdout.png
+examples.html
 
 # temp files
 test.m

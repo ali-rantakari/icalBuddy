@@ -1,0 +1,53 @@
+
+/* CSS for the usage examples HTML (generated via make) */
+
+.fg-black { color: black; }
+.fg-red { color: red; }
+.fg-green { color: green; }
+.fg-yellow { color: yellow; }
+.fg-blue { color: blue; }
+.fg-magenta { color: magenta; }
+.fg-cyan { color: cyan; }
+.fg-white { color: white; }
+
+.bg-black { color: black; }
+.bg-red { color: red; }
+.bg-green { color: green; }
+.bg-yellow { color: yellow; }
+.bg-blue { color: blue; }
+.bg-magenta { color: magenta; }
+.bg-cyan { color: cyan; }
+.bg-white { color: white; }
+
+.bright-fg-black { color: black; }
+.bright-fg-red { color: red; }
+.bright-fg-green { color: green; }
+.bright-fg-yellow { color: yellow; }
+.bright-fg-blue { color: blue; }
+.bright-fg-magenta { color: magenta; }
+.bright-fg-cyan { color: cyan; }
+.bright-fg-white { color: white; }
+
+.bright-bg-black { color: black; }
+.bright-bg-red { color: red; }
+.bright-bg-green { color: green; }
+.bright-bg-yellow { color: yellow; }
+.bright-bg-blue { color: blue; }
+.bright-bg-magenta { color: magenta; }
+.bright-bg-cyan { color: cyan; }
+.bright-bg-white { color: white; }
+
+.bold { font-weight: bold; }
+
+.underlined { text-decoration: underline; }
+.double-underlined { text-decoration: underline; }
+
+code {
+	display: inline-block;
+	border: 1px solid black;
+	padding: 10px;
+	background: black;
+	color: white;
+	}
+
+
