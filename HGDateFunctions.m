@@ -185,12 +185,14 @@ NSInteger getDayDiff(NSDate *date1, NSDate *date2)
 	if (date1 == nil || date2 == nil)
 		return 0;
 	
-	NSDate *d1 = dateForStartOfDay([date1 dateWithCalendarFormat:nil timeZone:nil]);
-	NSDate *d2 = dateForStartOfDay([date2 dateWithCalendarFormat:nil timeZone:nil]);
+	NSDate *d1 = dateForStartOfDay(date1);
+	NSDate *d2 = dateForStartOfDay(date2);
 	
 	NSTimeInterval ti = [d2 timeIntervalSinceDate:d1];
-	return abs(ti / (60*60*24));
+	return (ti / (60*60*24));
 }
+
+
 
 NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 {

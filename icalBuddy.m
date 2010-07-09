@@ -482,8 +482,6 @@ NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
 				if (dayDiffFormatSpecifierRange.location != NSNotFound)
 				{
 					NSInteger dayDiff = getDayDiff(now, date);
-					if ([now compare:date] == NSOrderedDescending)
-						dayDiff *= -1; // in the past
 					
 					NSString *dayDiffStr = nil;
 					if (dayDiff < -1)
@@ -1016,7 +1014,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		else
 		{
 			// TODO:
-			// fix the convoluted logic here.
+			// fix the convoluted control flow here.
 			// should probably determine the start and end datetime strings
 			// first (i.e. make them "..." if singleDayContext and the event
 			// doesn't start or end on context day) and then combine them together
@@ -1081,19 +1079,20 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					{
 						if ([event isAllDay])
 						{
-							NSInteger daysDiff = getDayDiff([event startDate], [event endDate]);
+							// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
+							// we want them displayed as only spanning from <start day> to <end day>
+							NSDate *endDateMinusOneDay = dateByAddingDays([event endDate], -1);
+							NSInteger daysDiff = getDayDiff([event startDate], endDateMinusOneDay);
 							
-							if (daysDiff > 1)
+							if (daysDiff > 0)
 							{
-								// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
-								// we want them displayed as only spanning from <start day> to <end day>
-								NSDate *endDateMinusOneDay = dateByAddingDays([event endDate], -1);
 								thisPropOutputValue = MUTABLE_ATTR_STR((
-									[NSString
-										stringWithFormat: @"%@ - %@",
-											dateStr([event startDate], true, false),
-											dateStr(endDateMinusOneDay, true, false)
-										]
+									strConcat(
+										dateStr([event startDate], true, false),
+										@" - ",
+										dateStr(endDateMinusOneDay, true, false),
+										nil
+										)
 									));
 							}
 							else
@@ -2309,12 +2308,7 @@ int main(int argc, char *argv[])
 			}
 			
 			
-			eventsDateRangeDaysSpan = [[[NSCalendar currentCalendar]
-				components:NSDayCalendarUnit
-				fromDate:eventsDateRangeStart
-				toDate:eventsDateRangeEnd
-				options:0
-				] day];
+			eventsDateRangeDaysSpan = getDayDiff(eventsDateRangeStart, eventsDateRangeEnd);
 			
 			
 			NSDate *predicateDateStart = ((arg_includeOnlyEventsFromNowOn)?now:eventsDateRangeStart);
@@ -2466,24 +2460,14 @@ int main(int argc, char *argv[])
 					// calculate anEvent's days span and limit it to the range of days we
 					// want displayed
 					
-					NSUInteger anEventDaysSpan = [[[NSCalendar currentCalendar]
-						components:NSDayCalendarUnit
-						fromDate:[anEvent startDate]
-						toDate:[anEvent endDate]
-						options:0
-						] day];
+					NSUInteger anEventDaysSpan = getDayDiff([anEvent startDate], [anEvent endDate]);
 					
 					// the previous method call returns day spans that are one day too long for
 					// all-day events so in those cases we'll subtract one
 					if ([anEvent isAllDay] && anEventDaysSpan > 0)
 						anEventDaysSpan--;
 					
-					NSUInteger rangeStartToAnEventStartDaysSpan = [[[NSCalendar currentCalendar]
-						components:NSDayCalendarUnit
-						fromDate:eventsDateRangeStart
-						toDate:[anEvent startDate]
-						options:0
-						] day];
+					NSUInteger rangeStartToAnEventStartDaysSpan = getDayDiff(eventsDateRangeStart, [anEvent startDate]);
 					
 					NSUInteger daySpanLeftInRange = eventsDateRangeDaysSpan - rangeStartToAnEventStartDaysSpan;
 					NSUInteger anEventDaysSpanToConsider = MIN(daySpanLeftInRange, anEventDaysSpan);
