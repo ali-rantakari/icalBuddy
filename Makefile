@@ -66,6 +66,17 @@ analyze:
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+# write usage output to text file
+#-------------------------------------------------------------------------
+usage.txt: icalBuddy
+	@echo
+	@echo ---- generating usage.txt:
+	@echo ======================================
+	./icalBuddy > usage.txt
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
 # generate main man page from POD syntax file
 #-------------------------------------------------------------------------
 icalBuddy.1: icalBuddy.pod
@@ -154,7 +165,7 @@ deployment/faq.html: faq.markdown faq-style.css
 #-------------------------------------------------------------------------
 # generate documentation
 #-------------------------------------------------------------------------
-docs: icalBuddy.1 deployment/faq.html icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyConfig.pdf Manual-icalBuddyLocalization.pdf
+docs: icalBuddy.1 deployment/faq.html icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyConfig.pdf Manual-icalBuddyLocalization.pdf usage.txt
 	@echo
 	@echo ---- Generating HTML from manpages:
 	@echo ======================================
@@ -214,7 +225,7 @@ deploy: package
 	fi;\
 	echo "Press enter to continue uploading to server or Ctrl-C to cancel.";\
 	read INPUTSTR;\
-	scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(TEMP_DEPLOYMENT_L10NMANFILE) $(TEMP_DEPLOYMENT_CONFIGMANFILE) $(TEMP_DEPLOYMENT_FAQFILE) $(SCP_TARGET); )
+	scp -r $(TEMP_DEPLOYMENT_DIR) $(TEMP_DEPLOYMENT_MANFILE) $(TEMP_DEPLOYMENT_L10NMANFILE) $(TEMP_DEPLOYMENT_CONFIGMANFILE) $(TEMP_DEPLOYMENT_FAQFILE) usage.txt $(SCP_TARGET); )
 
 
 
