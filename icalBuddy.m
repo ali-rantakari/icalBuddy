@@ -950,11 +950,11 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		else
 			thisPropTempValue = [event title];
 		
-		thisPropOutputValue = MUTABLE_ATTR_STR(thisPropTempValue);
+		thisPropOutputValue = M_ATTR_STR(thisPropTempValue);
 		
 		if (!(printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC))
 		{
-			thisPropOutputValueSuffix = MUTABLE_ATTR_STR(@" ");
+			thisPropOutputValueSuffix = M_ATTR_STR(@" ");
 			[thisPropOutputValueSuffix
 				appendAttributedString: mutableAttrStrWithAttrs(
 					strConcat(@"(", [[event calendar] title], @")", nil),
@@ -965,16 +965,16 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 	}
 	else if ([propName isEqualToString:kPropName_location])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameLocation), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameLocation), @":", nil));
 		
 		if ([event location] != nil &&
 			![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
 			)
-			thisPropOutputValue = MUTABLE_ATTR_STR([event location]);
+			thisPropOutputValue = M_ATTR_STR([event location]);
 	}
 	else if ([propName isEqualToString:kPropName_notes])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
 		
 		if ([event notes] != nil &&
 			![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
@@ -992,7 +992,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			else
 				thisNewlineReplacement = notesNewlineReplacement;
 			
-			thisPropOutputValue = MUTABLE_ATTR_STR(
+			thisPropOutputValue = M_ATTR_STR(
 				[[event notes]
 					stringByReplacingOccurrencesOfString:@"\n"
 					withString:thisNewlineReplacement
@@ -1002,24 +1002,24 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 	}
 	else if ([propName isEqualToString:kPropName_url])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
 		
 		if ([event url] != nil &&
 			![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday]
 			)
-			thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat: @"%@", [event url]]));
+			thisPropOutputValue = M_ATTR_STR(([NSString stringWithFormat: @"%@", [event url]]));
 	}
 	else if ([propName isEqualToString:kPropName_UID])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
-		thisPropOutputValue = MUTABLE_ATTR_STR([event uid]);
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
+		thisPropOutputValue = M_ATTR_STR([event uid]);
 	}
 	else if ([propName isEqualToString:kPropName_datetime])
 	{
 		if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
 		{
 			if (!(printOptions & PRINT_OPTION_SINGLE_DAY))
-				thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], ONLY_DATE));
+				thisPropOutputValue = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
 		}
 		else
 		{
@@ -1046,7 +1046,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					// -> we only want to show the start datetime
 					
 					if (singleDayContext && !startsOnContextDay)
-						thisPropOutputValue = MUTABLE_ATTR_STR(@"...");
+						thisPropOutputValue = M_ATTR_STR(@"...");
 					else
 					{
 						DatePrintOption datePrintOpt = DATE_PRINT_OPTION_NONE;
@@ -1061,7 +1061,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							datePrintOpt = ONLY_TIME;
 						
 						if (datePrintOpt != DATE_PRINT_OPTION_NONE)
-							thisPropOutputValue = MUTABLE_ATTR_STR(
+							thisPropOutputValue = M_ATTR_STR(
 								dateStr([event startDate], datePrintOpt)
 								);
 					}
@@ -1071,7 +1071,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					if (singleDayContext)
 					{
 						if (startsOnContextDay && endsOnContextDay)
-							thisPropOutputValue = MUTABLE_ATTR_STR((
+							thisPropOutputValue = M_ATTR_STR((
 								strConcat(
 									dateStr([event startDate], ONLY_TIME),
 									@" - ",
@@ -1080,15 +1080,15 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 									)
 								));
 						else if (startsOnContextDay)
-							thisPropOutputValue = MUTABLE_ATTR_STR((
+							thisPropOutputValue = M_ATTR_STR((
 								strConcat(dateStr([event startDate], ONLY_TIME), @" - ...", nil)
 								));
 						else if (endsOnContextDay)
-							thisPropOutputValue = MUTABLE_ATTR_STR((
+							thisPropOutputValue = M_ATTR_STR((
 								strConcat(@"... - ", dateStr([event endDate], ONLY_TIME), nil)
 								));
 						else
-							thisPropOutputValue = MUTABLE_ATTR_STR(@"... - ...");
+							thisPropOutputValue = M_ATTR_STR(@"... - ...");
 					}
 					else
 					{
@@ -1101,7 +1101,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							
 							if (daysDiff > 0)
 							{
-								thisPropOutputValue = MUTABLE_ATTR_STR((
+								thisPropOutputValue = M_ATTR_STR((
 									strConcat(
 										dateStr([event startDate], ONLY_DATE),
 										@" - ",
@@ -1111,7 +1111,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 									));
 							}
 							else
-								thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], ONLY_DATE));
+								thisPropOutputValue = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
 						}
 						else
 						{
@@ -1120,7 +1120,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							DatePrintOption datePrintOpt = datesRepresentSameDay([event startDate], [event endDate]) ? ONLY_TIME : DATE_AND_TIME;
 							NSString *endDateFormattedStr = dateStr([event endDate], datePrintOpt);
 							
-							thisPropOutputValue = MUTABLE_ATTR_STR(strConcat(startDateFormattedStr, @" - ", endDateFormattedStr, nil));
+							thisPropOutputValue = M_ATTR_STR(strConcat(startDateFormattedStr, @" - ", endDateFormattedStr, nil));
 						}
 					}
 				}
@@ -1197,7 +1197,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay)
 			if (numPrintedProps == 0)
 				prefixStr = mutableAttrStrWithAttrs(prefixStrBullet, getBulletStringAttributes(NO));
 			else
-				prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+				prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 			
 			// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
 			// with a number of whitespace characters ("indentation") that matches the
@@ -1238,7 +1238,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay)
 		}
 		
 		if (numPrintedProps > 0)
-			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
+			addToOutputBuffer(M_ATTR_STR(@"\n"));
 		
 		numPrintedItems++;
 	}
@@ -1265,11 +1265,11 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 	
 	if ([propName isEqualToString:kPropName_title])
 	{
-		thisPropOutputValue = MUTABLE_ATTR_STR([task title]);
+		thisPropOutputValue = M_ATTR_STR([task title]);
 		
 		if (!(printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC))
 		{
-			thisPropOutputValueSuffix = MUTABLE_ATTR_STR(@" ");
+			thisPropOutputValueSuffix = M_ATTR_STR(@" ");
 			[thisPropOutputValueSuffix
 				appendAttributedString: mutableAttrStrWithAttrs(
 					strConcat(@"(", [[task calendar] title], @")", nil),
@@ -1280,7 +1280,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 	}
 	else if ([propName isEqualToString:kPropName_notes])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
 		
 		if ([task notes] != nil &&
 			![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
@@ -1298,7 +1298,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 			else
 				thisNewlineReplacement = notesNewlineReplacement;
 			
-			thisPropOutputValue = MUTABLE_ATTR_STR((
+			thisPropOutputValue = M_ATTR_STR((
 				[[task notes]
 					stringByReplacingOccurrencesOfString:@"\n"
 					withString:thisNewlineReplacement
@@ -1308,42 +1308,42 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 	}
 	else if ([propName isEqualToString:kPropName_url])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
 		
 		if ([task url] != nil)
-			thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat:@"%@", [task url]]));
+			thisPropOutputValue = M_ATTR_STR(([NSString stringWithFormat:@"%@", [task url]]));
 	}
 	else if ([propName isEqualToString:kPropName_UID])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
-		thisPropOutputValue = MUTABLE_ATTR_STR([task uid]);
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
+		thisPropOutputValue = M_ATTR_STR([task uid]);
 	}
 	else if ([propName isEqualToString:kPropName_datetime])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
 		
 		if ([task dueDate] != nil && !(printOptions & PRINT_OPTION_SINGLE_DAY))
-			thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
+			thisPropOutputValue = M_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
 	}
 	else if ([propName isEqualToString:kPropName_priority])
 	{
-		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNamePriority), @":", nil));
+		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNamePriority), @":", nil));
 		
 		if ([task priority] != CalPriorityNone)
 		{
 			switch([task priority])
 			{
 				case CalPriorityHigh:
-					thisPropOutputValue = MUTABLE_ATTR_STR(localizedStr(kL10nKeyPriorityHigh));
+					thisPropOutputValue = M_ATTR_STR(localizedStr(kL10nKeyPriorityHigh));
 					break;
 				case CalPriorityMedium:
-					thisPropOutputValue = MUTABLE_ATTR_STR(localizedStr(kL10nKeyPriorityMedium));
+					thisPropOutputValue = M_ATTR_STR(localizedStr(kL10nKeyPriorityMedium));
 					break;
 				case CalPriorityLow:
-					thisPropOutputValue = MUTABLE_ATTR_STR(localizedStr(kL10nKeyPriorityLow));
+					thisPropOutputValue = M_ATTR_STR(localizedStr(kL10nKeyPriorityLow));
 					break;
 				default:
-					thisPropOutputValue = MUTABLE_ATTR_STR(([NSString stringWithFormat:@"%d", [task priority]]));
+					thisPropOutputValue = M_ATTR_STR(([NSString stringWithFormat:@"%d", [task priority]]));
 					break;
 			}
 		}
@@ -1425,7 +1425,7 @@ void printCalTask(CalTask *task, int printOptions)
 					);
 			}
 			else
-				prefixStr = MUTABLE_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+				prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 			
 			// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
 			// with a number of whitespace characters ("indentation") that matches the
@@ -1466,7 +1466,7 @@ void printCalTask(CalTask *task, int printOptions)
 		}
 		
 		if (numPrintedProps > 0)
-			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
+			addToOutputBuffer(M_ATTR_STR(@"\n"));
 		
 		numPrintedItems++;
 	}
@@ -1495,8 +1495,8 @@ void printItemSections(NSArray *sections, int printOptions)
 		// print section title
 		NSString *sectionTitle = [sectionDict objectForKey:kSectionDictKey_title];
 		if (!currentIsFirstPrintedSection)
-			addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
-		NSMutableAttributedString *thisOutput = MUTABLE_ATTR_STR(
+			addToOutputBuffer(M_ATTR_STR(@"\n"));
+		NSMutableAttributedString *thisOutput = M_ATTR_STR(
 			strConcat(sectionTitle, @":", sectionSeparatorStr, nil)
 			);
 		[thisOutput
@@ -1520,13 +1520,13 @@ void printItemSections(NSArray *sections, int printOptions)
 		}
 		
 		addToOutputBuffer(thisOutput);
-		addToOutputBuffer(MUTABLE_ATTR_STR(@"\n"));
+		addToOutputBuffer(M_ATTR_STR(@"\n"));
 		currentIsFirstPrintedSection = NO;
 		
 		if (sectionItems == nil || [sectionItems count] == 0)
 		{
 			// print the "no items" text
-			NSMutableAttributedString *noItemsTextOutput = MUTABLE_ATTR_STR(
+			NSMutableAttributedString *noItemsTextOutput = M_ATTR_STR(
 				strConcat(localizedStr(kL10nKeyNoItemsInSection), @"\n", nil)
 				);
 			[noItemsTextOutput
