@@ -4,7 +4,7 @@
 
 ## Q: How do I install/uninstall icalBuddy?
 
-The distribution archive (i.e. the `zip` package) comes with scripts for installing and uninstalling (called `install.command` and `uninstall.command`, respectively). You can run these by double-clicking on them in the Finder, or in the normal fashion from the Terminal (they're shell scripts). Of course you can also just manually copy the binary executable and the man page wherever you please.
+The distribution archive (i.e. the `zip` package) comes with scripts for installing and uninstalling (called `install.command` and `uninstall.command`, respectively). You can run these by double-clicking on them in the Finder, or in the normal fashion from the Terminal (they're shell scripts). Of course you can also just manually copy the binary executable and the man pages wherever you please.
 
 
 ## Q: Does icalBuddy have a manual? If so, where is it?
@@ -36,12 +36,19 @@ It's important to note that *GeekTool doesn't run these shell configuration file
 
 ## Q: How can I get icalBuddy to display times according to a 12-hour clock?
 
+Since version 1.7.9, icalBuddy uses the system standard date and time formats (unless custom formats are specified like in the examples below). If you're using an older version and the date and time formats in your System Preferences are set to your liking, you can simply update icalBuddy.
+
 You can use the `-tf` (or `--timeFormat`) argument to specify the format in which to display times. For example, `icalBuddy -tf "%1I:%M %p" eventsToday` would display times such as `5:00 PM`. See [Apple's documentation][datetimeformats] for all the possible values you can use for date and time formatting (there's also the `-df` (or `--dateFormat`) argument for date formatting, which works similarly to this one.)
 
 
 ## Q: I would like icalBuddy to speak my language instead of just english. Can it be localized?
 
-As of version 1.5.0, it can be. Read the [localization man page][l10nmanpageonline] for documentation on how to do this. If you think you have managed to write a nice general localization file for your language, please [contact me][hassegcontact] and I'll include it into the distribution package so that others who'd like to use a localized icalBuddy in your language wouldn't have to redo that work. Some finished localization files are included in the distribution package under the `exampleLocalizationFiles` folder.
+As of version 1.5.0, it can be. There are some ready-made localization files under the `exampleLocalizationFiles` directory in the distribution archive. You can take them into use by __copying them under your home folder with the name `.icalBuddyLocalization.plist`__. So for example:
+
+    $ cd path/where/i/unzipped/the/archive
+    $ cp exampleLocalizationFiles/french-icalBuddyLocalization.plist ~/.icalBuddyLocalization.plist
+
+If you want to translate icalBuddy into your language, read the [localization man page][l10nmanpageonline] for documentation on how to do this. If you think you have managed to write a nice general localization file for your language, please [contact me][hassegcontact] and I'll include it into the distribution package so that others who'd like to use a localized icalBuddy in your language wouldn't have to redo that work.
 
 
 ## Q: How can I change the bullet points used in the output? We don't like them asterisks/bullet point symbols around these here parts.
