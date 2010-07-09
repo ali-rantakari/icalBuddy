@@ -43,7 +43,7 @@ all: icalBuddy
 #-------------------------------------------------------------------------
 icalBuddy: $(SOURCE_FILES)
 	@echo
-	@echo ---- Compiling:
+	@echo ---- Compiling main app:
 	@echo ======================================
 	$(COMPILER) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ $(SOURCE_FILES)
 
@@ -61,6 +61,16 @@ analyze:
 	$(COMPILER_CLANG) --analyze $(SOURCE_FILES)
 
 
+cmdStdoutToHTML: cmdStdoutToHTML.m
+	@echo
+	@echo ---- Compiling cmdStdoutToHTML:
+	@echo ======================================
+	$(COMPILER) -Wall -std=c99 -arch i386 -framework Cocoa -o $@ cmdStdoutToHTML.m ANSIEscapeHelper.m HGCLIUtils.m HGUtils.m
+
+examples: cmdStdoutToHTML examples.txt
+	#@echo
+	#@echo ---- Running example generator:
+	#@echo ======================================
 
 
 
