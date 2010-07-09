@@ -187,6 +187,13 @@ enum calItemPrintOption
 } CalItemPrintOption;
 
 
+typedef enum datePrintOption
+{
+	DATE_PRINT_OPTION_NONE = 	0,
+	ONLY_DATE =					(1 << 0),
+	ONLY_TIME = 				(1 << 1),
+	DATE_AND_TIME =				(1 << 2)
+} DatePrintOption;
 
 
 
@@ -410,15 +417,18 @@ BOOL shouldPrintProperty(NSString *propertyName, NSSet *inclusionsSet, NSSet *ex
 
 
 // returns a formatted date+time
-NSString* dateStr(NSDate *date, BOOL includeDate, BOOL includeTime)
+NSString* dateStr(NSDate *date, DatePrintOption printOption)
 {
-	if (date == nil || (!includeDate && !includeTime))
+	if (date == nil)
 		return @"";
 	
 	NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
 	
 	NSString *outputDateStr = nil;
 	NSString *outputTimeStr = nil;
+	
+	BOOL includeDate = (printOption != ONLY_TIME);
+	BOOL includeTime = (printOption != ONLY_DATE);
 	
 	if (includeDate)
 	{
@@ -1009,7 +1019,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
 		{
 			if (!(printOptions & PRINT_OPTION_SINGLE_DAY))
-				thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], true, false));
+				thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], ONLY_DATE));
 		}
 		else
 		{
@@ -1021,8 +1031,8 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			// based on what we want to display.
 			
 			BOOL singleDayContext = (printOptions & PRINT_OPTION_SINGLE_DAY);
-			BOOL startsOnContextDay = false;
-			BOOL endsOnContextDay = false;
+			BOOL startsOnContextDay = NO;
+			BOOL endsOnContextDay = NO;
 			if (contextDay != nil)
 			{
 				startsOnContextDay = datesRepresentSameDay(contextDay, [event startDate]);
@@ -1038,13 +1048,23 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					if (singleDayContext && !startsOnContextDay)
 						thisPropOutputValue = MUTABLE_ATTR_STR(@"...");
 					else
-						thisPropOutputValue = MUTABLE_ATTR_STR(
-							dateStr(
-								[event startDate],
-								(!singleDayContext),
-								![event isAllDay]
-								)
-							);
+					{
+						DatePrintOption datePrintOpt = DATE_PRINT_OPTION_NONE;
+						BOOL printDate = !singleDayContext;
+						BOOL printTime = ![event isAllDay];
+						
+						if (printDate && printTime)
+							datePrintOpt = DATE_AND_TIME;
+						else if (printDate)
+							datePrintOpt = ONLY_DATE;
+						else if (printTime)
+							datePrintOpt = ONLY_TIME;
+						
+						if (datePrintOpt != DATE_PRINT_OPTION_NONE)
+							thisPropOutputValue = MUTABLE_ATTR_STR(
+								dateStr([event startDate], datePrintOpt)
+								);
+					}
 				}
 				else
 				{
@@ -1052,25 +1072,20 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 					{
 						if (startsOnContextDay && endsOnContextDay)
 							thisPropOutputValue = MUTABLE_ATTR_STR((
-								[NSString
-									stringWithFormat: @"%@ - %@",
-										dateStr([event startDate], false, true),
-										dateStr([event endDate], false, true)
-									]
+								strConcat(
+									dateStr([event startDate], ONLY_TIME),
+									@" - ",
+									dateStr([event endDate], ONLY_TIME),
+									nil
+									)
 								));
 						else if (startsOnContextDay)
 							thisPropOutputValue = MUTABLE_ATTR_STR((
-								[NSString
-									stringWithFormat: @"%@ - ...",
-										dateStr([event startDate], false, true)
-									]
+								strConcat(dateStr([event startDate], ONLY_TIME), @" - ...", nil)
 								));
 						else if (endsOnContextDay)
 							thisPropOutputValue = MUTABLE_ATTR_STR((
-								[NSString
-									stringWithFormat: @"... - %@",
-										dateStr([event endDate], false, true)
-									]
+								strConcat(@"... - ", dateStr([event endDate], ONLY_TIME), nil)
 								));
 						else
 							thisPropOutputValue = MUTABLE_ATTR_STR(@"... - ...");
@@ -1088,27 +1103,24 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 							{
 								thisPropOutputValue = MUTABLE_ATTR_STR((
 									strConcat(
-										dateStr([event startDate], true, false),
+										dateStr([event startDate], ONLY_DATE),
 										@" - ",
-										dateStr(endDateMinusOneDay, true, false),
+										dateStr(endDateMinusOneDay, ONLY_DATE),
 										nil
 										)
 									));
 							}
 							else
-								thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], true, false));
+								thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([event startDate], ONLY_DATE));
 						}
 						else
 						{
-							NSString *startDateFormattedStr = dateStr([event startDate], true, true);
-							NSString *endDateFormattedStr;
-							if (datesRepresentSameDay([event startDate], [event endDate]))
-								endDateFormattedStr = dateStr([event endDate], false, true);
-							else
-								endDateFormattedStr = dateStr([event endDate], true, true);
-							thisPropOutputValue = MUTABLE_ATTR_STR((
-								[NSString stringWithFormat: @"%@ - %@", startDateFormattedStr, endDateFormattedStr]
-								));
+							NSString *startDateFormattedStr = dateStr([event startDate], DATE_AND_TIME);
+							
+							DatePrintOption datePrintOpt = datesRepresentSameDay([event startDate], [event endDate]) ? ONLY_TIME : DATE_AND_TIME;
+							NSString *endDateFormattedStr = dateStr([event endDate], datePrintOpt);
+							
+							thisPropOutputValue = MUTABLE_ATTR_STR(strConcat(startDateFormattedStr, @" - ", endDateFormattedStr, nil));
 						}
 					}
 				}
@@ -1311,7 +1323,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 		thisPropOutputName = MUTABLE_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
 		
 		if ([task dueDate] != nil && !(printOptions & PRINT_OPTION_SINGLE_DAY))
-			thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([task dueDate], true, false));
+			thisPropOutputValue = MUTABLE_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
 	}
 	else if ([propName isEqualToString:kPropName_priority])
 	{
@@ -2595,7 +2607,7 @@ int main(int argc, char *argv[])
 				
 				NSString *thisSectionTitle = nil;
 				if ([aDayKey isKindOfClass:[NSDate class]])
-					thisSectionTitle = dateStr(aDayKey, true, false);
+					thisSectionTitle = dateStr(aDayKey, ONLY_DATE);
 				else if ([aDayKey isEqual:[NSNull null]])
 					thisSectionTitle = strConcat(@"(", localizedStr(kL10nKeyNoDueDate), @")", nil);
 				[thisSectionDict setObject:thisSectionTitle forKey:kSectionDictKey_title];
