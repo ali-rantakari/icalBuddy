@@ -42,12 +42,30 @@
 .underlined { text-decoration: underline; }
 .double-underlined { text-decoration: underline; }
 
-code {
-	display: inline-block;
+#main {
+	width: 600px;
+	margin: 0 auto 50px auto;
+	font-family: Baskerville, Times, "Times New Roman", serif;
+	}
+
+h1, h2, h3 {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	}
+
+pre.command {
+	border: 1px dotted #ff9999;
+	background: #ffffcc;
+	padding: 10px;
+	}
+
+code.output {
+	display: block;
 	border: 1px solid black;
 	padding: 10px;
 	background: black;
 	color: white;
+	max-width: 400px;
+	float: right;
+	margin: 0 0 10px 20px;
 	}
-
 

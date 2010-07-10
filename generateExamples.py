@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
+from subprocess import Popen, PIPE, STDOUT
+
 
 def runInShell(cmd):
 	o = os.popen(cmd, 'r')
@@ -22,9 +25,43 @@ print getFileContents('examples.css')
 print "</style>"
 print "</head><body><div id='main'>"
 
-print "<code>"
-cmd = "icalBuddy -cf '' -f eventsToday+10"
-print runInShell('./cmdStdoutToHTML "'+cmd+'"')
-print "</code>"
+cfgFilePath = os.path.expanduser('~/.icalBuddyConfig.plist')
+cfgFilePathDisabled = os.path.expanduser('~/.icalBuddyConfig.plist.disabled')
+if os.path.exists(cfgFilePath):
+	os.rename(cfgFilePath, cfgFilePathDisabled)
+
+md = getFileContents('examples.markdown')
+lines = md.splitlines(True)
+
+cmdMarker = '•••'
+clearMarker = '•----'
+s = ''
+for line in lines:
+	if line.strip().startswith(cmdMarker):
+		cmd = line.strip()[len(cmdMarker):]
+		escapedCmd = cmd.replace('"', '\\"')
+		
+		s += '<pre class="command"><code>'
+		s += cmd
+		s += '</code></pre>\n\n'
+		
+		s += '<code class="output">\n'
+		s += runInShell('./cmdStdoutToHTML "'+escapedCmd+'"')+'\n'
+		#s += '</code><div class="clear"></div>\n'
+		s += '</code>\n'
+		
+		continue
+	elif line.strip().startswith(clearMarker):
+		s += '<div style="clear:both;"></div>'
+		continue
+	s += line
+
+if os.path.exists(cfgFilePathDisabled):
+	os.rename(cfgFilePathDisabled, cfgFilePath)
+
+p = Popen(['utils/discount'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+p_out, p_err = p.communicate(input=s)
+
+print p_out
 
 print "</div></body></html>"

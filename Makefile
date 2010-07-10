@@ -78,7 +78,7 @@ cmdStdoutToHTML: cmdStdoutToHTML.m
 #-------------------------------------------------------------------------
 # generate usage examples HTML
 #-------------------------------------------------------------------------
-examples.html: cmdStdoutToHTML
+examples.html: cmdStdoutToHTML examples.markdown generateExamples.py
 	@echo
 	@echo ---- Running example generator:
 	@echo ======================================
@@ -267,6 +267,9 @@ clean:
 	-rm -Rf icalBuddyLocalization.1
 	-rm -Rf Manual-icalBuddyLocalization.pdf
 	-rm -Rf deployment/*
+	-rm -Rf examples.html
+	-rm -Rf cmdStdoutToHTML
+	-rm -Rf cmdStdoutToPNG
 
 
 
