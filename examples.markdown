@@ -91,6 +91,21 @@ Again -- same events as before, just under calendar headings this time.
 
 •-----------------------------------
 
+### Events Within an Arbitrary Date Span
+
+We can use the `eventsFrom:DATE to:DATE` command argument to ask for events between any two date/times:
+
+    ••• icalBuddy -f eventsFrom:'aug 1, 2010' to:'august 10, 2010 at 9pm'
+
+You can specify the date values pretty freely here -- `last tuesday`, `tomorrow at noon` or `jul 3 at 5am` are all acceptable, for example.
+
+
+_(Pro tip: if you want to make sure that icalBuddy has interpreted your date inputs correctly, add the `-d` (or `--debug`) argument and it'll tell you.)_
+
+
+•-----------------------------------
+
+
 
 # Basic Examples: Tasks
 
@@ -136,7 +151,21 @@ Both events and tasks can be separated by calendar (as seen here) as well as by 
 
 
 
-# Tips and Tricks: Output Formatting
+# Tips and Tricks
+
+### Getting Started With Custom Output Formatting
+
+In order to make changes to the output formatting you need to edit the icalBuddy configuration file. I suggest you **install the OS X developer tools (XCode etc.)** before doing that because the *Property List Editor* application, which is strongly suggested for editing the configuration file, will then be available on your computer. The developer tools can be installed from the system discs that came with your Mac or [downloaded from Apple's website][devtoolsweb].
+
+In order to **open the icalBuddy configuration file for editing**, simply run the following command in the Terminal:
+
+    /usr/local/bin/icalBuddy editConfig
+
+If you have the Developer Tools (XCode etc.) installed, this will open the config file in Property List Editor. Then you can just start adding key-value pairs __under the *formatting* section__ (remember to save the file when you're done, though).
+
+You can check out the examples below as well as the [configuration file man page][cfg-man] for more info.
+
+[devtoolsweb]: http://developer.apple.com/technologies/tools/
 
 
 ### Underlined Section Titles

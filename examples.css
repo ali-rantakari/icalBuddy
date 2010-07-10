@@ -63,9 +63,10 @@ html, body {
 	background: #555;
 	color: white;
 	padding: 30px 0 20px 200px;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	font-size: 30px;
+	font-family: Baskerville, Georgia, Times, "Times New Roman", serif;
+	font-size: 35px;
 	font-weight: bold;
+	font-style: italic;
 	}
 
 h1, h2, h3 {
