@@ -53,7 +53,7 @@ If you want to translate icalBuddy into your language, read the [localization ma
 
 ## Q: How can I change the bullet points used in the output? We don't like them asterisks/bullet point symbols around these here parts.
 
-You can use the `-b` (or `--bullet`) argument to change the normal bullet point value (`"• "` by default) and `-ab` (or `--alertBullet`) to change the alert bullet point value (`"! "` by default, used for tasks that are late from their due date.) Also note that you can change indenting for non-bulleted lines with the `-i` (or `--indent`) argument. See [the manual page][manpageonline] for more info.
+You can use the `-b` (or `--bullet`) argument to change the normal bullet point value (`"• "` by default) and `-ab` (or `--alertBullet`) to change the alert bullet point value (`"! "` by default, used for tasks that are late from their due date.) See [the manual page][manpageonline] for more info.
 
 
 ## Q: Newlines (`"\n"`) and/or other escape sequences I'm adding to argument values don't seem to be interpreted correctly. How do I fix this?
