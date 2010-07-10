@@ -3,39 +3,39 @@
 
 .fg-black { color: black; }
 .fg-red { color: red; }
-.fg-green { color: green; }
+.fg-green { color: #33cc00; }
 .fg-yellow { color: yellow; }
 .fg-blue { color: blue; }
 .fg-magenta { color: magenta; }
 .fg-cyan { color: cyan; }
 .fg-white { color: white; }
 
-.bg-black { color: black; }
-.bg-red { color: red; }
-.bg-green { color: green; }
-.bg-yellow { color: yellow; }
-.bg-blue { color: blue; }
-.bg-magenta { color: magenta; }
-.bg-cyan { color: cyan; }
-.bg-white { color: white; }
+.bg-black { background-color: black; }
+.bg-red { background-color: red; }
+.bg-green { background-color: #33cc00; }
+.bg-yellow { background-color: yellow; }
+.bg-blue { background-color: blue; }
+.bg-magenta { background-color: magenta; }
+.bg-cyan { background-color: cyan; }
+.bg-white { background-color: white; }
 
 .bright-fg-black { color: black; }
 .bright-fg-red { color: red; }
-.bright-fg-green { color: green; }
+.bright-fg-green { color: #33cc00; }
 .bright-fg-yellow { color: yellow; }
 .bright-fg-blue { color: blue; }
 .bright-fg-magenta { color: magenta; }
 .bright-fg-cyan { color: cyan; }
 .bright-fg-white { color: white; }
 
-.bright-bg-black { color: black; }
-.bright-bg-red { color: red; }
-.bright-bg-green { color: green; }
-.bright-bg-yellow { color: yellow; }
-.bright-bg-blue { color: blue; }
-.bright-bg-magenta { color: magenta; }
-.bright-bg-cyan { color: cyan; }
-.bright-bg-white { color: white; }
+.bright-bg-black { background-color: black; }
+.bright-bg-red { background-color: red; }
+.bright-bg-green { background-color: #33cc00; }
+.bright-bg-yellow { background-color: yellow; }
+.bright-bg-blue { background-color: blue; }
+.bright-bg-magenta { background-color: magenta; }
+.bright-bg-cyan { background-color: cyan; }
+.bright-bg-white { background-color: white; }
 
 .bold { font-weight: bold; }
 
@@ -44,7 +44,7 @@
 
 html, body {
 	padding: 0;
-	margin: 0;
+	margin: 0 0 100px 0;
 	}
 
 #main {
@@ -54,24 +54,66 @@ html, body {
 	font-family: Baskerville, Times, "Times New Roman", serif;
 	}
 
-#main p, #main pre {
+#main > p, #main > pre, #main > div, #main > table {
 	margin-left: 200px;
+	}
+
+#title {
+	margin: 0 0 10px 0 !important;
+	background: #555;
+	color: white;
+	padding: 30px 0 20px 200px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 30px;
+	font-weight: bold;
 	}
 
 h1, h2, h3 {
 	padding-left: 200px;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	border-bottom: 1px solid #999;
+	margin-top: 40px;
 	}
 
 h1 {
-	margin-top: 0;
-	background: #555;
+	font-size: 24px;
+	background: #888;
 	color: white;
-	padding: 30px 0 20px 200px;
+	-moz-border-radius-topright: 15px;
+	-moz-border-radius-bottomright: 15px;
+	-webkit-border-top-right-radius: 15px;
+	-webkit-border-bottom-right-radius: 15px;
+	border-top-right-radius: 15px;
+	border-bottom-right-radius: 15px;
 	}
 
-h2, h3 {
-	border-bottom: 1px solid #999;
+h2 {
+	font-size: 21px;
+	}
+
+h3 {
+	font-size: 18px;
+	}
+
+code {
+	border: 1px solid #ddd;
+	background: #eee;
+	padding: 0 4px 0 4px;
+	white-space: nowrap;
+	}
+
+code.output {
+	max-width: 320px;
+	background: black;
+	color: white;
+	font-family: Monaco, "DejaVu Sans Mono", monospace;
+	font-size: 9px;
+	display: block;
+	border: 1px solid black;
+	padding: 10px;
+	float: right;
+	margin: 0 0 10px 20px;
+	white-space: normal;
 	}
 
 pre.command {
@@ -80,14 +122,23 @@ pre.command {
 	padding: 10px;
 	}
 
-code.output {
-	display: block;
-	border: 1px solid black;
-	padding: 10px;
-	background: black;
+pre.command code {
+	border: none;
+	background: none;
+	white-space: pre-wrap;
+	}
+
+table.formattingConfig {
+	font-family: "Lucida Sans", sans-serif;
+	font-size: 13px;
+	border-collapse: collapse;
+	}
+table.formattingConfig th, table.formattingConfig td {
+	padding: 2px 5px;
+	border: 1px solid #999;
+	}
+table.formattingConfig th {
+	background: #999;
 	color: white;
-	max-width: 360px;
-	float: right;
-	margin: 0 0 10px 20px;
 	}
 
