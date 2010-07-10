@@ -25,11 +25,6 @@ print getFileContents('examples.css')
 print "</style>"
 print "</head><body><div id='main'>"
 
-cfgFilePath = os.path.expanduser('~/.icalBuddyConfig.plist')
-cfgFilePathDisabled = os.path.expanduser('~/.icalBuddyConfig.plist.disabled')
-if os.path.exists(cfgFilePath):
-	os.rename(cfgFilePath, cfgFilePathDisabled)
-
 md = getFileContents('examples.markdown')
 lines = md.splitlines(True)
 
@@ -38,15 +33,16 @@ clearMarker = '•----'
 s = ''
 for line in lines:
 	if line.strip().startswith(cmdMarker):
-		cmd = line.strip()[len(cmdMarker):]
-		escapedCmd = cmd.replace('"', '\\"')
+		cmdToShow = line.strip()[len(cmdMarker):].strip()
+		cmdToRun = cmdToShow.replace('/icalBuddy', '/icalBuddy -cf ""')
+		cmdToRun = cmdToRun.replace('"', '\\"')
 		
 		s += '<pre class="command"><code>'
-		s += cmd
+		s += cmdToShow
 		s += '</code></pre>\n\n'
 		
 		s += '<code class="output">\n'
-		s += runInShell('./cmdStdoutToHTML "'+escapedCmd+'"')+'\n'
+		s += runInShell('./cmdStdoutToHTML "'+cmdToRun+'"')+'\n'
 		#s += '</code><div class="clear"></div>\n'
 		s += '</code>\n'
 		
@@ -55,9 +51,6 @@ for line in lines:
 		s += '<div style="clear:both;"></div>'
 		continue
 	s += line
-
-if os.path.exists(cfgFilePathDisabled):
-	os.rename(cfgFilePathDisabled, cfgFilePath)
 
 p = Popen(['utils/discount'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
 p_out, p_err = p.communicate(input=s)

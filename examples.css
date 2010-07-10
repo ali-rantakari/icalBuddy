@@ -42,14 +42,36 @@
 .underlined { text-decoration: underline; }
 .double-underlined { text-decoration: underline; }
 
+html, body {
+	padding: 0;
+	margin: 0;
+	}
+
 #main {
-	width: 600px;
-	margin: 0 auto 50px auto;
+	width: 800px;
+	padding: 0;
+	margin: 0;
 	font-family: Baskerville, Times, "Times New Roman", serif;
 	}
 
+#main p, #main pre {
+	margin-left: 200px;
+	}
+
 h1, h2, h3 {
+	padding-left: 200px;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	}
+
+h1 {
+	margin-top: 0;
+	background: #555;
+	color: white;
+	padding: 30px 0 20px 200px;
+	}
+
+h2, h3 {
+	border-bottom: 1px solid #999;
 	}
 
 pre.command {
@@ -64,7 +86,7 @@ code.output {
 	padding: 10px;
 	background: black;
 	color: white;
-	max-width: 400px;
+	max-width: 360px;
 	float: right;
 	margin: 0 0 10px 20px;
 	}
