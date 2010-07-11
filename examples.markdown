@@ -172,7 +172,7 @@ You can check out the examples below as well as the [configuration file man page
 
 You can make section titles more concise by making them underlined while removing the section separators completely:
 
-    ••f sectionTitle = bold,underlined
+    ••f sectionTitle = bold, underlined
     ••• icalBuddy -f -sc -ss "" eventsToday+10
 
 The section separators (i.e. the dashes: `---------`) can be removed by specifying an empty value for the `-ss` (or `--sectionSeparators`) argument.
@@ -201,16 +201,45 @@ In order to indent the property lines one character further, we'll replace the d
 •-----------------------------------
 
 
-### Very Concise Event or Task List
+### Very Concise Event/Task List
 
 We can get a very concise listing of events or tasks (this example shows events but the same arguments work for tasks as well) with just a few arguments:
 
-    ••• icalBuddy -f -npn -nc -ps "/ | /" eventsToday+10
+    ••• icalBuddy -f -npn -nc -ps "/ » /" -eep "url" eventsToday+10
 
 We use the `-npn` (or `--noPropertyNames`) argument to omit all property names and the `-nc` (or `--noCalendarNames`) argument to omit all calendar names.
 
-In order to keep all properties (location, notes, date/time etc.) of the same events/tasks on the same line we set the value `"/ | /"` for the `-ps` (or `--propertySeparators`) argument. This means that icalBuddy should separate all properties with the string ` | ` (the slashes at the beginning and the end are just the separator characters -- see the [man page][man] for more info).
+Specific properties can be excluded by using the `-eep` (or `--excludeEventProperties`) and `-etp` (or `--excludeTaskProperties`) arguments. Here we exclude the URL properties.
 
+In order to keep all properties (location, notes, date/time etc.) of the same events/tasks on the same line we set the value `"/ » /"` for the `-ps` (or `--propertySeparators`) argument. This means that icalBuddy should separate all properties with the string ` » ` (the slashes at the beginning and the end are just the separator characters -- see the [man page][man] for more info).
+
+
+•-----------------------------------
+
+
+### Even More Concise Event/Task List
+
+If we only want to see the titles of events/tasks -- and nothing else -- that's possible too:
+
+    ••• icalBuddy -f -npn -nc -eep "*" eventsToday+10
+
+We use the same arguments here as in the last example except we now give `"*"` as the value for the `-eep` argument in order to *exclude all properties*.
+
+
+•-----------------------------------
+
+
+### Even More Concise Event/Task List With Relative Dates
+
+We can add relative dates with one-day precision to the previous example like this:
+
+    ••• icalBuddy -f -npn -nc -iep "title,datetime" -ps "| : |" -po "datetime,title" -tf "" -df "%RD" -eed eventsToday+10
+
+We use the `-iep` (or `--includeEventProperties`) argument to include only event titles and date/times from all the properties and the `-po` (or `--propertyOrder`) argument to order the date/times first and the titles second.
+
+We only want to see the *start dates* of events here so we add the `-eed` (or `--excludeEndDates`) argument. We set an empty value for the `-tf` (or `--timeFormat`) argument to keep times from showing and `"%RD"` as the value for the `-df` (or `--dateFormat`) argument in order to print dates in simple day-precision relative terms.
+
+We also set `"| : |"` as the `-ps` (or `--propertySeparators`) argument value to separate the two properties by ` : `.
 
 
 •-----------------------------------
