@@ -94,7 +94,7 @@ for a_line in lines:
 	s += line
 
 
-p = Popen(['../utils/discount', '-T', '-f', '+toc'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+p = Popen(['../utils/discount', '-T', '-f', '+toc', '-f', '-pants'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
 p_out, p_err = p.communicate(input=s.encode('utf-8'))
 
 html = p_out

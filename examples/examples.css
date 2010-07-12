@@ -130,7 +130,7 @@ code.output {
 	padding: 10px;
 	float: right;
 	margin: 0 0 10px 20px;
-	white-space: normal;
+	white-space: pre-wrap;
 	}
 
 pre.command {

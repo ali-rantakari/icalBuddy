@@ -86,7 +86,7 @@ Instead of separating events by date, we can separate them **by calendar** with 
 
     ••• icalBuddy -f -sc eventsToday+10
 
-Again -- same events as before, just under calendar headings this time.
+Again &mdash; same events as before, just under calendar headings this time.
 
 
 •-----------------------------------
@@ -97,7 +97,7 @@ We can use the `eventsFrom:DATE to:DATE` command argument to ask for events betw
 
     ••• icalBuddy -f eventsFrom:'july 20, 2010' to:'july 22, 2010 at 9pm'
 
-You can specify the date values pretty freely here -- `last tuesday`, `tomorrow at noon` or `jul 3 at 5am` are all acceptable, for example.
+You can specify the date values pretty freely here &mdash; `last tuesday`, `tomorrow at noon` or `jul 3 at 5am` are all acceptable, for example.
 
 
 _(Pro tip: if you want to make sure that icalBuddy has interpreted your date inputs correctly, add the `-d` (or `--debug`) argument and it'll tell you.)_
@@ -212,7 +212,7 @@ We use the `-npn` (or `--noPropertyNames`) argument to omit all property names a
 
 Specific properties can be excluded by using the `-eep` (or `--excludeEventProperties`) and `-etp` (or `--excludeTaskProperties`) arguments. Here we exclude the URL properties.
 
-In order to keep all properties (location, notes, date/time etc.) of the same events/tasks on the same line we set the value `"/ » /"` for the `-ps` (or `--propertySeparators`) argument. This means that icalBuddy should separate all properties with the string ` » ` (the slashes at the beginning and the end are just the separator characters -- see the [man page][man] for more info).
+In order to keep all properties (location, notes, date/time etc.) of the same events/tasks on the same line we set the value `"/ » /"` for the `-ps` (or `--propertySeparators`) argument. This means that icalBuddy should separate all properties with the string ` » ` (the slashes at the beginning and the end are just the separator characters &mdash; see the [man page][man] for more info).
 
 
 •-----------------------------------
@@ -220,7 +220,7 @@ In order to keep all properties (location, notes, date/time etc.) of the same ev
 
 ## Even More Concise Event/Task List
 
-If we only want to see the titles of events/tasks -- and nothing else -- that's possible too:
+If we only want to see the titles of events/tasks &mdash; and nothing else &mdash; that's possible too:
 
     ••• icalBuddy -f -npn -nc -eep "*" eventsToday+10
 
@@ -249,7 +249,7 @@ We also set `"| : |"` as the `-ps` (or `--propertySeparators`) argument value to
 
 # Further Information
 
-That's it for the examples -- be sure to check out the [man page][man] for a **complete list of all the arguments** you can use to customize your output.
+That's it for the examples &mdash; be sure to check out the [man page][man] for a **complete list of all the arguments** you can use to customize your output.
 
 If you want to **customize the colors** used or set constant arguments you can do that by creating and editing the configuration file. See the [configuration file man page][cfg-man] for more info.
 
