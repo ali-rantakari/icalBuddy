@@ -1,4 +1,5 @@
 
+SCP_TARGET=$(shell cat ../deploymentScpTarget)
 
 
 COMPILER_GCC="gcc"
@@ -45,6 +46,18 @@ exampleCommandOutputs.plist: generateExamplesOutput.py
 	@echo ---- Running example command output generator:
 	@echo ======================================
 	./generateExamplesOutput.py
+
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# deploy to server
+#-------------------------------------------------------------------------
+deploy-examples: examples
+	@echo
+	@echo ---- Deploying examples to server:
+	@echo ======================================
+	scp -r examples.html arrow-down.png arrow-right.png FontList.swf $(SCP_TARGET)
 
 
 
