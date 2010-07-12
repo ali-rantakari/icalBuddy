@@ -2,8 +2,8 @@
 
 
 #import <Cocoa/Cocoa.h>
-#import "ANSIEscapeHelper.h"
-#import "HGCLIUtils.h"
+#import "../ANSIEscapeHelper.h"
+#import "../HGCLIUtils.h"
 
 
 ANSIEscapeHelper *ansiHelper;

@@ -63,29 +63,6 @@ analyze:
 
 
 
-#-------------------------------------------------------------------------
-#-------------------------------------------------------------------------
-# compile tool for generating HTML from command output
-#-------------------------------------------------------------------------
-cmdStdoutToHTML: cmdStdoutToHTML.m
-	@echo
-	@echo ---- Compiling cmdStdoutToHTML:
-	@echo ======================================
-	$(COMPILER) -Wall -std=c99 -arch i386 -framework Cocoa -o $@ cmdStdoutToHTML.m ANSIEscapeHelper.m HGCLIUtils.m HGUtils.m
-
-
-#-------------------------------------------------------------------------
-#-------------------------------------------------------------------------
-# generate usage examples HTML
-#-------------------------------------------------------------------------
-examples.html: cmdStdoutToHTML examples.markdown generateExamples.py
-	@echo
-	@echo ---- Running example generator:
-	@echo ======================================
-	./generateExamples.py > examples.html
-
-examples: examples.html
-
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -267,9 +244,6 @@ clean:
 	-rm -Rf icalBuddyLocalization.1
 	-rm -Rf Manual-icalBuddyLocalization.pdf
 	-rm -Rf deployment/*
-	-rm -Rf examples.html
-	-rm -Rf cmdStdoutToHTML
-	-rm -Rf cmdStdoutToPNG
 
 
 

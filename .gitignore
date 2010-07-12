@@ -23,10 +23,6 @@ icalBuddyLocalization.1
 icalBuddyConfig.1
 Manual-*.pdf
 usage.txt
-cmdStdoutToPNG
-cmdStdoutToHTML
-cmdStdout.png
-examples.html
 
 # temp files
 test.m

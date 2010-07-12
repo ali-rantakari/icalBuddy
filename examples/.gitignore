@@ -1,0 +1,15 @@
+# ignored patterns
+
+# OS X junk
+Icon*
+.DS_Store
+
+# jEdit temp files
+\#*#
+
+# generated files
+cmdStdoutToPNG
+cmdStdoutToHTML
+cmdStdout.png
+examples.html
+FontList.swf
