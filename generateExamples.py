@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import types
 from subprocess import Popen, PIPE, STDOUT
 
 
@@ -17,11 +18,20 @@ def getFileContents(path):
 
 configFilePath = 'exampleConfig.plist'
 
+constArgs = {
+	'includeCals':	'ExampleCal-Birthdays, ExampleCal-Home, ExampleCal-Work'
+	}
+
 def createConfigFile(formattingAttrs):
 	header = """<?xml version="1.0" encoding="UTF-8"?>
 		<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 		<plist version="1.0">
 		<dict>
+			<key>constantArguments</key>
+			<dict>
+		"""
+	middle = """
+			</dict>
 			<key>formatting</key>
 			<dict>
 		"""
@@ -30,10 +40,22 @@ def createConfigFile(formattingAttrs):
 		</dict>
 		</plist>"""
 	contents = header
+	
+	if constArgs != None:
+		for key, value in constArgs.items():
+			contents += '<key>'+key+'</key>\n'
+			if type(value) is types.StringType:
+				contents += '<string>'+value+'</string>\n'
+			elif type(value) is types.BooleanType:
+				contents += '<boolean>'+('true' if value else 'false')+'</boolean>\n'
+	
+	contents += middle
+	
 	if formattingAttrs != None:
 		for key, value in formattingAttrs.items():
 			contents += '<key>'+key+'</key>\n'
 			contents += '<string>'+value+'</string>\n'
+	
 	contents += footer
 	f = open(configFilePath, 'w')
 	f.write(contents)
@@ -88,7 +110,9 @@ for line in lines:
 		s += '</code></pre>\n\n'
 		
 		s += '<code class="output">\n'
-		s += runInShell('./cmdStdoutToHTML "'+cmdToRun+'"')+'\n'
+		cmdOutput = runInShell('./cmdStdoutToHTML "'+cmdToRun+'"')
+		cmdOutput = cmdOutput.replace('ExampleCal-', '')
+		s += cmdOutput+'\n'
 		s += '</code>\n'
 		
 		s += '<img src="arrow-down.png" style="float:right; position:relative; left:150px; top:-25px; z-index:10;" />\n'

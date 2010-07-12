@@ -95,7 +95,7 @@ Again -- same events as before, just under calendar headings this time.
 
 We can use the `eventsFrom:DATE to:DATE` command argument to ask for events between any two date/times:
 
-    ••• icalBuddy -f eventsFrom:'aug 1, 2010' to:'august 10, 2010 at 9pm'
+    ••• icalBuddy -f eventsFrom:'july 20, 2010' to:'july 22, 2010 at 9pm'
 
 You can specify the date values pretty freely here -- `last tuesday`, `tomorrow at noon` or `jul 3 at 5am` are all acceptable, for example.
 
@@ -127,9 +127,9 @@ _(Notice those red exclamation marks? Those are "alert bullet points" and they a
 
 ### Uncompleted Tasks Due in the Near Future
 
-If we're only interested in seeing uncompleted tasks that are due soon (let's say within the next seven days) we can use the `tasksDueBefore:DATE` command argument with `today+7` as the date:
+If we're only interested in seeing uncompleted tasks that are due soon (let's say within the next three days) we can use the `tasksDueBefore:DATE` command argument with `today+3` as the date:
 
-    ••• icalBuddy -f tasksDueBefore:today+7
+    ••• icalBuddy -f tasksDueBefore:today+3
 
 You can specify any date (like *tomorrow*, *'aug 10'*, *'next sunday'* or *'2010-10-03 22:00:00 +02:00'*) for `tasksDueBefore:` but using `today+NUM` is useful for always getting the near future tasks regardless of what the current date is.
 
