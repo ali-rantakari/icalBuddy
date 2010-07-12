@@ -214,25 +214,61 @@ int main(int argc, char *argv[])
 	
 	ansiHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
 	
-	if (argc == 1)
+	NSString *arg_outputFilePath = nil;
+	NSString *arg_commandToRun = nil;
+	BOOL arg_readCommandsFromSTDIN = YES;
+	
+	for (int i = 1; i < argc; i++)
 	{
-		Print(@"Need command to run as an argument.\n");
+		if (strcmp(argv[i], "-o") == 0)
+			arg_outputFilePath = [NSString stringWithUTF8String:argv[i+1]];
+		else if (strcmp(argv[i], "-c") == 0)
+		{
+			arg_commandToRun = [NSString stringWithUTF8String:argv[i+1]];
+			arg_readCommandsFromSTDIN = NO;
+		}
+	}
+	
+	if (arg_readCommandsFromSTDIN)
+	{
+		NSFileHandle *stdinHandle = [NSFileHandle fileHandleWithStandardInput];
+		NSData *stdinData = [NSData dataWithData:[stdinHandle readDataToEndOfFile]];
+		arg_commandToRun = [[[NSString alloc] initWithData:stdinData encoding:NSUTF8StringEncoding] autorelease];
+	}
+	
+	if (arg_commandToRun != nil)
+		arg_commandToRun = [arg_commandToRun stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	
+	if (!arg_readCommandsFromSTDIN && (arg_commandToRun == nil || [arg_commandToRun length] == 0))
+	{
+		PrintfErr(@"Need command to run as an argument (-c command) or\n");
+		PrintfErr(@"specified line-by-line via STDIN.\n");
 		return 1;
 	}
 	
-	NSString *command = [NSString stringWithUTF8String:argv[1]];
+	NSArray *commands = [arg_commandToRun componentsSeparatedByString:@"\n"];
 	
-	command = [command stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-	if ([command length] == 0)
+	NSMutableDictionary *commandsAndOutputs = [NSMutableDictionary dictionaryWithCapacity:[commands count]];
+	
+	for (NSString *command in commands)
 	{
-		Print(@"Need command to run as an argument.\n");
-		return 1;
+		NSString *output = runTask(@"/bin/bash", [NSArray arrayWithObjects: @"-c", command, nil]);
+		output = toHTMLEntities(output);
+		output = htmlFromAttributedString([ansiHelper attributedStringWithANSIEscapedString:output]);
+		[commandsAndOutputs setObject:output forKey:command];
 	}
 	
-	NSString *output = runTask(@"/bin/bash", [NSArray arrayWithObjects: @"-c", command, nil]);
-	output = toHTMLEntities(output);
-	
-	Print(htmlFromAttributedString([ansiHelper attributedStringWithANSIEscapedString:output]));
+	if (arg_outputFilePath != nil)
+	{
+		[commandsAndOutputs writeToFile:arg_outputFilePath atomically:YES];
+	}
+	else
+	{
+		for (NSString *key in commandsAndOutputs)
+		{
+			Print([commandsAndOutputs objectForKey:key]);
+		}
+	}
 	
 	
 	[autoReleasePool release];
