@@ -7,7 +7,7 @@ Even if you're a regular Unix Hacker&trade; this might still give you a good und
 
 
 
-    ¶¶¶ TOC ¶¶¶
+¶¶¶ TOC ¶¶¶
 
 
 # Basic Examples: Events
@@ -151,7 +151,8 @@ Both events and tasks can be separated by calendar (as seen here) as well as by 
 
 
 
-# Tips and Tricks
+# More Advanced Examples
+
 
 ### Getting Started With Custom Output Formatting
 
@@ -175,7 +176,7 @@ You can make section titles more concise by making them underlined while removin
     ••f sectionTitle = bold, underlined
     ••• icalBuddy -f -sc -ss "" eventsToday+10
 
-The section separators (i.e. the dashes: `---------`) can be removed by specifying an empty value for the `-ss` (or `--sectionSeparators`) argument.
+The section separators (i.e. the dashes: `---------`) can be removed by specifying an empty value for the `-ss` (or `--sectionSeparator`) argument.
 
 The section title can be made underlined by adding the value `underlined` for the `sectionTitle` formatting key in the config file's formatting section.
 

@@ -45,13 +45,31 @@
 html, body {
 	padding: 0;
 	margin: 0 0 100px 0;
+	font-family: Baskerville, Times, "Times New Roman", serif;
 	}
 
 #main {
 	width: 800px;
 	padding: 0;
 	margin: 0;
-	font-family: Baskerville, Times, "Times New Roman", serif;
+	}
+
+#visualParams {
+	width: 300px;
+	position: fixed;
+	left: 810px;
+	top: 0;
+	background: #eee;
+	padding: 0px 10px 20px 10px;
+	}
+
+#visualParams > form > ul > li > em {
+	font-weight: bold;
+	font-style: normal;
+	color: #777;
+	}
+#visualParams ul {
+	
 	}
 
 #main > p, #main > pre, #main > div, #main > table {
@@ -107,8 +125,6 @@ code.output {
 	max-width: 320px;
 	background: black;
 	color: white;
-	font-family: Monaco, "DejaVu Sans Mono", monospace;
-	font-size: 9px;
 	display: block;
 	border: 1px solid black;
 	padding: 10px;

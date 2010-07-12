@@ -1,0 +1,72 @@
+American Typewriter
+Andale Mono
+Apple Chancery
+Apple LiGothic Medium
+Apple LiSung Light
+Apple Symbols
+AppleGothic
+AppleMyungjo
+Arial
+Arial Black
+Arial Narrow
+Ayuthaya
+Baskerville
+BiauKai
+Big Caslon
+Brush Script MT Italic
+Chalkboard
+Chalkduster
+Charcoal CY
+Cochin
+Comic Sans MS
+Copperplate
+Courier
+Courier New
+Didot
+Euphemia UCAS
+Futura
+Futura Condensed
+GB18030 Bitmap
+Geneva
+Geneva CY
+Georgia
+Georgia Italic
+Gill Sans
+Hei
+Heiti SC
+Heiti TC
+Helvetica
+Helvetica CY
+Helvetica Neue
+Herculanum
+Hiragino Sans GB
+Hoefler Text
+Impact
+InaiMathi
+Kai
+Krungthep
+KufiStandardGK
+Lucida Grande
+Marker Felt
+Menlo
+Microsoft Sans Serif
+Monaco
+Optima
+Papyrus
+Plantagenet Cherokee
+Sathu
+Silom
+Skia
+Symbol
+Tahoma
+Thonburi
+Times
+Times New Roman
+Trebuchet MS
+Verdana
+Webdings
+Wingdings
+Wingdings 2
+Wingdings 3
+Zapf Dingbats
+Zapfino

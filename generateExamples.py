@@ -43,11 +43,15 @@ def createEmptyConfigFile():
 	createConfigFile(None)
 
 
+default_code_font_size = 11
+default_code_font_family = 'Courier New'
+
 print "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>"
 print "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>"
 print "<head><title>icalBuddy Examples</title>"
 print "<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 print "<style type='text/css'>"
+print "code.output { font-size: "+str(default_code_font_size)+"px; font-family: "+default_code_font_family+", monospace; }"
 print getFileContents('examples.css')
 print "</style>"
 print "</head><body><div id='main'>"
@@ -137,7 +141,89 @@ for line in html_lines:
 
 print s
 
-print "</div></body></html>"
+print "</div>" # /main 
+
+font_list = getFileContents('font-list.txt')
+fonts = font_list.splitlines()
+fontJSArr = 'var defaultFontNameArr = ['
+for font in fonts:
+	fontJSArr += '"'+font+'",'
+fontJSArr += '];\n'
+
+print """
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" language="javascript">
+
+"""+fontJSArr+"""
+
+$(document).ready(function() {
+	populateFontList(defaultFontNameArr);
+});
+
+function populateFontList(fontArr)
+{
+	var s = "";
+	for (var key in fontArr)
+	{
+		var fontName = fontArr[key];
+		if (fontName.match(' Italic$')
+			|| fontName.match(' (Demi)?Bold$')
+			|| fontName.match(' Medium$')
+			|| fontName.match(' (Ultra)?Light$')
+			|| fontName.match(' Condensed$')
+			)
+			continue;
+		if (fontName.match(' Regular$'))
+			fontName = fontName.substr(0, fontName.indexOf('Regular'));
+		
+		fontName = jQuery.trim(fontName);
+		var sel = (fontName == '"""+default_code_font_family+"""') ? ' selected="true"' : '';
+		s += "<option value='"+fontName+"'"+sel+">"+fontName+"</option>";
+	}
+	$('#fontSelection').html(s);
+}
+function visualParamUpdated()
+{
+	var props = {
+		'font-family': $('#fontSelection').val()+', monospace',
+		'font-size': $('#fontSizeSelection').val()+'px'
+		};
+	var allOutputElements = $('.output');
+	allOutputElements.css(props);
+}
+function adjustFontSize(delta)
+{
+	var currSize = parseInt($('#fontSizeSelection').val());
+	var allOutputElements = $('.output');
+	allOutputElements.css('font-size', (currSize+delta)+'px');
+	$('#fontSizeSelection').val(currSize+delta);
+}
+</script>
+
+<div id="visualParams">
+<p>You can change the look of all the output examples on this page by changing these values:</p>
+<form action="javascript:visualParamUpdated();">
+<ul>
+	<li><em>Font Family:</em>
+		<select id="fontSelection" onchange="visualParamUpdated();">
+		</select>
+	</li>
+	<li><em>Font Size:</em>
+		<input type="text" size="3" id="fontSizeSelection" onchange="visualParamUpdated();" value='"""+str(default_code_font_size)+"""' /> px
+		<button onclick="adjustFontSize(1);">+</button><button onclick="adjustFontSize(-1);">-</button>
+	</li>
+</ul>
+<input type="submit" value="Update" />
+</form>
+</div>
+
+<object id="fontListSWF" name="fontListSWF" type="application/x-shockwave-flash" data="FontList.swf" width="1" height="1">
+    <param name="movie" value="FontList.swf" />
+</object>
+
+"""
+
+print "</body></html>"
 
 if os.path.exists(configFilePath):
 	os.remove(configFilePath)
