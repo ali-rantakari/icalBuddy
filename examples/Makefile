@@ -30,7 +30,7 @@ FontList.swf: FontList.as
 #-------------------------------------------------------------------------
 # generate usage examples HTML
 #-------------------------------------------------------------------------
-examples.html: cmdStdoutToHTML FontList.swf examples.markdown generateExamplesHTML.py
+examples.html: cmdStdoutToHTML FontList.swf examples.markdown examples.css generateExamplesHTML.py exampleCommandOutputs.plist
 	@echo
 	@echo ---- Running examples HTML generator:
 	@echo ======================================
