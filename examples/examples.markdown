@@ -13,7 +13,7 @@ Even if you're a regular Unix Hacker&trade; this might still give you a good und
 # Basic Examples: Events
 
 
-### Events Today
+## Events Today
 
 First we'll simply use the `eventsToday` command argument to print out all the events occurring today.
 
@@ -28,7 +28,7 @@ _(Note that the date and time formats are [taken from System Preferences][faq-da
 •-----------------------------------
 
 
-### Events *Later* Today
+## Events *Later* Today
 
 In the previous example the output shows *all* events for the current date, including past ones. We can *exclude events that have already passed* simply by adding the `-n` (or `--includeOnlyEventsFromNowOn`) argument:
 
@@ -40,7 +40,7 @@ So now we only get events occurring *later today*. You can use the `-n` argument
 •-----------------------------------
 
 
-### Events in the Near Future
+## Events in the Near Future
 
 Let's use the same command as in the first example, but add `+10` after `eventsToday`:
 
@@ -51,7 +51,7 @@ We get a bit more stuff now. The `eventsToday+10` command argument gives us even
 •-----------------------------------
 
 
-### Events in the Near Future &mdash; In TechniColor&trade;
+## Events in the Near Future &mdash; In TechniColor&trade;
 
 Now let's add the `-f` (or `--formatOutput`) argument:
 
@@ -67,7 +67,7 @@ _(Note that icalBuddy tries to choose colors that match the calendar colors set 
 •-----------------------------------
 
 
-### Events in the Near Future, Separated by Date
+## Events in the Near Future, Separated by Date
 
 In the previous examples all of the events are in the same continuous list. We can **separate them by date** by adding the `-sd` (or `--separateByDate`) argument:
 
@@ -80,7 +80,7 @@ Notice that these are the same events as in the previous example, they're just s
 •-----------------------------------
 
 
-### Events in the Near Future, Separated by Calendar
+## Events in the Near Future, Separated by Calendar
 
 Instead of separating events by date, we can separate them **by calendar** with the `-sc` (or `--separateByCalendar`) argument:
 
@@ -91,7 +91,7 @@ Again -- same events as before, just under calendar headings this time.
 
 •-----------------------------------
 
-### Events Within an Arbitrary Date Span
+## Events Within an Arbitrary Date Span
 
 We can use the `eventsFrom:DATE to:DATE` command argument to ask for events between any two date/times:
 
@@ -110,7 +110,7 @@ _(Pro tip: if you want to make sure that icalBuddy has interpreted your date inp
 # Basic Examples: Tasks
 
 
-### Uncompleted Tasks
+## Uncompleted Tasks
 
 We can switch the command argument to `uncompletedTasks`:
 
@@ -125,7 +125,7 @@ _(Notice those red exclamation marks? Those are "alert bullet points" and they a
 •-----------------------------------
 
 
-### Uncompleted Tasks Due in the Near Future
+## Uncompleted Tasks Due in the Near Future
 
 If we're only interested in seeing uncompleted tasks that are due soon (let's say within the next three days) we can use the `tasksDueBefore:DATE` command argument with `today+3` as the date:
 
@@ -137,7 +137,7 @@ You can specify any date (like *tomorrow*, *'aug 10'*, *'next sunday'* or *'2010
 •-----------------------------------
 
 
-### Uncompleted Tasks Due in the Near Future, Separated by Calendar
+## Uncompleted Tasks Due in the Near Future, Separated by Calendar
 
 We can add the `-sc` (or `--separateByCalendar`) argument here as well:
 
@@ -154,7 +154,7 @@ Both events and tasks can be separated by calendar (as seen here) as well as by 
 # More Advanced Examples
 
 
-### Getting Started With Custom Output Formatting
+## Getting Started With Custom Output Formatting
 
 In order to make changes to the output formatting you need to edit the icalBuddy configuration file. I suggest you **install the OS X developer tools (XCode etc.)** before doing that because the *Property List Editor* application, which is strongly suggested for editing the configuration file, will then be available on your computer. The developer tools can be installed from the system discs that came with your Mac or [downloaded from Apple's website][devtoolsweb].
 
@@ -169,7 +169,7 @@ You can check out the examples below as well as the [configuration file man page
 [devtoolsweb]: http://developer.apple.com/technologies/tools/
 
 
-### Underlined Section Titles
+## Underlined Section Titles
 
 You can make section titles more concise by making them underlined while removing the section separators completely:
 
@@ -184,7 +184,7 @@ The section title can be made underlined by adding the value `underlined` for th
 •-----------------------------------
 
 
-### Custom Bullet Points
+## Custom Bullet Points
 
 You can customize both the regular and the "alert" bullet points to your liking:
 
@@ -202,7 +202,7 @@ In order to indent the property lines one character further, we'll replace the d
 •-----------------------------------
 
 
-### Very Concise Event/Task List
+## Very Concise Event/Task List
 
 We can get a very concise listing of events or tasks (this example shows events but the same arguments work for tasks as well) with just a few arguments:
 
@@ -218,7 +218,7 @@ In order to keep all properties (location, notes, date/time etc.) of the same ev
 •-----------------------------------
 
 
-### Even More Concise Event/Task List
+## Even More Concise Event/Task List
 
 If we only want to see the titles of events/tasks -- and nothing else -- that's possible too:
 
@@ -230,7 +230,7 @@ We use the same arguments here as in the last example except we now give `"*"` a
 •-----------------------------------
 
 
-### Even More Concise Event/Task List With Relative Dates
+## Even More Concise Event/Task List With Relative Dates
 
 We can add relative dates with one-day precision to the previous example like this:
 

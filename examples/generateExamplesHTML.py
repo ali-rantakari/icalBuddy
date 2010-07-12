@@ -71,12 +71,12 @@ for a_line in lines:
 		s += cmdOutput+'\n'
 		s += '</code>\n'
 		
-		s += '<img src="arrow-down.png" style="float:right; position:relative; left:150px; top:-25px; z-index:10;" />\n'
+		s += '<img src="arrow-down.png" style="float:right; position:relative; left:150px; top:-25px; z-index:10;" alt="" />\n'
 		
 		if (formattingDict != None):
 			s += '<table class="formattingConfig">\n'
 			s += '<tr><th colspan="2">Values for config file formatting section</th>'
-			s += '    <td rowspan="'+str(len(formattingDict)+1)+'" style="border:none;"><img src="arrow-right.png" /></td></tr>\n'
+			s += '    <td rowspan="'+str(len(formattingDict)+1)+'" style="border:none;"><img src="arrow-right.png" alt="" /></td></tr>\n'
 			for key, value in formattingDict.items():
 				s += '<tr><td>'+key+'</td><td>'+value.replace('ExampleCal-', '')+'</td></tr>\n'
 			s += '</table>'
@@ -127,13 +127,17 @@ print "</div>" # /main
 font_list = getFileContents('font-list.txt')
 fonts = font_list.splitlines()
 fontJSArr = 'var defaultFontNameArr = ['
+quotedFonts = []
 for font in fonts:
-	fontJSArr += '"'+font+'",'
+	quotedFonts.append('"'+font+'"');
+
+fontJSArr += ','.join(quotedFonts)
 fontJSArr += '];\n'
 
 print """
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript" language="javascript">
+<!--
 
 """+fontJSArr+"""
 
@@ -179,6 +183,8 @@ function adjustFontSize(delta)
 	allOutputElements.css('font-size', (currSize+delta)+'px');
 	$('#fontSizeSelection').val(currSize+delta);
 }
+
+-->
 </script>
 
 <div id="visualParams">
