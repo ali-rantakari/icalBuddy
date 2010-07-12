@@ -3,6 +3,7 @@
 
 import os
 import types
+import plistlib
 from subprocess import Popen, PIPE, STDOUT
 
 
@@ -16,54 +17,11 @@ def getFileContents(path):
 	f.close()
 	return s
 
+
+commandOutputsPlistPath = 'exampleCommandOutputs.plist'
 configFilePath = 'exampleConfig.plist'
 
-constArgs = {
-	'includeCals':	'ExampleCal-Birthdays, ExampleCal-Home, ExampleCal-Work'
-	}
-
-def createConfigFile(formattingAttrs):
-	header = """<?xml version="1.0" encoding="UTF-8"?>
-		<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-		<plist version="1.0">
-		<dict>
-			<key>constantArguments</key>
-			<dict>
-		"""
-	middle = """
-			</dict>
-			<key>formatting</key>
-			<dict>
-		"""
-	footer = """
-			</dict>
-		</dict>
-		</plist>"""
-	contents = header
-	
-	if constArgs != None:
-		for key, value in constArgs.items():
-			contents += '<key>'+key+'</key>\n'
-			if type(value) is types.StringType:
-				contents += '<string>'+value+'</string>\n'
-			elif type(value) is types.BooleanType:
-				contents += '<boolean>'+('true' if value else 'false')+'</boolean>\n'
-	
-	contents += middle
-	
-	if formattingAttrs != None:
-		for key, value in formattingAttrs.items():
-			contents += '<key>'+key+'</key>\n'
-			contents += '<string>'+value+'</string>\n'
-	
-	contents += footer
-	f = open(configFilePath, 'w')
-	f.write(contents)
-	f.close()
-
-def createEmptyConfigFile():
-	createConfigFile(None)
-
+commandOutputs = plistlib.readPlist(commandOutputsPlistPath)
 
 default_code_font_size = 11
 default_code_font_family = 'Courier New'
@@ -81,18 +39,16 @@ print "</head><body><div id='main'>"
 md = getFileContents('examples.markdown')
 lines = md.splitlines(True)
 
-formatMarker = '••f'
-cmdMarker = '•••'
-clearMarker = '•----'
-tocMarker = '¶¶¶ TOC ¶¶¶'
+formatMarker = u'••f'
+cmdMarker = u'•••'
+clearMarker = u'•----'
+tocMarker = u'¶¶¶ TOC ¶¶¶'
 
 formattingDict = None
 
-if not os.path.exists(configFilePath):
-	createEmptyConfigFile()
-
-s = ''
-for line in lines:
+s = u''
+for a_line in lines:
+	line = unicode(a_line, 'utf-8')
 	if line.strip().startswith(cmdMarker):
 		cmdToShow = line.strip()[len(cmdMarker):].strip()
 		if cmdToShow.startswith('icalBuddy'):
@@ -102,16 +58,16 @@ for line in lines:
 		cmdToRun = cmdToRun.replace('\\', '\\\\')
 		cmdToRun = cmdToRun.replace('"', '\\"')
 		
-		if (formattingDict != None):
-			createConfigFile(formattingDict)
-		
 		s += '<pre class="command"><code>'
 		s += cmdToShow
 		s += '</code></pre>\n\n'
 		
 		s += '<code class="output">\n'
-		cmdOutput = runInShell('./cmdStdoutToHTML "'+cmdToRun+'"')
+		
+		cmdOutput = commandOutputs[cmdToShow]
+		#cmdOutput = runInShell('./cmdStdoutToHTML "'+cmdToRun+'"')
 		cmdOutput = cmdOutput.replace('ExampleCal-', '')
+		
 		s += cmdOutput+'\n'
 		s += '</code>\n'
 		
@@ -122,9 +78,8 @@ for line in lines:
 			s += '<tr><th colspan="2">Values for config file formatting section</th>'
 			s += '    <td rowspan="'+str(len(formattingDict)+1)+'" style="border:none;"><img src="arrow-right.png" /></td></tr>\n'
 			for key, value in formattingDict.items():
-				s += '<tr><td>'+key+'</td><td>'+value+'</td></tr>\n'
+				s += '<tr><td>'+key+'</td><td>'+value.replace('ExampleCal-', '')+'</td></tr>\n'
 			s += '</table>'
-			createEmptyConfigFile()
 			formattingDict = None
 		
 		continue
@@ -138,8 +93,9 @@ for line in lines:
 		continue
 	s += line
 
+
 p = Popen(['utils/discount', '-T', '-f', '+toc'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-p_out, p_err = p.communicate(input=s)
+p_out, p_err = p.communicate(input=s.encode('utf-8'))
 
 html = p_out
 
@@ -148,7 +104,8 @@ toc = ''
 gotTOC = False
 s = ''
 html_lines = html.splitlines(True)
-for line in html_lines:
+for a_line in html_lines:
+	line = unicode(a_line, 'utf-8')
 	if not gotTOC:
 		if line.strip().find('icalBuddy Usage Examples') != -1:
 			gotTOC = True
@@ -163,7 +120,7 @@ for line in html_lines:
 		continue
 	s += line
 
-print s
+print s.encode('utf-8')
 
 print "</div>" # /main 
 
@@ -248,8 +205,5 @@ function adjustFontSize(delta)
 """
 
 print "</body></html>"
-
-if os.path.exists(configFilePath):
-	os.remove(configFilePath)
 
 
