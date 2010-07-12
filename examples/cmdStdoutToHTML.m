@@ -37,7 +37,7 @@ NSString *runTask(NSString *path, NSArray *args)
 }
 
 
-NSString *toHTMLEntities(NSString *str)
+NSString *toHTMLEntities(NSString *str, BOOL minimal)
 {
 	if (str == nil)
 		return nil;
@@ -47,22 +47,31 @@ NSString *toHTMLEntities(NSString *str)
 	
 	NSMutableString *ms = [NSMutableString string];
 	
-	// deal with line indentation & newlines
-	NSArray *lines = [eStr componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-	for (NSString *line in lines)
+	if (minimal)
 	{
-		int i = 0;
-		while (i < [line length] && [line characterAtIndex:i] == 32) // 32 is the space unichar
-		{
-			[ms appendString:@"&nbsp;"];
-			i++;
-		}
-		[ms appendString:[line substringFromIndex:i]];
-		[ms appendString:@"<br />"];
+		// minimal replacements
+		ms = [eStr mutableCopy];
+		[ms replaceOccurrencesOfString:@"\n" withString:@"<br />" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
 	}
-	
-	// tabs
-	[ms replaceOccurrencesOfString:@"\t" withString:@"&nbsp;&nbsp;&nbsp;&nbsp;" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+	else
+	{
+		// deal with line indentation & newlines
+		NSArray *lines = [eStr componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+		for (NSString *line in lines)
+		{
+			int i = 0;
+			while (i < [line length] && [line characterAtIndex:i] == 32) // 32 is the space unichar
+			{
+				[ms appendString:@"&nbsp;"];
+				i++;
+			}
+			[ms appendString:[line substringFromIndex:i]];
+			[ms appendString:@"<br />"];
+		}
+		
+		// tabs
+		[ms replaceOccurrencesOfString:@"\t" withString:@"&nbsp;&nbsp;&nbsp;&nbsp;" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+	}
 	
 	return ms;
 }
@@ -217,11 +226,14 @@ int main(int argc, char *argv[])
 	NSString *arg_outputFilePath = nil;
 	NSString *arg_commandToRun = nil;
 	BOOL arg_readCommandsFromSTDIN = YES;
+	BOOL arg_replaceMinimalHTMLEntities = YES;
 	
 	for (int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "-o") == 0)
 			arg_outputFilePath = [NSString stringWithUTF8String:argv[i+1]];
+		else if (strcmp(argv[i], "-e") == 0)
+			arg_replaceMinimalHTMLEntities = NO;
 		else if (strcmp(argv[i], "-c") == 0)
 		{
 			arg_commandToRun = [NSString stringWithUTF8String:argv[i+1]];
@@ -253,7 +265,7 @@ int main(int argc, char *argv[])
 	for (NSString *command in commands)
 	{
 		NSString *output = runTask(@"/bin/bash", [NSArray arrayWithObjects: @"-c", command, nil]);
-		output = toHTMLEntities(output);
+		output = toHTMLEntities(output, arg_replaceMinimalHTMLEntities);
 		output = htmlFromAttributedString([ansiHelper attributedStringWithANSIEscapedString:output]);
 		[commandsAndOutputs setObject:output forKey:command];
 	}
