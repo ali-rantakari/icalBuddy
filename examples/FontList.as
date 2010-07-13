@@ -2,6 +2,8 @@ package {
 	
 	import flash.display.Sprite;
 	import flash.text.Font;
+	import flash.text.FontType;
+	import flash.text.FontStyle;
 	import flash.external.ExternalInterface;
 	
 	public class FontList extends Sprite
@@ -13,13 +15,14 @@ package {
 		
 		public function getDeviceFonts():Array
 		{
-			var embeddedFonts:Array = Font.enumerateFonts(true);
 			var embeddedAndDeviceFonts:Array = Font.enumerateFonts(true);
 			
 			var deviceFontNames:Array = [];
 			for each (var font:Font in embeddedAndDeviceFonts)
 			{
-				if (embeddedFonts.indexOf(font) != -1)
+				if (font.fontType == FontType.EMBEDDED
+					|| font.fontStyle != FontStyle.REGULAR
+					)
 					continue;
 				deviceFontNames.push(font.fontName);
 			}
