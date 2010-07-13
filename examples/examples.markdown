@@ -1,7 +1,7 @@
 
 <div id='title'>icalBuddy Usage Examples</div>
 
-I've noticed that a lot of people who are not familiar with the command line have been using icalBuddy with GeekTool in order to display events and tasks from their calendars on their desktops. I understand how dealing with the user interface of a command-line application (i.e. figuring out arcane combinations of weird command arguments) might be daunting for these people so I thought I'd make this page to try and help out by **showing some examples** of what kind of output you can get from icalBuddy (and **what arguments you need to use** to get them).
+I've noticed that a lot of people who are not familiar with the command line have been using icalBuddy with GeekTool in order to display events and tasks from their calendars on their desktops. I understand how dealing with the user interface of a command-line application (i.e. figuring out arcane combinations of weird command arguments) might be daunting so I thought I'd make this page to try and help out by **showing some examples** of what kind of output you can get from icalBuddy (and **what arguments you need to use** to get them).
 
 Even if you're a regular Unix Hacker&trade; this might still give you a good understanding of what this program is good for.
 
@@ -163,6 +163,8 @@ In order to **open the icalBuddy configuration file for editing**, simply run th
     /usr/local/bin/icalBuddy editConfig
 
 If you have the Developer Tools (XCode etc.) installed, this will open the config file in Property List Editor. Then you can just start adding key-value pairs __under the *formatting* section__ (remember to save the file when you're done, though).
+
+![Config file example image](configExample.png)
 
 You can check out the examples below as well as the [configuration file man page][cfg-man] for more info.
 

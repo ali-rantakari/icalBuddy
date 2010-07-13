@@ -31,7 +31,7 @@ FontList.swf: FontList.as
 #-------------------------------------------------------------------------
 # generate usage examples HTML
 #-------------------------------------------------------------------------
-examples.html: cmdStdoutToHTML FontList.swf examples.markdown examples.css generateExamplesHTML.py exampleCommandOutputs.plist
+examples.html: cmdStdoutToHTML FontList.swf examples.markdown examples.css configExample.png generateExamplesHTML.py exampleCommandOutputs.plist
 	@echo
 	@echo ---- Running examples HTML generator:
 	@echo ======================================
@@ -57,7 +57,7 @@ deploy-examples: examples
 	@echo
 	@echo ---- Deploying examples to server:
 	@echo ======================================
-	scp -r examples.html arrow-down.png arrow-right.png FontList.swf $(SCP_TARGET)
+	scp -r examples.html arrow-down.png arrow-right.png configExample.png FontList.swf $(SCP_TARGET)
 
 
 

@@ -25,13 +25,19 @@ commandOutputs = plistlib.readPlist(commandOutputsPlistPath)
 
 default_code_font_size = 11
 default_code_font_family = 'Courier New'
+default_code_whitespace = 'pre-wrap'
+
 
 print "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>"
 print "<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>"
 print "<head><title>icalBuddy Examples</title>"
 print "<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 print "<style type='text/css'>"
-print "code.output { font-size: "+str(default_code_font_size)+"px; font-family: "+default_code_font_family+", monospace; }"
+print "code.output {"
+print "		font-size: "+str(default_code_font_size)+"px;"
+print "		font-family: "+default_code_font_family+", monospace;"
+print "		white-space: "+default_code_whitespace+";"
+print "		}"
 print getFileContents('examples.css')
 print "</style>"
 print "</head><body><div id='main'>"
@@ -171,7 +177,8 @@ function visualParamUpdated()
 {
 	var props = {
 		'font-family': $('#fontSelection').val()+', monospace',
-		'font-size': $('#fontSizeSelection').val()+'px'
+		'font-size': $('#fontSizeSelection').val()+'px',
+		'white-space': ($('#wrapSelection').is(':checked') ? 'pre-wrap' : 'pre')
 		};
 	var allOutputElements = $('.output');
 	allOutputElements.css(props);
@@ -197,7 +204,11 @@ function adjustFontSize(delta)
 	</li>
 	<li><em>Font Size:</em>
 		<input type="text" size="3" id="fontSizeSelection" onchange="visualParamUpdated();" value='"""+str(default_code_font_size)+"""' /> px
-		<button onclick="adjustFontSize(1);">+</button><button onclick="adjustFontSize(-1);">-</button>
+		<button onclick="adjustFontSize(1);" title="Increase font size">+</button>
+		<button onclick="adjustFontSize(-1);" title="Decrease font size">-</button>
+	</li>
+	<li><em>Wrap Lines:</em>
+		<input type="checkbox" id="wrapSelection" onchange="visualParamUpdated();" value=''"""+(' checked="checked"' if default_code_whitespace == 'pre-wrap' else '')+""" />
 	</li>
 </ul>
 <input type="submit" value="Update" />

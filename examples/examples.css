@@ -68,8 +68,8 @@ html, body {
 	font-style: normal;
 	color: #777;
 	}
-#visualParams ul {
-	
+#visualParams ul li {
+	margin-top: 3px;
 	}
 
 #main > p, #main > pre, #main > div, #main > table {
@@ -130,7 +130,7 @@ code.output {
 	padding: 10px;
 	float: right;
 	margin: 0 0 10px 20px;
-	white-space: pre-wrap;
+	overflow: hidden;
 	}
 
 pre.command {
