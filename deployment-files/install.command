@@ -75,7 +75,7 @@ echo "(If you'd like to specify an installation prefix other than the current ($
 echo "do it with the prefix argument: --prefix=/my/path)"
 echo
 echo $'We\'ll need administrator rights to install to these locations so \e[33mplease enter your admin password when asked\e[m.'
-echo $'\e[1mPress any key to continue installing or Ctrl-C to cancel.\e[m'
+echo $'\e[1mPress enter to continue installing or Ctrl-C to cancel.\e[m'
 read
 echo
 sudo -v
