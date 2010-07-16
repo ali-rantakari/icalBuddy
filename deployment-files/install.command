@@ -1,107 +1,215 @@
-#!/usr/bin/env bash
+#!/usr/bin/python
 # 
 # install script for icalBuddy
-# Copyright 2008-2010 Ali Rantakari
-# 
-# --------------------------------------
-# 
-# You can use the --prefix=/path
-# argument to specify the prefix where
-# the program should be installed.
-# 
+# Copyright 2010 Ali Rantakari
 # 
 
-DN="`dirname \"$0\"`"
-THISDIR="`cd \"$DN\"; pwd`"
-
-# default prefix:
-PREFIX=/usr/local
-
-BINDIR=bin
-MANDIR=share/man/man1
-
-BINFILE="${THISDIR}/icalBuddy"
-MANFILE="${THISDIR}/icalBuddy.1"
-L10NMANFILE="${THISDIR}/icalBuddyLocalization.1"
-CONFIGMANFILE="${THISDIR}/icalBuddyConfig.1"
+import os
+from subprocess import Popen, PIPE, STDOUT
 
 
-# check that the required (installable) files can be found
-if [ ! -e "${BINFILE}" ];then
-	echo "Error: can not find \"${BINFILE}\". Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.) If you already are, run 'make' to build icalBuddy and then try running this script again."
-	exit 1
-fi
-if [ ! -e "${MANFILE}" ];then
-	echo "Error: can not find \"${MANFILE}\" (the man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
-	exit 1
-fi
-if [ ! -e "${L10NMANFILE}" ];then
-	echo "Error: can not find \"${L10NMANFILE}\" (the localization man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
-	exit 1
-fi
-if [ ! -e "${L10NMANFILE}" ];then
-	echo "Error: can not find \"${CONFIGMANFILE}\" (the configuration man page.) Make sure you're running this script from within the distribution directory (the same directory where icalBuddy resides.)"
-	exit 1
-fi
+# search paths configuration
+prefixes = ['/usr/local', os.path.expanduser('~')]
+bin_paths = ['bin', '.bin']
+
+# exit status values
+STATUS_OK = 0
+STATUS_ERROR = 1
+STATUS_USER_CANCEL = 11
 
 
-# check --prefix=path argument
-if [[ "${1:0:9}" == "--prefix=" ]]; then
-	PREFIX="${1:9}"
-else
-	# (no prefix argument -> ) check if installed already; adjust prefix if so
-	which icalBuddy >/dev/null
-	if [[ $? -eq 0 ]]; then
-		if [[ "`which icalBuddy | xargs -0 dirname | xargs -0 basename | tr -d '\n'`" == "bin" ]]; then
-			PREFIX="`which icalBuddy | xargs -0 dirname | xargs -0 dirname | tr -d '\n'`"
-		fi
-	fi
-fi
+def wrap_ansi(s, start_code, end_code):
+	return '\x1b['+str(start_code)+'m'+s+'\x1b['+str(end_code)+'m'
+def wrap_ansi_sgr(s, sgr):
+	return wrap_ansi(s, sgr, (sgr-(sgr%10)+9))
+def red(s): return wrap_ansi_sgr(s, 31)
+def green(s): return wrap_ansi_sgr(s, 32)
+def yellow(s): return wrap_ansi_sgr(s, 33)
+def blue(s): return wrap_ansi_sgr(s, 34)
+def magenta(s): return wrap_ansi_sgr(s, 35)
+def cyan(s): return wrap_ansi_sgr(s, 36)
+def bold(s): return wrap_ansi(s,1,22)
+
+
+def find_path_under_prefix(name, prefix):
+	for path in bin_paths:
+		p = os.path.join(prefix,path,name)
+		if os.path.exists(p): return p
+	return None
+
+def find_path(name):
+	ret = None
+	for prefix in prefixes:
+		ret = find_path_under_prefix(name,prefix)
+		if ret != None: return ret
+	return None
+
+def find_already_installed_prefix(binfile):
+	found_path = find_path(binfile)
+	if found_path == None:
+		# can't find binary from hardcoded prefix paths;
+		# try asking `which`:
+		p = Popen(['which',binfile], stdout=PIPE)
+		found_path = p.communicate()[0].strip('\n')
+		if p.returncode > 0: found_path = None
+	
+	if found_path != None:
+		found_path_dirname = os.path.dirname(found_path)
+		found_path_prefix, found_path_leafdir = os.path.split(found_path_dirname)
+		if found_path_leafdir == 'bin':
+			return found_path_prefix
+		return found_path_dirname
 
 
 
-BINPATH="${PREFIX}/${BINDIR}"
-MANPATH="${PREFIX}/${MANDIR}"
+if __name__ == '__main__':
+	
+	import sys
+	import shutil
+	import errno
+	
+	homedir = os.path.expanduser('~')
+	
+	install_prefix = '/usr/local' # default
+	
+	existing_prefix = find_already_installed_prefix('icalBuddy')
+	if existing_prefix != None:
+		install_prefix = existing_prefix
+	
+	if len(sys.argv) > 1 and sys.argv[1].startswith('--prefix='):
+		install_prefix = sys.argv[1][len('--prefix='):]
+	
+	exit_status = STATUS_OK
+	installed = False
+	
+	while 1 == 1:
+		
+		try:
+			install_prefix = os.path.expanduser(install_prefix)
+			
+			files_to_install = {
+				'icalBuddy':				os.path.join(install_prefix, 'bin'),
+				'icalBuddy.1':				os.path.join(install_prefix, 'share/man/man1'),
+				'icalBuddyConfig.1':		os.path.join(install_prefix, 'share/man/man1'),
+				'icalBuddyLocalization.1':	os.path.join(install_prefix, 'share/man/man1'),
+				}
+			
+			files_missing = False
+			for filename, path in files_to_install.items():
+				if not os.path.exists(filename):
+					files_missing = True
+					print red('Can not find file: ')+cyan(filename)
+			
+			if files_missing:
+				print 'Make sure you\'re running this script from the distribution'
+				print 'folder where the above mentioned files are present.'
+				exit_status = STATUS_ERROR
+				sys.exit()
+			
+			print '================================='
+			print
+			print 'This script will '+green('install')+' icalBuddy and related files:'
+			print
+			
+			if existing_prefix != None and install_prefix == existing_prefix:
+				print yellow('(icalBuddy installation found in:')
+				print green(' '+existing_prefix)
+				print yellow(' -- using same path for updating:)')
+				print
+			
+			for filename, path in files_to_install.items():
+				print cyan(os.path.join(path, filename))
+			
+			if not install_prefix.startswith(homedir):
+				print
+				print yellow('We might need administrator privileges to install to')
+				print yellow('this location so please enter your password if prompted.')
+			
+			print
+			print 'Input '+green('y')+' to continue installing, '+yellow('c')
+			print 'to change the installation path or '+red('q')+' to quit.'
+			r = ''
+			while (r not in ['y','c','q']):
+				r = raw_input('['+green('y')+'/'+yellow('c')+'/'+red('q')+']: ').lower()
+			
+			if r == 'q':
+				sys.exit(STATUS_USER_CANCEL)
+			elif r == 'c':
+				print
+				print 'Input new installation prefix:'
+				install_prefix = raw_input(': ')
+				continue
+			
+			
+			# copy files over
+			need_sudo = False
+			for filename, path in files_to_install.items():
+				print green('- ')+'Copying '+cyan(filename)+' to '+cyan(path)
+				
+				if not need_sudo:
+					try:
+						try:
+							os.makedirs(path)
+						except OSError as (errnum, strerror):
+							if errnum == errno.EEXIST: pass # path exists
+							else: raise
+						shutil.copy(filename, path)
+						print green('  copied.')
+					except IOError as (errnum, strerror):
+						if errnum == errno.EACCES: # permission denied
+							need_sudo = True
+						elif errnum == errno.ENOENT: # no such file/directory
+							need_sudo = True
+						else:
+							raise
+					except:
+						raise
+				
+				if need_sudo:
+					e_filename = filename.replace('\\', '\\\\').replace("'", "\\'")
+					e_dest_path = path.replace('\\', '\\\\').replace("'", "\\'")
+					e_dest_filepath = os.path.join(path,filename).replace('\\', '\\\\').replace("'", "\\'")
+					
+					ret = os.system("sudo mkdir -p '"+e_dest_path+"'")
+					exit_status = (ret >> 8) & 0xFF
+					if exit_status > 0:
+						print red('  error: mkdir exit status '+str(exit_status))
+						exit_status = STATUS_ERROR
+					
+					ret = os.system("sudo cp '"+e_filename+"' '"+e_dest_filepath+"'")
+					exit_status = (ret >> 8) & 0xFF
+					if exit_status == 0: print green('  copied.')
+					else:
+						print red('  error: cp exit status '+str(exit_status))
+						exit_status = STATUS_ERROR
+			
+			installed = True
+			
+		except KeyboardInterrupt:
+			exit_status = STATUS_OK
+			print
+		except SystemExit:
+			pass
+		except:
+			print red('Exception: '+str(sys.exc_info()[0]))
+			raise
+			exit_status = STATUS_ERROR
+		
+		if exit_status == STATUS_ERROR:
+			print
+			print red('There were errors in the installation.')
+			print red('icalBuddy may not have been installed correctly.')
+			print
+		elif installed and exit_status == STATUS_OK:
+			print
+			print green('icalBuddy has successfully been installed.')
+			print
+		
+		sys.exit(exit_status)
 
 
-echo "================================="
-echo
-echo "This script will install:"
-echo
-printf "icalBuddy executable to: \e[36m${BINPATH}\e[m\n"
-printf "man pages (icalBuddy, icalBuddyConfig, icalBuddyLocalization) to: \e[36m${MANPATH}\e[m\n"
-echo
-echo "(If you'd like to specify an installation prefix other than the current (${PREFIX}), you can"
-echo "do it with the prefix argument: --prefix=/my/path)"
-echo
-echo $'We\'ll need administrator rights to install to these locations so \e[33mplease enter your admin password when asked\e[m.'
-echo $'\e[1mPress enter to continue installing or Ctrl-C to cancel.\e[m'
-read
-echo
-sudo -v
-if [ ! $? -eq 0 ];then echo "error! aborting." >&2; exit 10; fi
-echo
 
-echo -n "Creating directories..."
-sudo mkdir -p ${BINPATH}
-if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
-sudo mkdir -p ${MANPATH}
-if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
-echo "done."
 
-echo -n "Installing the binary executable..."
-sudo cp -f "${BINFILE}" "${BINPATH}"
-if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
-echo "done."
 
-echo -n "Installing the man pages..."
-sudo cp -f "${MANFILE}" "${MANPATH}"
-sudo cp -f "${L10NMANFILE}" "${MANPATH}"
-sudo cp -f "${CONFIGMANFILE}" "${MANPATH}"
-if [ ! $? -eq 0 ];then echo "...error! aborting." >&2; exit 10; fi
-echo "done."
 
-echo 
-echo $'\e[32micalBuddy has been successfully installed.\e[m'
-echo
 
