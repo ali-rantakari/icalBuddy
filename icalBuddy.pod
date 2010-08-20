@@ -168,11 +168,11 @@ Sets I<value> as the string to be used as the section separator in the output. T
 
 =item B<-ic>, B<--includeCals> I<value>
 
-Includes only items in calendars specified by I<value> into the output. I<value> must be a comma-separated list of calendar UIDs (which you can find out by using the 'calendars' I<command> parameter.) You can also use titles, but remember that they may not be unique (as opposed to UIDs.) The B<-ic> and B<-ec> parameters will be handled in the order of first include, then exclude.
+Includes only items from specific calendars into the output. I<value> must be a comma-separated list of calendar titles or UIDs (you can see UIDs (unique identifiers) for your calendars by using the 'calendars' I<command> parameter.) The B<-ic> and B<-ec> parameters will be handled in the order of first include, then exclude.
 
 =item B<-ec>, B<--excludeCals> I<value>
 
-Excludes items in calendars specified by I<value> from the output. I<value> must be a comma-separated list of calendar UIDs (which you can find out by using the 'calendars' I<command> parameter.) You can also use titles, but remember that they may not be unique (as opposed to UIDs.) The B<-ic> and B<-ec> parameters will be handled in the order of first include, then exclude.
+Excludes items from specific calendars from the output. I<value> must be a comma-separated list of calendar titles or UIDs (you can see UIDs (unique identifiers) for your calendars by using the 'calendars' I<command> parameter.) The B<-ic> and B<-ec> parameters will be handled in the order of first include, then exclude.
 
 =item B<-iep>, B<--includeEventProps> I<value>
 
