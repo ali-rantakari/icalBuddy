@@ -4,12 +4,26 @@
 
 ## Q: How do I install/uninstall icalBuddy?
 
-The distribution archive (i.e. the `zip` package) comes with scripts for installing and uninstalling (called `install.command` and `uninstall.command`, respectively). You can run these by double-clicking on them in the Finder, or in the normal fashion from the Terminal (they're shell scripts). Of course you can also just manually copy the binary executable and the man pages wherever you please.
+The distribution archive (i.e. the `zip` package) comes with scripts for installing and uninstalling (called `install.command` and `uninstall.command`, respectively). You can run these by double-clicking on them in the Finder, or in the normal fashion from the Terminal (they're scripts).
+
+
+## Q: I don't want to install icalBuddy under `/usr/local`. How do I install it somewhere else?
+
+When you run the `install.command` script, choose the `c` option ("change installation path") and then type in the new *prefix*. (If you don't get this choice in the installer, download the latest release of icalBuddy and try that.)
+
+This __prefix__ is the path under which the icalBuddy executable and its manual pages are installed. The executable is installed in a folder called `bin` and the manual pages under `share/man/man1`. The default prefix is `/usr/local`.
+
+If you want to install icalBuddy __under your home folder__, I suggest setting the prefix to `~/local`. With this prefix, the executable would be `~/local/bin/icalBuddy` and the manual pages would be located in `~/local/share/man/man1`.
+
+After installation into a custom location you should make sure that these locations are included in your `PATH` and `MANPATH` environment variables. You can add them there by adding lines such as the following into your [shell configuration file][wp-bashstartup] (e.g. `~/.bashrc`):
+
+    export PATH=${PATH}:/Users/username/local/bin
+    export MANPATH=${MANPATH}:/Users/username/local/share/man
 
 
 ## Q: Does icalBuddy have a manual? If so, where is it?
 
-Yes indeed: icalBuddy, like most other Unix-type command line applications, has something called a [man page][wp-manpages]. You can read it by typing `man icalBuddy` into the terminal, and the man page for the latest version of icalBuddy is also [available online][manpageonline]. If you'd prefer to use a dedicated application for reading manual pages in normal GUI windows, see the TUAW post ["Here comes your man (viewer)"][tuawmanviewers].
+Yes indeed: icalBuddy, like most other Unix-type command line applications, has something called a [man page][wp-manpages]. You can read it by typing `man icalBuddy` into the terminal or by opening the PDF file that was included in the distribution archive you downloaded. The man page for the *latest version* of icalBuddy is also [available online][manpageonline].
 
 
 ## Q: The output of my calendar items is garbled! What gives?
@@ -174,7 +188,7 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 
 [wp-manpages]:          http://en.wikipedia.org/wiki/Manual_page_(Unix)
 [wp-envvars]:           http://en.wikipedia.org/wiki/Environment_variable
-[wp-bashstartup]:       http://en.wikipedia.org/wiki/Bash#Startup_scripts
+[wp-bashstartup]:       http://en.wikipedia.org/wiki/Bash_(Unix_shell)#Startup_scripts
 [manpageonline]:        http://hasseg.org/icalBuddy/man.html
 [tuawmanviewers]:       http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
 [l10nmanpageonline]:    http://hasseg.org/icalBuddy/localization-man.html
