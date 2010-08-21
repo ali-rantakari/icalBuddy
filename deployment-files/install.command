@@ -69,6 +69,7 @@ if __name__ == '__main__':
 	import errno
 	
 	homedir = os.path.expanduser('~')
+	thispath = sys.path[0]
 	
 	install_prefix = '/usr/local' # default
 	
@@ -88,10 +89,10 @@ if __name__ == '__main__':
 			install_prefix = os.path.expanduser(install_prefix)
 			
 			files_to_install = {
-				'icalBuddy':				os.path.join(install_prefix, 'bin'),
-				'icalBuddy.1':				os.path.join(install_prefix, 'share/man/man1'),
-				'icalBuddyConfig.1':		os.path.join(install_prefix, 'share/man/man1'),
-				'icalBuddyLocalization.1':	os.path.join(install_prefix, 'share/man/man1'),
+				thispath+'/icalBuddy':					os.path.join(install_prefix, 'bin'),
+				thispath+'/icalBuddy.1':				os.path.join(install_prefix, 'share/man/man1'),
+				thispath+'/icalBuddyConfig.1':			os.path.join(install_prefix, 'share/man/man1'),
+				thispath+'/icalBuddyLocalization.1':	os.path.join(install_prefix, 'share/man/man1'),
 				}
 			
 			files_missing = False
@@ -117,8 +118,9 @@ if __name__ == '__main__':
 				print yellow(' -- using same path for updating:)')
 				print
 			
-			for filename, path in files_to_install.items():
-				print cyan(os.path.join(path, filename))
+			for sourcepath, targetpath in files_to_install.items():
+				filename = os.path.basename(sourcepath)
+				print cyan(os.path.join(targetpath, filename))
 			
 			if not install_prefix.startswith(homedir):
 				print
@@ -143,17 +145,18 @@ if __name__ == '__main__':
 			
 			# copy files over
 			need_sudo = False
-			for filename, path in files_to_install.items():
-				print green('- ')+'Copying '+cyan(filename)+' to '+cyan(path)
+			for sourcepath, targetpath in files_to_install.items():
+				filename = os.path.basename(sourcepath)
+				print green('- ')+'Copying '+cyan(filename)+' to '+cyan(targetpath)
 				
 				if not need_sudo:
 					try:
 						try:
-							os.makedirs(path)
+							os.makedirs(targetpath)
 						except OSError as (errnum, strerror):
 							if errnum == errno.EEXIST: pass # path exists
 							else: raise
-						shutil.copy(filename, path)
+						shutil.copy(sourcepath, targetpath)
 						print green('  copied.')
 					except IOError as (errnum, strerror):
 						if errnum == errno.EACCES: # permission denied
@@ -167,16 +170,17 @@ if __name__ == '__main__':
 				
 				if need_sudo:
 					e_filename = filename.replace('\\', '\\\\').replace("'", "\\'")
-					e_dest_path = path.replace('\\', '\\\\').replace("'", "\\'")
-					e_dest_filepath = os.path.join(path,filename).replace('\\', '\\\\').replace("'", "\\'")
+					e_src_filepath = sourcepath.replace('\\', '\\\\').replace("'", "\\'")
+					e_dest_dirpath = targetpath.replace('\\', '\\\\').replace("'", "\\'")
+					e_dest_filepath = os.path.join(targetpath,filename).replace('\\', '\\\\').replace("'", "\\'")
 					
-					ret = os.system("sudo mkdir -p '"+e_dest_path+"'")
+					ret = os.system("sudo mkdir -p '"+e_dest_dirpath+"'")
 					exit_status = (ret >> 8) & 0xFF
 					if exit_status > 0:
 						print red('  error: mkdir exit status '+str(exit_status))
 						exit_status = STATUS_ERROR
 					
-					ret = os.system("sudo cp '"+e_filename+"' '"+e_dest_filepath+"'")
+					ret = os.system("sudo cp '"+e_src_filepath+"' '"+e_dest_filepath+"'")
 					exit_status = (ret >> 8) & 0xFF
 					if exit_status == 0: print green('  copied.')
 					else:
