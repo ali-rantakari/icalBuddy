@@ -153,12 +153,12 @@ if __name__ == '__main__':
 					try:
 						try:
 							os.makedirs(targetpath)
-						except OSError as (errnum, strerror):
+						except OSError, (errnum, strerror):
 							if errnum == errno.EEXIST: pass # path exists
 							else: raise
 						shutil.copy(sourcepath, targetpath)
 						print green('  copied.')
-					except IOError as (errnum, strerror):
+					except IOError, (errnum, strerror):
 						if errnum == errno.EACCES: # permission denied
 							need_sudo = True
 						elif errnum == errno.ENOENT: # no such file/directory
