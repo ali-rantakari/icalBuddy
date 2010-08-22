@@ -165,6 +165,13 @@ if __name__ == '__main__':
 							need_sudo = True
 						else:
 							raise
+					except OSError, (errnum, strerror):
+						if errnum == errno.EACCES: # permission denied
+							need_sudo = True
+						elif errnum == errno.ENOENT: # no such file/directory
+							need_sudo = True
+						else:
+							raise
 					except:
 						raise
 				
