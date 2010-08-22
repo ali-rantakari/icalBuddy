@@ -168,7 +168,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 11;
+const int VERSION_BUILD = 12;
 
 
 
