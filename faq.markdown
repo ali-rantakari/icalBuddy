@@ -116,23 +116,10 @@ Here is another example of a more terse listing where we only show the titles of
 
 
 
-## Q: Can I get the output in CSV format?
+## Q: Can I get the output in CSV/(La)TeX/XML/whatever format?
 
-Not really &mdash; this is not supported. If you'd still like to try, you could achieve some kind of a result with something like this:
+Not really &mdash; this is not supported. If you want to get events or tasks from your calendars and format them in some custom way, I suggest you take a look at [CalStoreHelper][calstorehelper], a Python class that lets you easily get events/tasks from the calendar store, and write a small script that performs the formatting you want (take a look at the example script provided with the class).
 
-    $ icalBuddy eventsToday+2
-    • An Event (Work)
-        location: Meeting room A
-        13:00 - 14:15
-    • Second Event (Work)
-        location: Meeting room B
-        tomorrow at 11:00 - 12:00
-    $
-    $ icalBuddy -cf "" -b '"' -ab '"' -ps '|","|' eventsToday+20 | sed -e "s/$/\"/"
-    "An Event (Work)","location: Meeting room A","13:00 - 14:15"
-    "Second Event (Work)","location: Meeting room B","tomorrow at 11:00 - 12:00"
-
-When trying this out, note that properties that have no value are not printed out by icalBuddy, so *the column order will not be consistent* in this CSV output unless all printed items have values for all of the same printed properties. Also, double quotes (`"`) in property values will mess things up completely.
 
 
 ## Q: How can I automatically get events for a single day (or any date/time range, for that matter) that is *relative to the current date* (e.g. yesterday, tomorrow or the day after tomorrow)?
@@ -190,7 +177,6 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [wp-envvars]:           http://en.wikipedia.org/wiki/Environment_variable
 [wp-bashstartup]:       http://en.wikipedia.org/wiki/Bash_(Unix_shell)#Startup_scripts
 [manpageonline]:        http://hasseg.org/icalBuddy/man.html
-[tuawmanviewers]:       http://www.tuaw.com/2008/03/07/here-comes-your-man-viewer/
 [l10nmanpageonline]:    http://hasseg.org/icalBuddy/localization-man.html
 [geektool]:             http://projects.tynsoe.org/en/geektool
 [custom-geektool]:      http://hasseg.org/blog/?p=350
@@ -199,3 +185,6 @@ You should look through icalBuddy's [manual page][manpageonline] and see if what
 [links]:                http://links.sourceforge.net/
 [gcal-feeds]:           http://www.google.com/support/calendar/bin/answer.py?hl=en&answer=37648
 [busycal]:              http://busymac.com/
+[calstorehelper]:    http://hasseg.org/calStoreHelper/
+
+
