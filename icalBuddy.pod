@@ -41,7 +41,7 @@ Print events occurring at present time
 
 =item B<C<eventsFrom:START to:END>>
 
-Print events occurring between the two specified dates. The dates (START and END) may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
+Print events occurring between the two specified dates. The dates (START and END) may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) or as relative dates (such as C<today+3> or C<yesterday-2>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
 
 =item B<C<uncompletedTasks>>
 
@@ -49,7 +49,7 @@ Print uncompleted tasks
 
 =item B<C<tasksDueBefore:DATE>>
 
-Print uncompleted tasks that are due before the given date. DATE may be C<today+NUM> (where C<NUM> is an integer) or it may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
+Print uncompleted tasks that are due before the given date. DATE may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) or as a relative date (such as C<today+3> or C<yesterday-2>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)
 
 =item B<C<calendars>>
 
