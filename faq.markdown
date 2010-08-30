@@ -139,8 +139,8 @@ Example: get events for tomorrow and the day after tomorrow:
 
 The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. There are two workarounds I've come up with, depending on the application you're using to invoke icalBuddy:
 
- 1. If the application you're using to call icalBuddy allows you to set the "writing direction" for the printed output, set that to something other than "natural". GeekTool doesn't support this by default, but you can instead use [my custom build of it][custom-geektool] that does.
- 2. If the application you're using to call icalBuddy <em>does not</em> allow you to set the "writing direction", you can try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped".
+ 1. If the application you're using to call icalBuddy allows you to set the "writing direction" for the printed output, set that to something other than "natural" (in Geektool 3 this setting is called *right to left text direction*).
+ 2. If the application you're using to call icalBuddy *does not* allow you to set the "writing direction", you can try to "trick" the layout system to keep the bullets on the left side by adding a letter from the latin alphabet as a part of the bullet point. Unfortunately this is not very pretty, though. :( So for example: `icalBuddy -b "I- "`. You can also omit the bullet points completely by running: `icalBuddy -b "" -ab ""`, but this won't keep the lines from being "flipped".
 
 
 ## Q: Why doesn't icalBuddy display events from calendars I see under the "Delegates" heading in iCal's calendar list?
