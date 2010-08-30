@@ -96,10 +96,10 @@ if __name__ == '__main__':
 				}
 			
 			files_missing = False
-			for filename, path in files_to_install.items():
-				if not os.path.exists(filename):
+			for sourcepath, targetpath in files_to_install.items():
+				if not os.path.exists(sourcepath):
 					files_missing = True
-					print red('Can not find file: ')+cyan(filename)
+					print red('Can not find file: ')+cyan(sourcepath)
 			
 			if files_missing:
 				print 'Make sure you\'re running this script from the distribution'
