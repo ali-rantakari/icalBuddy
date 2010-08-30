@@ -168,7 +168,7 @@ THE SOFTWARE.
 
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 12;
+const int VERSION_BUILD = 13;
 
 
 
@@ -2291,6 +2291,7 @@ int main(int argc, char *argv[])
 				
 				if (eventsDateRangeStart == nil || eventsDateRangeEnd == nil)
 				{
+					PrintfErr(@"\n");
 					printDateFormatInfo();
 					return(0);
 				}
@@ -2313,7 +2314,7 @@ int main(int argc, char *argv[])
 				NSRange arg_output_plusSymbolRange = [arg_output rangeOfString:@"+"];
 				if (arg_output_plusSymbolRange.location != NSNotFound)
 				{
-					NSInteger daysToAddToRange = [[arg_output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] intValue];
+					NSInteger daysToAddToRange = [[arg_output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
 					eventsDateRangeEnd = dateByAddingDays(eventsDateRangeEnd, daysToAddToRange);
 					events_printOptions &= ~PRINT_OPTION_SINGLE_DAY;
 				}
@@ -2346,28 +2347,14 @@ int main(int argc, char *argv[])
 			{
 				NSDate *dueBeforeDate = nil;
 				
-				if ([arg_output hasPrefix:@"tasksDueBefore:today+"])
+				NSString *dueBeforeDateStr = [arg_output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
+				dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date");
+				
+				if (dueBeforeDate == nil)
 				{
-					// tasksDueBefore:today+NUM
-					NSRange arg_output_plusSymbolRange = [arg_output rangeOfString:@"+"];
-					NSInteger daysToAdd = [[arg_output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
-					dueBeforeDate = dateByAddingDays(today, daysToAdd);
-				}
-				else if ([arg_output hasPrefix:@"tasksDueBefore:tomorrow"])
-					// tasksDueBefore:tomorrow
-					dueBeforeDate = dateByAddingDays(today, 1);
-				else
-				{
-					// tasksDueBefore:"YYYY-MM-DD HH:MM:SS ±HHMM"
-					NSString *dueBeforeDateStr = [arg_output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
-					
-					dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date");
-					
-					if (dueBeforeDate == nil)
-					{
-						printDateFormatInfo();
-						return(0);
-					}
+					PrintfErr(@"\n");
+					printDateFormatInfo();
+					return(0);
 				}
 				
 				DebugPrintf(@"effective query 'due before' date: %@\n", dueBeforeDate);

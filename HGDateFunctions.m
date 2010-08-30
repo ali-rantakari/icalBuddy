@@ -199,6 +199,42 @@ NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 	NSDate *result = [NSDate dateWithString:input];
 	
 	if (result == nil)
+	{
+		// custom relative dates
+		
+		NSString *trimmedInput = [[input stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
+		NSDate *now = [NSDate date];
+		NSDate *today = dateForStartOfDay(now);
+		
+		if ([trimmedInput hasPrefix:@"day before yesterday"])
+			result = dateByAddingDays(today, -2);
+		else if ([trimmedInput hasPrefix:@"yesterday"])
+			result = dateByAddingDays(today, -1);
+		else if ([trimmedInput hasPrefix:@"now"])
+			result = now;
+		else if ([trimmedInput hasPrefix:@"today"])
+			result = today;
+		else if ([trimmedInput hasPrefix:@"tomorrow"])
+			result = dateByAddingDays(today, 1);
+		else if ([trimmedInput hasPrefix:@"day after tomorrow"])
+			result = dateByAddingDays(today, 2);
+		
+		// +/-NUM suffix (add/remove NUM days from result)
+		if (result != nil)
+		{
+			NSRange plusOrMinusSymbolRange = [trimmedInput rangeOfString:@"+"];
+			if (plusOrMinusSymbolRange.location == NSNotFound)
+				plusOrMinusSymbolRange = [trimmedInput rangeOfString:@"-"];
+			
+			if (plusOrMinusSymbolRange.location != NSNotFound)
+			{
+				NSInteger daysToAdd = [[trimmedInput substringFromIndex:plusOrMinusSymbolRange.location] integerValue];
+				result = dateByAddingDays(result, daysToAdd);
+			}
+		}
+	}
+	
+	if (result == nil)
 		result = [NSDate dateWithNaturalLanguageString:input];
 	
 	NSString *inputDateName = (inputName == nil) ? @"date" : inputName;
@@ -213,7 +249,8 @@ NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 void printDateFormatInfo()
 {
 	PrintfErr(@"You can use some natural language (primarily english) and common date formats when\n");
-	PrintfErr(@"specifying dates but the safest format is: \"YYYY-MM-DD HH:MM:SS ±HHMM\"\n\n");
+	PrintfErr(@"specifying dates, as well as some relative date formats (e.g. 'tomorrow', 'day\n");
+	PrintfErr(@"after tomorrow', 'today+NUM'), but the safest format is: \"YYYY-MM-DD HH:MM:SS ±HHMM\".\n\n");
 }
 
 
