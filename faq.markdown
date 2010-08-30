@@ -124,28 +124,15 @@ Not really &mdash; this is not supported. If you want to get events or tasks fro
 
 ## Q: How can I automatically get events for a single day (or any date/time range, for that matter) that is *relative to the current date* (e.g. yesterday, tomorrow or the day after tomorrow)?
 
-You should write a shell script that dynamically determines the start and end date-times and call that. Here's an example of a bash script that will get you events only from tomorrow:
+As of version 1.7.13 you can specify relative dates such as these in the arguments. The following relative dates are supported: `day before yesterday`, `yesterday`, `today`, `now`, `tomorrow` and `day after tomorrow`. You can also specify a 'day shift' (i.e. number of days to add to or remove from) for these relative dates by adding `+NUM` or `-NUM` to the end.
 
-    #!/bin/bash
-    # 
-    # Prints tomorrow's events using icalBuddy
-    # 
-    
-    day_in_seconds=86400
-    
-    # get current seconds since the epoch
-    sec=`date +%s`
-    
-    # get tomorrows date as seconds since the epoch
-    sec_tomorrow=`expr ${sec} + ${day_in_seconds}`
-    
-    # 'start' date/time, in the format required by icalBuddy
-    start_dt="`date -r ${sec_tomorrow} +'%Y-%m-%d 00:00:00 %z'`"
-    
-    # 'end' date/time, in the format required by icalBuddy
-    end_dt="`date -r ${sec_tomorrow} +'%Y-%m-%d 23:59:59 %z'`"
-    
-    icalBuddy eventsFrom:"${start_dt}" to:"${end_dt}"
+Example: get events for tomorrow:
+
+    icalBuddy eventsFrom:tomorrow to:tomorrow+1
+
+Example: get events for tomorrow and the day after tomorrow:
+
+    icalBuddy eventsFrom:tomorrow to:'day after tomorrow+1'
 
 
 ## Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
