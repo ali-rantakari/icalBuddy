@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>Titel</string>
+	<key>location</key>
+	<string>Locatie</string>
+	<key>notes</key>
+	<string>Notities</string>
+	<key>url</key>
+	<string>URL</string>
+	<key>dueDate</key>
+	<string>Vervalt</string>
+	<key>noDueDate</key>
+	<string>Geen vervaldatum</string>
+	<key>priority</key>
+	<string>Prioriteit</string>
+	<key>someonesBirthday</key>
+	<string>Verjaardag van %@</string>
+	<key>today</key>
+	<string>Vandaag</string>
+	<key>tomorrow</key>
+	<string>Morgen</string>
+	<key>yesterday</key>
+	<string>Gisteren</string>
+	<key>dayBeforeYesterday</key>
+	<string>Eergisteren</string>
+	<key>dayAfterTomorrow</key>
+	<string>Overmorgen</string>
+	<key>xDaysAgo</key>
+	<string>%d dagen geleden</string>
+	<key>xDaysFromNow</key>
+	<string>over %d dagen</string>
+	<key>thisWeek</key>
+	<string>deze week</string>
+	<key>lastWeek</key>
+	<string>vorige week</string>
+	<key>nextWeek</key>
+	<string>volgende week</string>
+	<key>xWeeksAgo</key>
+	<string>%d weken geleden</string>
+	<key>xWeeksFromNow</key>
+	<string>over %d weken</string>
+	<key>high</key>
+	<string>Hoog</string>
+	<key>medium</key>
+	<string>Medium</string>
+	<key>low</key>
+	<string>Laag</string>
+	<key>dateTimeSeparator</key>
+	<string> om </string>
+	<key>noItems</key>
+	<string>Niets</string>
+</dict>
+</plist>
+
