@@ -32,135 +32,19 @@ THE SOFTWARE.
 #import <CalendarStore/CalendarStore.h>
 #import <AppKit/AppKit.h>
 #import <AddressBook/AddressBook.h>
+
 #import "HGUtils.h"
 #import "HGCLIUtils.h"
 #import "HGCLIAutoUpdater.h"
 #import "HGDateFunctions.h"
+
+#import "icalBuddyMacros.h"
+#import "icalBuddyL10N.h"
+
 #import "IcalBuddyAutoUpdaterDelegate.h"
 #import "ANSIEscapeHelper.h"
 
 
-
-#define kInternalErrorDomain @"org.hasseg.icalBuddy"
-
-#define kPropertyListEditorAppName @"Property List Editor"
-
-// custom date-formatting specifiers
-#define kRelativeWeekFormatSpecifier @"%RW"
-#define kDayDiffFormatSpecifier @"%RD"
-
-
-// property names
-#define kPropName_title 	@"title"
-#define kPropName_location 	@"location"
-#define kPropName_notes 	@"notes"
-#define kPropName_url 		@"url"
-#define kPropName_datetime 	@"datetime"
-#define kPropName_priority 	@"priority"
-#define kPropName_UID		@"uid"
-
-
-// keys for the "sections" dictionary (see printItemSections())
-#define kSectionDictKey_title 				@"sectionTitle"
-#define kSectionDictKey_items 				@"sectionItems"
-#define kSectionDictKey_eventsContextDay 	@"eventsContextDay"
-
-
-// output formatting configuration keys
-#define kFormatKeySectionTitle			@"sectionTitle"
-#define kFormatKeyFirstItemLine			@"firstItemLine"
-#define kFormatKeyBullet				@"bullet"
-#define kFormatKeyAlertBullet			@"alertBullet"
-#define kFormatKeyNoItems				@"noItems"
-#define kFormatKeyCalendarNameInTitle	@"calendarNameInTitle"
-#define kFormatKeyPriorityValueHigh		@"priorityValueHigh"
-#define kFormatKeyPriorityValueMedium	@"priorityValueMedium"
-#define kFormatKeyPriorityValueLow		@"priorityValueLow"
-// the "suffix" definitions below are used like:
-//   kPropName_notes + kFormatKeyPropNameSuffix
-//   ^-- defines the formatting config key for the
-//       "notes" property name
-#define kFormatKeyPropNameSuffix		@"Name"
-#define kFormatKeyPropValueSuffix		@"Value"
-
-
-// output formatting parameters
-#define kFormatFgColorPrefix		@"fg:"
-#define kFormatBgColorPrefix		@"bg:"
-#define kFormatDoubleUnderlined		@"double-underlined"
-#define kFormatUnderlined			@"underlined"
-#define kFormatBold					@"bold"
-#define kFormatBlink				@"blink"
-#define kFormatColorBlack			@"black"
-#define kFormatColorRed				@"red"
-#define kFormatColorGreen			@"green"
-#define kFormatColorYellow			@"yellow"
-#define kFormatColorBlue			@"blue"
-#define kFormatColorMagenta			@"magenta"
-#define kFormatColorWhite			@"white"
-#define kFormatColorCyan			@"cyan"
-#define kFormatColorBrightBlack		@"bright-black"
-#define kFormatColorBrightRed		@"bright-red"
-#define kFormatColorBrightGreen		@"bright-green"
-#define kFormatColorBrightYellow	@"bright-yellow"
-#define kFormatColorBrightBlue		@"bright-blue"
-#define kFormatColorBrightMagenta	@"bright-magenta"
-#define kFormatColorBrightWhite		@"bright-white"
-#define kFormatColorBrightCyan		@"bright-cyan"
-
-// custom string formatting attribute(s)
-#define kBlinkAttributeName			@"blinkAttributeName"
-#define kSGRCodeBlink				5
-#define kSGRCodeBlinkReset			25
-
-// localization configuration keys
-#define kL10nKeyPropNameTitle		kPropName_title
-#define kL10nKeyPropNameLocation	kPropName_location
-#define kL10nKeyPropNameNotes		kPropName_notes
-#define kL10nKeyPropNameUrl			kPropName_url
-#define kL10nKeyPropNamePriority	kPropName_priority
-#define kL10nKeyPropNameUID			kPropName_UID
-#define kL10nKeyPropNameDueDate		@"dueDate"
-#define kL10nKeyNoDueDate			@"noDueDate"
-#define kL10nKeyToday				@"today"
-#define kL10nKeyTomorrow			@"tomorrow"
-#define kL10nKeyDayAfterTomorrow	@"dayAfterTomorrow"
-#define kL10nKeyYesterday			@"yesterday"
-#define kL10nKeyDayBeforeYesterday	@"dayBeforeYesterday"
-#define kL10nKeyXDaysAgo			@"xDaysAgo"
-#define kL10nKeyXDaysFromNow		@"xDaysFromNow"
-#define kL10nKeyLastWeek			@"lastWeek"
-#define kL10nKeyThisWeek			@"thisWeek"
-#define kL10nKeyNextWeek			@"nextWeek"
-#define kL10nKeyXWeeksAgo			@"xWeeksAgo"
-#define kL10nKeyXWeeksFromNow		@"xWeeksFromNow"
-#define kL10nKeyPriorityHigh 		@"high"
-#define kL10nKeyPriorityMedium		@"medium"
-#define kL10nKeyPriorityLow			@"low"
-#define kL10nKeySomeonesBirthday	@"someonesBirthday"
-#define kL10nKeyMyBirthday			@"myBirthday"
-#define kL10nKeyDateTimeSeparator	@"dateTimeSeparator"
-#define kL10nKeyNoItemsInSection	@"noItems"
-
-
-
-// default item property order + list of allowed property names (i.e. these must be in
-// the default order and include all of the allowed property names)
-#define kDefaultPropertyOrder [NSArray arrayWithObjects:kPropName_title, kPropName_location, kPropName_notes, kPropName_url, kPropName_datetime, kPropName_priority, kPropName_UID, nil]
-
-#define kDefaultPropertySeparators [NSArray arrayWithObjects:@"\n    ", nil]
-
-// localization configuration file path
-#define kL10nFilePath @"~/.icalBuddyLocalization.plist"
-
-// general configuration file path
-#define kConfigFilePath @"~/.icalBuddyConfig.plist"
-
-// contents for a new configuration file "stub"
-#define kConfigFileStub [NSDictionary dictionaryWithObjectsAndKeys:\
-						 [NSDictionary dictionary], @"formatting",\
-						 nil\
-						]
 
 
 
@@ -170,6 +54,10 @@ const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
 const int VERSION_BUILD = 14;
 
+NSString* versionNumberStr()
+{
+	return [NSString stringWithFormat:@"%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD];
+}
 
 
 
@@ -242,11 +130,10 @@ NSMutableDictionary *configDict;
 // configuration file.)
 NSDictionary *defaultFormattingConfigDict;
 
-// dictionary for localization values
-NSDictionary *L10nStringsDict;
+ANSIEscapeHelper *ansiEscapeHelper;
+HGCLIAutoUpdater *autoUpdater;
+IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 
-// default version of L10nStringsDict
-NSDictionary *defaultStringsDict;
 
 // the output buffer string where we add everything we
 // want to print out, and right before terminating
@@ -256,10 +143,12 @@ NSDictionary *defaultStringsDict;
 // last minute.
 NSMutableAttributedString *stdoutBuffer;
 
-ANSIEscapeHelper *ansiEscapeHelper;
-HGCLIAutoUpdater *autoUpdater;
-IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 
+// adds the specified attributed string to the output buffer.
+void addToOutputBuffer(NSAttributedString *aStr)
+{
+	[stdoutBuffer appendAttributedString:aStr];
+}
 
 
 
@@ -267,20 +156,6 @@ IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 // BEGIN: Misc. helper functions
-
-
-NSString* versionNumberStr()
-{
-	return [NSString stringWithFormat:@"%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD];
-}
-
-
-
-// adds the specified attributed string to the output buffer.
-void addToOutputBuffer(NSAttributedString *aStr)
-{
-	[stdoutBuffer appendAttributedString:aStr];
-}
 
 
 
@@ -299,26 +174,6 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 	return [ansiEscapeHelper colorForSGRCode:closestSGRCode];
 }
 
-
-
-// returns localized, human-readable string corresponding to the
-// specified localization dictionary key
-NSString* localizedStr(NSString *str)
-{
-	if (str == nil)
-		return nil;
-	
-	if (L10nStringsDict != nil)
-	{
-		NSString *localizedStr = [L10nStringsDict objectForKey:str];
-		if (localizedStr != nil)
-			return localizedStr;
-	}
-	
-	NSString *defaultStr = [defaultStringsDict objectForKey:str];
-	NSCAssert((defaultStr != nil), @"defaultStr is nil");
-	return defaultStr;
-}
 
 
 
@@ -1609,37 +1464,6 @@ int main(int argc, char *argv[])
 	autoUpdater.delegate = autoUpdaterDelegate;
 	
 	
-	// default localization strings (english)
-	defaultStringsDict = [NSDictionary dictionaryWithObjectsAndKeys:
-		@"title",			kL10nKeyPropNameTitle,
-		@"location",		kL10nKeyPropNameLocation,
-		@"notes", 			kL10nKeyPropNameNotes,
-		@"url", 			kL10nKeyPropNameUrl,
-		@"uid",				kL10nKeyPropNameUID,
-		@"due",		 		kL10nKeyPropNameDueDate,
-		@"no due date",		kL10nKeyNoDueDate,
-		@"priority", 		kL10nKeyPropNamePriority,
-		@"%@'s Birthday",	kL10nKeySomeonesBirthday,
-		@"My Birthday",		kL10nKeyMyBirthday,
-		@"today", 					kL10nKeyToday,
-		@"tomorrow", 				kL10nKeyTomorrow,
-		@"yesterday", 				kL10nKeyYesterday,
-		@"day before yesterday",	kL10nKeyDayBeforeYesterday,
-		@"day after tomorrow",		kL10nKeyDayAfterTomorrow,
-		@"%d days ago",				kL10nKeyXDaysAgo,
-		@"%d days from now",		kL10nKeyXDaysFromNow,
-		@"this week",				kL10nKeyThisWeek,
-		@"last week",				kL10nKeyLastWeek,
-		@"next week",				kL10nKeyNextWeek,
-		@"%d weeks ago",			kL10nKeyXWeeksAgo,
-		@"%d weeks from now",		kL10nKeyXWeeksFromNow,
-		@"high",		kL10nKeyPriorityHigh,
-		@"medium",		kL10nKeyPriorityMedium,
-		@"low",			kL10nKeyPriorityLow,
-		@" at ",		kL10nKeyDateTimeSeparator,
-		@"Nothing.",	kL10nKeyNoItemsInSection,
-		nil
-		];
 	
 	// default formatting for different output elements
 	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1861,66 +1685,8 @@ int main(int argc, char *argv[])
 	}
 	
 	
-	
-	// read and validate localization configuration file
-	
-	L10nStringsDict = nil;
-	if (L10nFilePath == nil)
-		L10nFilePath = [kL10nFilePath stringByExpandingTildeInPath];
-	if (L10nFilePath != nil && [L10nFilePath length] > 0)
-	{
-		BOOL L10nFileIsDir;
-		BOOL L10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:L10nFilePath isDirectory:&L10nFileIsDir];
-		if (L10nFileExists && !L10nFileIsDir)
-		{
-			BOOL L10nFileIsValid = YES;
-			
-			L10nStringsDict = [NSDictionary dictionaryWithContentsOfFile:L10nFilePath];
-			
-			if (L10nStringsDict == nil)
-			{
-				PrintfErr(@"* Error in localization file \"%@\":\n", L10nFilePath);
-				PrintfErr(@"  can not recognize file format -- must be a valid property list\n");
-				PrintfErr(@"  with a structure specified in the icalBuddyLocalization man page.\n");
-				L10nFileIsValid = NO;
-			}
-			
-			if (L10nFileIsValid)
-			{
-				// validate some specific keys in localization config
-				NSDictionary *L10nKeysRequiringSubstrings = [NSDictionary dictionaryWithObjectsAndKeys:
-					@"%d", kL10nKeyXWeeksFromNow,
-					@"%d", kL10nKeyXWeeksAgo,
-					@"%d", kL10nKeyXDaysAgo,
-					@"%d", kL10nKeyXDaysFromNow,
-					@"%@", kL10nKeySomeonesBirthday,
-					nil
-					];
-				NSString *thisKey;
-				NSString *thisVal;
-				NSString *requiredSubstring;
-				for (thisKey in [L10nKeysRequiringSubstrings allKeys])
-				{
-					requiredSubstring = [L10nKeysRequiringSubstrings objectForKey:thisKey];
-					thisVal = [L10nStringsDict objectForKey:thisKey];
-					if (thisVal != nil && [thisVal rangeOfString:requiredSubstring].location == NSNotFound)
-					{
-						PrintfErr(@"* Error in localization file \"%@\"\n", L10nFilePath);
-						PrintfErr(@"  (key: \"%@\", value: \"%@\"):\n", thisKey, thisVal);
-						PrintfErr(@"  value must include %@ to indicate position for a variable.\n", requiredSubstring);
-						L10nFileIsValid = NO;
-					}
-				}
-			}
-			
-			if (!L10nFileIsValid)
-			{
-				PrintfErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\n");
-				PrintfErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", L10nFilePath);
-			}
-		}
-	}
-	
+	// initialize localization
+	initL10N(L10nFilePath);
 	
 	
 	

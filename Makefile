@@ -29,7 +29,7 @@ else
 	ARCH_64BIT=
 endif
 
-SOURCE_FILES=icalBuddy.m ANSIEscapeHelper.m HGUtils.m HGCLIUtils.m HGDateFunctions.m HGCLIAutoUpdater.m HGCLIAutoUpdaterDelegate.m IcalBuddyAutoUpdaterDelegate.m
+SOURCE_FILES=icalBuddy*.m ANSIEscapeHelper.m HG*.m IcalBuddy*.m
 
 
 
