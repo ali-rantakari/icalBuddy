@@ -67,5 +67,7 @@ void readArgsFromConfigFile(NSString *filePath, NSMutableDictionary **retConfigD
 
 void readArgs(int argc, char *argv[]);
 
+void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigFilePath, NSString **retL10NConfigFilePath);
+
 void processArgs(NSArray **retPropertySeparators);
 

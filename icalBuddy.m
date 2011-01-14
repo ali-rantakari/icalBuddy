@@ -226,63 +226,16 @@ int main(int argc, char *argv[])
 	
 	
 	
-	NSString *configFilePath = nil;
-	NSString *L10nFilePath = nil;
-	
 	// read user arguments for specifying paths to the config and
 	// localization files before reading any other arguments (we
-	// want to load the config first and then read the arguments
-	// so that the arguments could override whatever is set in
-	// the config. the localization stuff is just along for the
-	// ride (it's good friends with the config stuff and I don't
-	// have the heart to separate them))
-	for (int i = 1; i < argc; i++)
-	{
-		if (((strcmp(argv[i], "-cf") == 0) || (strcmp(argv[i], "--configFile") == 0)) && (i+1 < argc))
-		{
-			configFilePath = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath];
-			if ([configFilePath length] > 0)
-			{
-				BOOL userSpecifiedConfigFileIsDir;
-				BOOL userSpecifiedConfigFileExists = [[NSFileManager defaultManager]
-					fileExistsAtPath:configFilePath
-					isDirectory:&userSpecifiedConfigFileIsDir
-					];
-				if (!userSpecifiedConfigFileExists)
-				{
-					PrintfErr(@"Error: specified configuration file doesn't exist: '%@'\n", configFilePath);
-					configFilePath = nil;
-				}
-				else if (userSpecifiedConfigFileIsDir)
-				{
-					PrintfErr(@"Error: specified configuration file is a directory: '%@'\n", configFilePath);
-					configFilePath = nil;
-				}
-			}
-		}
-		else if (((strcmp(argv[i], "-lf") == 0) || (strcmp(argv[i], "--localizationFile") == 0)) && (i+1 < argc))
-		{
-			L10nFilePath = [[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath];
-			if ([L10nFilePath length] > 0)
-			{
-				BOOL userSpecifiedL10nFileIsDir;
-				BOOL userSpecifiedL10nFileExists = [[NSFileManager defaultManager]
-					fileExistsAtPath:L10nFilePath
-					isDirectory:&userSpecifiedL10nFileIsDir
-					];
-				if (!userSpecifiedL10nFileExists)
-				{
-					PrintfErr(@"Error: specified localization file doesn't exist: '%@'\n", L10nFilePath);
-					L10nFilePath = nil;
-				}
-				else if (userSpecifiedL10nFileIsDir)
-				{
-					PrintfErr(@"Error: specified localization file is a directory: '%@'\n", L10nFilePath);
-					L10nFilePath = nil;
-				}
-			}
-		}
-	}
+	// want to load the config first and then read the argv arguments
+	// so that the latter could override whatever is set in the
+	// former. the localization stuff is just along for the ride
+	// (it's good friends with the config stuff and I don't have
+	// the heart to separate them))
+	NSString *configFilePath = nil;
+	NSString *L10nFilePath = nil;
+	readConfigAndL10NFilePathArgs(argc, argv, &configFilePath, &L10nFilePath);
 	
 	
 	initL10N(L10nFilePath);
