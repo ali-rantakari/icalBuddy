@@ -40,9 +40,9 @@ THE SOFTWARE.
 
 #import "icalBuddyMacros.h"
 #import "icalBuddyL10N.h"
+#import "icalBuddyFormatting.h"
 
 #import "IcalBuddyAutoUpdaterDelegate.h"
-#import "ANSIEscapeHelper.h"
 
 
 
@@ -93,9 +93,6 @@ typedef enum datePrintOption
 // the order of properties in the output
 NSArray *propertyOrder;
 
-// the separator strings between properties in the output
-NSArray *propertySeparators = nil;
-
 // the prefix strings
 NSString *prefixStrBullet = 			@"• ";
 NSString *prefixStrBulletAlert = 		@"! ";
@@ -124,13 +121,6 @@ NSDate *today;
 // dictionary for configuration values
 NSMutableDictionary *configDict;
 
-// default version of the formatting styles dictionary
-// that normally is under the "formatting" key in
-// configDict (if the user has defined it in the
-// configuration file.)
-NSDictionary *defaultFormattingConfigDict;
-
-ANSIEscapeHelper *ansiEscapeHelper;
 HGCLIAutoUpdater *autoUpdater;
 IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 
@@ -159,20 +149,6 @@ void addToOutputBuffer(NSAttributedString *aStr)
 
 
 
-// returns the closest ANSI color (from the colors used by
-// ansiEscapeHelper) to the given color, or nil if the given
-// color is nil.
-NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
-{
-	if (color == nil)
-		return nil;
-	
-	enum sgrCode closestSGRCode = [ansiEscapeHelper closestSGRCodeForColor:color isForegroundColor:foreground];
-	if (closestSGRCode == SGRCodeNoneOrInvalid)
-		return nil;
-	
-	return [ansiEscapeHelper colorForSGRCode:closestSGRCode];
-}
 
 
 
@@ -418,329 +394,6 @@ NSString* dateStr(NSDate *date, DatePrintOption printOption)
 		return outputTimeStr;
 	else
 		return strConcat(outputDateStr, localizedStr(kL10nKeyDateTimeSeparator), outputTimeStr, nil);
-}
-
-
-
-
-
-
-
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-// BEGIN: Functions for formatting the output
-
-
-// returns a dictionary of attribute name (key) - attribute value (value)
-// pairs (suitable for using directly with NSMutableAttributedString's
-// attribute setter methods) based on a user-defined formatting specification
-// (from the config file, like: "red,bg:blue,bold")
-NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig)
-{
-	NSMutableDictionary *returnAttributes = [NSMutableDictionary dictionary];
-	
-	NSArray *parts = [formattingConfig componentsSeparatedByString:@","];
-	NSString *part;
-	for (part in parts)
-	{
-		part = [[part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
-		
-		NSString *thisAttrName = nil;
-		NSObject *thisAttrValue = nil;
-		
-		BOOL isColorAttribute = NO;
-		BOOL isBackgroundColor = NO;
-		if ([part hasPrefix:kFormatFgColorPrefix] ||
-			[part isEqualToString:kFormatColorBlack] ||
-			[part isEqualToString:kFormatColorRed] ||
-			[part isEqualToString:kFormatColorGreen] ||
-			[part isEqualToString:kFormatColorYellow] ||
-			[part isEqualToString:kFormatColorBlue] ||
-			[part isEqualToString:kFormatColorMagenta] ||
-			[part isEqualToString:kFormatColorWhite] ||
-			[part isEqualToString:kFormatColorCyan] ||
-			[part isEqualToString:kFormatColorBrightBlack] ||
-			[part isEqualToString:kFormatColorBrightRed] ||
-			[part isEqualToString:kFormatColorBrightGreen] ||
-			[part isEqualToString:kFormatColorBrightYellow] ||
-			[part isEqualToString:kFormatColorBrightBlue] ||
-			[part isEqualToString:kFormatColorBrightMagenta] ||
-			[part isEqualToString:kFormatColorBrightWhite] ||
-			[part isEqualToString:kFormatColorBrightCyan]
-			)
-		{
-			thisAttrName = NSForegroundColorAttributeName;
-			isColorAttribute = YES;
-		}
-		else if ([part hasPrefix:kFormatBgColorPrefix])
-		{
-			thisAttrName = NSBackgroundColorAttributeName;
-			isColorAttribute = YES;
-			isBackgroundColor = YES;
-		}
-		else if ([part isEqualToString:kFormatBold])
-		{
-			thisAttrName = NSFontAttributeName;
-			thisAttrValue = [[NSFontManager sharedFontManager] convertFont:[ansiEscapeHelper font] toHaveTrait:NSBoldFontMask];
-		}
-		else if ([part isEqualToString:kFormatUnderlined])
-		{
-			thisAttrName = NSUnderlineStyleAttributeName;
-			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleSingle];
-		}
-		else if ([part isEqualToString:kFormatDoubleUnderlined])
-		{
-			thisAttrName = NSUnderlineStyleAttributeName;
-			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleDouble];
-		}
-		else if ([part isEqualToString:kFormatBlink])
-		{
-			thisAttrName = kBlinkAttributeName;
-			thisAttrValue = [NSNumber numberWithBool:YES];
-		}
-		
-		if (isColorAttribute)
-		{
-			enum sgrCode thisColorSGRCode = SGRCodeNoneOrInvalid;
-			if ([part hasSuffix:kFormatColorBrightBlack])
-				thisColorSGRCode = SGRCodeFgBrightBlack;
-			else if ([part hasSuffix:kFormatColorBrightRed])
-				thisColorSGRCode = SGRCodeFgBrightRed;
-			else if ([part hasSuffix:kFormatColorBrightGreen])
-				thisColorSGRCode = SGRCodeFgBrightGreen;
-			else if ([part hasSuffix:kFormatColorBrightYellow])
-				thisColorSGRCode = SGRCodeFgBrightYellow;
-			else if ([part hasSuffix:kFormatColorBrightBlue])
-				thisColorSGRCode = SGRCodeFgBrightBlue;
-			else if ([part hasSuffix:kFormatColorBrightMagenta])
-				thisColorSGRCode = SGRCodeFgBrightMagenta;
-			else if ([part hasSuffix:kFormatColorBrightWhite])
-				thisColorSGRCode = SGRCodeFgBrightWhite;
-			else if ([part hasSuffix:kFormatColorBrightCyan])
-				thisColorSGRCode = SGRCodeFgBrightCyan;
-			else if ([part hasSuffix:kFormatColorBlack])
-				thisColorSGRCode = SGRCodeFgBlack;
-			else if ([part hasSuffix:kFormatColorRed])
-				thisColorSGRCode = SGRCodeFgRed;
-			else if ([part hasSuffix:kFormatColorGreen])
-				thisColorSGRCode = SGRCodeFgGreen;
-			else if ([part hasSuffix:kFormatColorYellow])
-				thisColorSGRCode = SGRCodeFgYellow;
-			else if ([part hasSuffix:kFormatColorBlue])
-				thisColorSGRCode = SGRCodeFgBlue;
-			else if ([part hasSuffix:kFormatColorMagenta])
-				thisColorSGRCode = SGRCodeFgMagenta;
-			else if ([part hasSuffix:kFormatColorWhite])
-				thisColorSGRCode = SGRCodeFgWhite;
-			else if ([part hasSuffix:kFormatColorCyan])
-				thisColorSGRCode = SGRCodeFgCyan;
-			
-			if (thisColorSGRCode != SGRCodeNoneOrInvalid)
-			{
-				if (isBackgroundColor)
-					thisColorSGRCode += 10;
-				thisAttrValue = [ansiEscapeHelper colorForSGRCode:thisColorSGRCode];
-			}
-		}
-		
-		if (thisAttrName != nil && thisAttrValue != nil)
-			[returnAttributes setValue:thisAttrValue forKey:thisAttrName];
-	}
-	
-	return returnAttributes;
-}
-
-
-
-// insert ANSI escape sequences for custom formatting attributes (e.g. blink,
-// which ANSIEscapeHelper doesn't support (with good reason)) into the given
-// attributed string
-void processCustomStringAttributes(NSMutableAttributedString **aAttributedString)
-{
-	NSMutableAttributedString *str = *aAttributedString;
-	
-	if (str == nil)
-		return;
-	
-	
-	NSArray *attrNames = [NSArray arrayWithObjects:
-						  kBlinkAttributeName,
-						  nil
-						  ];
-	
-	NSRange limitRange;
-	NSRange effectiveRange;
-	id attributeValue;
-	
-	NSMutableArray *codesAndLocations = [NSMutableArray array];
-	
-	for (NSString *thisAttrName in attrNames)
-	{
-		limitRange = NSMakeRange(0, [str length]);
-		while (limitRange.length > 0)
-		{
-			attributeValue = [str
-							  attribute:thisAttrName
-							  atIndex:limitRange.location
-							  longestEffectiveRange:&effectiveRange
-							  inRange:limitRange
-							  ];
-			int thisSGRCode = SGRCodeNoneOrInvalid;
-			
-			if ([thisAttrName isEqualToString:kBlinkAttributeName])
-			{
-				thisSGRCode = (attributeValue != nil) ? kSGRCodeBlink : kSGRCodeBlinkReset;
-			}
-			
-			if (thisSGRCode != SGRCodeNoneOrInvalid)
-			{
-				[codesAndLocations addObject:
-					[NSDictionary
-					dictionaryWithObjectsAndKeys:
-						[NSNumber numberWithInt:thisSGRCode], @"code",
-						[NSNumber numberWithUnsignedInteger:effectiveRange.location], @"location",
-						nil
-						]
-					];
-			}
-			
-			limitRange = NSMakeRange(NSMaxRange(effectiveRange),
-									 NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
-		}
-	}
-	
-	NSUInteger locationOffset = 0;
-	for (NSDictionary *dict in codesAndLocations)
-	{
-		int sgrCode = [[dict objectForKey:@"code"] intValue];
-		NSUInteger location = [[dict objectForKey:@"location"] unsignedIntegerValue];
-		
-		NSAttributedString *ansiStr = ATTR_STR(strConcat(
-			kANSIEscapeCSI,
-			[NSString stringWithFormat:@"%i", sgrCode],
-			kANSIEscapeSGREnd,
-			nil));
-		
-		[str insertAttributedString:ansiStr atIndex:(location+locationOffset)];
-		
-		locationOffset += [ansiStr length];
-	}
-}
-
-
-
-// return formatting string attributes for specified key
-NSDictionary* getStringAttributesForKey(NSString *key)
-{
-	if (key == nil)
-		return [NSDictionary dictionary];
-	
-	NSString *formattingConfig = nil;
-	
-	if (configDict != nil)
-	{
-		NSDictionary *formattingConfigDict = [configDict objectForKey:@"formatting"];
-		if (formattingConfigDict != nil)
-			formattingConfig = [formattingConfigDict objectForKey:key];
-	}
-	
-	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:key];
-	
-	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig);
-	
-	return [NSDictionary dictionary];
-}
-
-
-
-// return string attributes for formatting a section title
-NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
-{
-	return getStringAttributesForKey(kFormatKeySectionTitle);
-}
-
-
-// return string attributes for formatting the first printed
-// line for a calendar item
-NSDictionary* getFirstLineStringAttributes()
-{
-	return getStringAttributesForKey(kFormatKeyFirstItemLine);
-}
-
-
-
-// return string attributes for formatting a bullet point
-NSDictionary* getBulletStringAttributes(BOOL isAlertBullet)
-{
-	return getStringAttributesForKey((isAlertBullet) ? kFormatKeyAlertBullet : kFormatKeyBullet);
-}
-
-
-// return string attributes for calendar names printed along
-// with title properties
-NSDictionary* getCalNameInTitleStringAttributes()
-{
-	return getStringAttributesForKey(kFormatKeyCalendarNameInTitle);
-}
-
-
-// return string attributes for formatting a property name
-NSDictionary* getPropNameStringAttributes(NSString *propName)
-{
-	if (propName == nil)
-		return [NSDictionary dictionary];
-	
-	NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropNameSuffix];
-	return getStringAttributesForKey(formattingConfigKey);
-}
-
-
-// return string attributes for formatting a property value
-NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propValue)
-{
-	if (propName == nil)
-		return [NSDictionary dictionary];
-	
-	NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropValueSuffix];
-	
-	if (propName == kPropName_priority)
-	{
-		if (propValue != nil)
-		{
-			if ([propValue isEqual:localizedStr(kL10nKeyPriorityHigh)])
-				formattingConfigKey = kFormatKeyPriorityValueHigh;
-			else if ([propValue isEqual:localizedStr(kL10nKeyPriorityMedium)])
-				formattingConfigKey = kFormatKeyPriorityValueMedium;
-			else if ([propValue isEqual:localizedStr(kL10nKeyPriorityLow)])
-				formattingConfigKey = kFormatKeyPriorityValueLow;
-		}
-	}
-	
-	return getStringAttributesForKey(formattingConfigKey);
-}
-
-
-// return separator string to prefix a printed property with, based on the
-// number of the property (as in: is it the first to be printed (1), the second
-// (2) and so on.)
-NSString* getPropSeparatorStr(NSUInteger propertyNumber)
-{
-	NSCAssert((propertySeparators != nil), @"propertySeparators is nil");
-	NSCAssert(([propertySeparators count] > 0), @"propertySeparators is empty");
-	
-	// we subtract two here because the first printed property is always
-	// prefixed with a bullet (so we only have propertySeparator prefix
-	// strings for properties thereafter -- thus -1) and we want a zero-based
-	// index to use for the array access (thus the other -1)
-	NSUInteger indexToGet = (propertyNumber >= 2) ? (propertyNumber-2) : 0;
-	NSUInteger lastIndex = [propertySeparators count]-1;
-	if (indexToGet > lastIndex)
-		indexToGet = lastIndex;
-	
-	return [propertySeparators objectAtIndex:indexToGet];
 }
 
 
@@ -1454,8 +1107,6 @@ int main(int argc, char *argv[])
 	today = dateForStartOfDay(now);
 	
 	
-	ansiEscapeHelper = [[ANSIEscapeHelper alloc] init];
-	
 	autoUpdater = [[HGCLIAutoUpdater alloc]
 		initWithAppName:@"icalBuddy"
 		currentVersionStr:versionNumberStr()
@@ -1464,63 +1115,37 @@ int main(int argc, char *argv[])
 	autoUpdater.delegate = autoUpdaterDelegate;
 	
 	
-	
-	// default formatting for different output elements
-	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
-		kFormatColorCyan,		@"datetimeName",
-		kFormatColorYellow,		@"datetimeValue",
-		@"",		 	 		@"titleValue",
-		kFormatColorCyan, 	 	@"notesName",
-		@"", 		 			@"notesValue",
-		kFormatColorCyan, 		@"urlName",
-		@"", 			 		@"urlValue",
-		kFormatColorCyan, 		@"locationName",
-		@"", 		 			@"locationValue",
-		kFormatColorCyan, 		@"dueDateName",
-		@"", 			 		@"dueDateValue",
-		kFormatColorCyan, 	 	@"priorityName",
-		@"", 		 			@"priorityValue",
-		kFormatColorCyan, 	 	@"uidName",
-		@"", 		 			@"uidValue",
-		kFormatColorRed,		kFormatKeyPriorityValueHigh,
-		kFormatColorYellow,	 	kFormatKeyPriorityValueMedium,
-		kFormatColorGreen,		kFormatKeyPriorityValueLow,
-		@"", 					kFormatKeySectionTitle,
-		kFormatBold,			kFormatKeyFirstItemLine,
-		@"", 					kFormatKeyBullet,
-		strConcat(kFormatColorRed, @",", kFormatBold, nil),	kFormatKeyAlertBullet,
-		kFormatColorBrightBlack,kFormatKeyNoItems,
-		nil
-		];
-	
-	
 	// variables for arguments
-	NSString *arg_output = nil;
-	BOOL arg_separateByCalendar = NO;
-	BOOL arg_separateByDate = NO;
-	NSArray *arg_includeCals = nil;
-	NSArray *arg_excludeCals = nil;
-	BOOL arg_updatesCheck = NO;
-	BOOL arg_printVersion = NO;
-	BOOL arg_includeOnlyEventsFromNowOn = NO;
-	BOOL arg_useFormatting = NO;
-	BOOL arg_noCalendarNames = NO;
-	BOOL arg_sortTasksByDueDate = NO;
-	BOOL arg_sortTasksByDueDateAscending = NO;
-	BOOL arg_sectionsForEachDayInSpan = NO;
-	BOOL arg_noPropNames = NO;
-	NSString *arg_strEncoding = nil;
-	NSString *arg_propertyOrderStr = nil;
-	NSString *arg_propertySeparatorsStr = nil;
+	typedef struct {
+		BOOL separateByCalendar;
+		BOOL separateByDate;
+		BOOL updatesCheck;
+		BOOL printVersion;
+		BOOL includeOnlyEventsFromNowOn;
+		BOOL useFormatting;
+		BOOL noCalendarNames;
+		BOOL sortTasksByDueDate;
+		BOOL sortTasksByDueDateAscending;
+		BOOL sectionsForEachDayInSpan;
+		BOOL noPropNames;
+		
+		BOOL output_is_uncompletedTasks;
+		BOOL output_is_eventsToday;
+		BOOL output_is_eventsNow;
+		BOOL output_is_eventsFromTo;
+		BOOL output_is_tasksDueBefore;
+		
+		NSString *output;
+		NSArray *includeCals;
+		NSArray *excludeCals;
+		NSString *strEncoding;
+		NSString *propertyOrderStr;
+		NSString *propertySeparatorsStr;
+		NSString *eventsFrom;
+		NSString *eventsTo;
+	} Arguments;
 	
-	BOOL arg_output_is_uncompletedTasks = NO;
-	BOOL arg_output_is_eventsToday = NO;
-	BOOL arg_output_is_eventsNow = NO;
-	BOOL arg_output_is_eventsFromTo = NO;
-	BOOL arg_output_is_tasksDueBefore = NO;
-	NSString *arg_eventsFrom = nil;
-	NSString *arg_eventsTo = nil;
-	
+	Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,nil,nil,nil,nil,nil,nil,nil,nil};
 	
 	
 	NSString *configFilePath = nil;
@@ -1584,8 +1209,11 @@ int main(int argc, char *argv[])
 	
 	
 	
+	
+	
 	// read and validate general configuration file
 	
+	NSDictionary *userSuppliedFormattingConfigDict = nil;
 	configDict = nil;
 	if (configFilePath == nil)
 		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
@@ -1617,6 +1245,8 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
+				userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
+				
 				NSDictionary *constArgsDict = [configDict objectForKey:@"constantArguments"];
 				if (constArgsDict != nil)
 				{
@@ -1640,41 +1270,41 @@ int main(int argc, char *argv[])
 					if ([allArgKeys containsObject:@"excludeTaskProps"])
 						excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeTaskProps"]);
 					if ([allArgKeys containsObject:@"includeCals"])
-						arg_includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
+						args.includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
 					if ([allArgKeys containsObject:@"excludeCals"])
-						arg_excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
+						args.excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
 					if ([allArgKeys containsObject:@"propertyOrder"])
-						arg_propertyOrderStr = [constArgsDict objectForKey:@"propertyOrder"];
+						args.propertyOrderStr = [constArgsDict objectForKey:@"propertyOrder"];
 					if ([allArgKeys containsObject:@"strEncoding"])
-						arg_strEncoding = [constArgsDict objectForKey:@"strEncoding"];
+						args.strEncoding = [constArgsDict objectForKey:@"strEncoding"];
 					if ([allArgKeys containsObject:@"separateByCalendar"])
-						arg_separateByCalendar = [[constArgsDict objectForKey:@"separateByCalendar"] boolValue];
+						args.separateByCalendar = [[constArgsDict objectForKey:@"separateByCalendar"] boolValue];
 					if ([allArgKeys containsObject:@"separateByDate"])
-						arg_separateByDate = [[constArgsDict objectForKey:@"separateByDate"] boolValue];
+						args.separateByDate = [[constArgsDict objectForKey:@"separateByDate"] boolValue];
 					if ([allArgKeys containsObject:@"includeOnlyEventsFromNowOn"])
-						arg_includeOnlyEventsFromNowOn = [[constArgsDict objectForKey:@"includeOnlyEventsFromNowOn"] boolValue];
+						args.includeOnlyEventsFromNowOn = [[constArgsDict objectForKey:@"includeOnlyEventsFromNowOn"] boolValue];
 					if ([allArgKeys containsObject:@"formatOutput"])
-						arg_useFormatting = [[constArgsDict objectForKey:@"formatOutput"] boolValue];
+						args.useFormatting = [[constArgsDict objectForKey:@"formatOutput"] boolValue];
 					if ([allArgKeys containsObject:@"noCalendarNames"])
-						arg_noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
+						args.noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
 					if ([allArgKeys containsObject:@"noRelativeDates"])
 						displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
 					if ([allArgKeys containsObject:@"showEmptyDates"])
-						arg_sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
+						args.sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
 					if ([allArgKeys containsObject:@"notesNewlineReplacement"])
 						notesNewlineReplacement = [constArgsDict objectForKey:@"notesNewlineReplacement"];
 					if ([allArgKeys containsObject:@"limitItems"])
 						maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 					if ([allArgKeys containsObject:@"propertySeparators"])
-						arg_propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
+						args.propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
 					if ([allArgKeys containsObject:@"excludeEndDates"])
 						excludeEndDates = [[constArgsDict objectForKey:@"excludeEndDates"] boolValue];
 					if ([allArgKeys containsObject:@"sortTasksByDate"])
-						arg_sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
+						args.sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
 					if ([allArgKeys containsObject:@"sortTasksByDateAscending"])
-						arg_sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
+						args.sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
 					if ([allArgKeys containsObject:@"noPropNames"])
-						arg_noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
+						args.noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
 					if ([allArgKeys containsObject:@"showUIDs"])
 						showUIDs = [[constArgsDict objectForKey:@"showUIDs"] boolValue];
 					if ([allArgKeys containsObject:@"debug"])
@@ -1689,26 +1319,25 @@ int main(int argc, char *argv[])
 	initL10N(L10nFilePath);
 	
 	
-	
 	// get arguments
 	
 	if (argc > 1)
 	{
-		arg_output = [NSString stringWithCString: argv[argc-1] encoding: NSASCIIStringEncoding];
+		args.output = [NSString stringWithCString: argv[argc-1] encoding: NSASCIIStringEncoding];
 		
-		arg_output_is_uncompletedTasks = [arg_output isEqualToString:@"uncompletedTasks"];
-		arg_output_is_eventsToday = [arg_output hasPrefix:@"eventsToday"];
-		arg_output_is_eventsNow = [arg_output isEqualToString:@"eventsNow"];
-		arg_output_is_tasksDueBefore = [arg_output hasPrefix:@"tasksDueBefore:"];
+		args.output_is_uncompletedTasks = [args.output isEqualToString:@"uncompletedTasks"];
+		args.output_is_eventsToday = [args.output hasPrefix:@"eventsToday"];
+		args.output_is_eventsNow = [args.output isEqualToString:@"eventsNow"];
+		args.output_is_tasksDueBefore = [args.output hasPrefix:@"tasksDueBefore:"];
 		
-		if ([arg_output hasPrefix:@"to:"] && argc > 2)
+		if ([args.output hasPrefix:@"to:"] && argc > 2)
 		{
 			NSString *secondToLastArg = [NSString stringWithCString: argv[argc-2] encoding: NSASCIIStringEncoding];
 			if ([secondToLastArg hasPrefix:@"eventsFrom:"])
 			{
-				arg_eventsFrom = [secondToLastArg substringFromIndex:11]; // "eventsFrom:" has 11 chars
-				arg_eventsTo = [arg_output substringFromIndex:3]; // "to:" has 3 chars
-				arg_output_is_eventsFromTo = YES;
+				args.eventsFrom = [secondToLastArg substringFromIndex:11]; // "eventsFrom:" has 11 chars
+				args.eventsTo = [args.output substringFromIndex:3]; // "to:" has 3 chars
+				args.output_is_eventsFromTo = YES;
 			}
 		}
 	}
@@ -1718,35 +1347,35 @@ int main(int argc, char *argv[])
 	for (i = 1; i < argc; i++)
 	{
 		if ((strcmp(argv[i], "-sc") == 0) || (strcmp(argv[i], "--separateByCalendar") == 0))
-			arg_separateByCalendar = YES;
+			args.separateByCalendar = YES;
 		else if ((strcmp(argv[i], "-sd") == 0) || (strcmp(argv[i], "--separateByDate") == 0))
-			arg_separateByDate = YES;
+			args.separateByDate = YES;
 		else if ((strcmp(argv[i], "-u") == 0) || (strcmp(argv[i], "--checkForUpdates") == 0))
-			arg_updatesCheck = YES;
+			args.updatesCheck = YES;
 		else if ((strcmp(argv[i], "-V") == 0) || (strcmp(argv[i], "--version") == 0))
-			arg_printVersion = YES;
+			args.printVersion = YES;
 		else if ((strcmp(argv[i], "-d") == 0) || (strcmp(argv[i], "--debug") == 0))
 			debugPrintEnabled = YES;
 		else if ((strcmp(argv[i], "-n") == 0) || (strcmp(argv[i], "--includeOnlyEventsFromNowOn") == 0))
-			arg_includeOnlyEventsFromNowOn = YES;
+			args.includeOnlyEventsFromNowOn = YES;
 		else if ((strcmp(argv[i], "-f") == 0) || (strcmp(argv[i], "--formatOutput") == 0))
-			arg_useFormatting = YES;
+			args.useFormatting = YES;
 		else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--noCalendarNames") == 0))
-			arg_noCalendarNames = YES;
+			args.noCalendarNames = YES;
 		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
 			displayRelativeDates = NO;
 		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--excludeEndDates") == 0))
 			excludeEndDates = YES;
 		else if ((strcmp(argv[i], "-std") == 0) || (strcmp(argv[i], "--sortTasksByDate") == 0))
-			arg_sortTasksByDueDate = YES;
+			args.sortTasksByDueDate = YES;
 		else if ((strcmp(argv[i], "-stda") == 0) || (strcmp(argv[i], "--sortTasksByDateAscending") == 0))
-			arg_sortTasksByDueDateAscending = YES;
+			args.sortTasksByDueDateAscending = YES;
 		else if ((strcmp(argv[i], "-sed") == 0) || (strcmp(argv[i], "--showEmptyDates") == 0))
-			arg_sectionsForEachDayInSpan = YES;
+			args.sectionsForEachDayInSpan = YES;
 		else if ((strcmp(argv[i], "-uid") == 0) || (strcmp(argv[i], "--showUIDs") == 0))
 			showUIDs = YES;
 		else if ((strcmp(argv[i], "-npn") == 0) || (strcmp(argv[i], "--noPropNames") == 0))
-			arg_noPropNames = YES;
+			args.noPropNames = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
@@ -1768,26 +1397,26 @@ int main(int argc, char *argv[])
 		else if (((strcmp(argv[i], "-nnr") == 0) || (strcmp(argv[i], "--notesNewlineReplacement") == 0)) && (i+1 < argc))
 			notesNewlineReplacement = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ic") == 0) || (strcmp(argv[i], "--includeCals") == 0)) && (i+1 < argc))
-			arg_includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+			args.includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-ec") == 0) || (strcmp(argv[i], "--excludeCals") == 0)) && (i+1 < argc))
-			arg_excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+			args.excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-po") == 0) || (strcmp(argv[i], "--propertyOrder") == 0)) && (i+1 < argc))
-			arg_propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+			args.propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
-			arg_strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+			args.strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-li") == 0) || (strcmp(argv[i], "--limitItems") == 0)) && (i+1 < argc))
 			maxNumPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
 		else if (((strcmp(argv[i], "-ps") == 0) || (strcmp(argv[i], "--propertySeparators") == 0)) && (i+1 < argc))
-			arg_propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+			args.propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 	}
 	
 	
-	if (arg_propertyOrderStr != nil)
+	if (args.propertyOrderStr != nil)
 	{
 		// if property order is specified, filter out property names that are not allowed (the allowed
 		// ones are all included in the NSArray specified by the kDefaultPropertyOrder macro definition)
 		// and then add to the list the omitted property names in the default order
-		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(arg_propertyOrderStr);
+		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(args.propertyOrderStr);
 		NSMutableArray *tempPropertyOrder = [NSMutableArray arrayWithCapacity:10];
 		[tempPropertyOrder
 			addObjectsFromArray:[specifiedPropertyOrder
@@ -1805,10 +1434,11 @@ int main(int argc, char *argv[])
 		propertyOrder = kDefaultPropertyOrder;
 	
 	
-	if (arg_propertySeparatorsStr != nil)
+	NSArray *propertySeparators = nil;
+	if (args.propertySeparatorsStr != nil)
 	{
 		NSError *propertySeparatorsArgParseError = nil;
-		propertySeparators = arrayFromArbitrarilySeparatedString(arg_propertySeparatorsStr, YES, &propertySeparatorsArgParseError);
+		propertySeparators = arrayFromArbitrarilySeparatedString(args.propertySeparatorsStr, YES, &propertySeparatorsArgParseError);
 		if (propertySeparators == nil && propertySeparatorsArgParseError != nil)
 		{
 			PrintfErr(
@@ -1818,19 +1448,20 @@ int main(int argc, char *argv[])
 			PrintfErr(@"  Make sure you start and end the value with the separator character\n  (like this: -ps \"|first|second|third|\")\n");
 		}
 	}
-	if (propertySeparators == nil || [propertySeparators count] == 0)
-		propertySeparators = kDefaultPropertySeparators;
+	
+	// initialize formatting
+	initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
 	
 	
-	if (arg_strEncoding != nil)
+	if (args.strEncoding != nil)
 	{
 		// process provided output string encoding argument
-		arg_strEncoding = [arg_strEncoding stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		args.strEncoding = [args.strEncoding stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		NSStringEncoding matchedEncoding = 0;
 		const NSStringEncoding *availableEncoding = [NSString availableStringEncodings];
 		while(*availableEncoding != 0)
 		{
-			if ([[NSString localizedNameOfStringEncoding: *availableEncoding] isEqualToString:arg_strEncoding])
+			if ([[NSString localizedNameOfStringEncoding: *availableEncoding] isEqualToString:args.strEncoding])
 			{
 				matchedEncoding = *availableEncoding;
 				break;
@@ -1841,7 +1472,7 @@ int main(int argc, char *argv[])
 			outputStrEncoding = matchedEncoding;
 		else
 		{
-			PrintfErr(@"* Error: Invalid string encoding argument: \"%@\".\n", arg_strEncoding);
+			PrintfErr(@"* Error: Invalid string encoding argument: \"%@\".\n", args.strEncoding);
 			PrintfErr(@"  Run \"icalBuddy strEncodings\" to see all the possible values.\n");
 			PrintfErr(@"  Using default encoding \"%@\".\n\n", [NSString localizedNameOfStringEncoding: outputStrEncoding]);
 		}
@@ -1862,7 +1493,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print version and exit
 	// ------------------------------------------------------------------
-	if (arg_printVersion)
+	if (args.printVersion)
 	{
 		Printf(@"%@\n", versionNumberStr());
 	}
@@ -1870,7 +1501,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// check for updates
 	// ------------------------------------------------------------------
-	else if (arg_updatesCheck)
+	else if (args.updatesCheck)
 	{
 		[autoUpdater checkForUpdatesWithUI];
 	}
@@ -1878,7 +1509,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print possible values for the string encoding argument and exit
 	// ------------------------------------------------------------------
-	else if ([arg_output isEqualToString:@"strEncodings"])
+	else if ([args.output isEqualToString:@"strEncodings"])
 	{
 		Printf(@"\nAvailable String encodings (you can use one of these\nas an argument to the --strEncoding option):\n\n");
 		const NSStringEncoding *availableEncoding = [NSString availableStringEncodings];
@@ -1893,13 +1524,13 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print all calendars
 	// ------------------------------------------------------------------
-	else if ([arg_output isEqualToString:@"calendars"])
+	else if ([args.output isEqualToString:@"calendars"])
 	{
 		// get all calendars
 		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
 		
 		// filter calendars based on arguments
-		allCalendars = filterCalendars(allCalendars, arg_includeCals, arg_excludeCals);
+		allCalendars = filterCalendars(allCalendars, args.includeCals, args.excludeCals);
 		
 		CalCalendar *cal;
 		for (cal in allCalendars)
@@ -1911,7 +1542,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// open config file for editing
 	// ------------------------------------------------------------------
-	else if ([arg_output hasPrefix:@"editConfig"])
+	else if ([args.output hasPrefix:@"editConfig"])
 	{
 		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
 		BOOL configFileIsDir;
@@ -1932,7 +1563,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			if ([arg_output hasSuffix:@"CLI"])
+			if ([args.output hasSuffix:@"CLI"])
 			{
 				NSString *foundEditorPath = nil;
 				
@@ -2009,18 +1640,18 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print events or tasks
 	// ------------------------------------------------------------------
-	else if (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo
-			 || arg_output_is_uncompletedTasks || arg_output_is_tasksDueBefore)
+	else if (args.output_is_eventsToday || args.output_is_eventsNow || args.output_is_eventsFromTo
+			 || args.output_is_uncompletedTasks || args.output_is_tasksDueBefore)
 	{
-		BOOL printingEvents = (arg_output_is_eventsToday || arg_output_is_eventsNow || arg_output_is_eventsFromTo);
-		BOOL printingAlsoPastEvents = (arg_output_is_eventsFromTo);
-		BOOL printingTasks = (arg_output_is_uncompletedTasks || arg_output_is_tasksDueBefore);
+		BOOL printingEvents = (args.output_is_eventsToday || args.output_is_eventsNow || args.output_is_eventsFromTo);
+		BOOL printingAlsoPastEvents = (args.output_is_eventsFromTo);
+		BOOL printingTasks = (args.output_is_uncompletedTasks || args.output_is_tasksDueBefore);
 		
 		// get all calendars
 		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
 		
 		// filter calendars based on arguments
-		allCalendars = filterCalendars(allCalendars, arg_includeCals, arg_excludeCals);
+		allCalendars = filterCalendars(allCalendars, args.includeCals, args.excludeCals);
 		
 		int tasks_printOptions = PRINT_OPTION_NONE;
 		int events_printOptions = PRINT_OPTION_NONE;
@@ -2037,23 +1668,23 @@ int main(int argc, char *argv[])
 			// default print options
 			events_printOptions = 
 				PRINT_OPTION_SINGLE_DAY | 
-				(arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+				(args.noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
 			
 			// get start and end dates for predicate
-			if (arg_output_is_eventsToday)
+			if (args.output_is_eventsToday)
 			{
 				eventsDateRangeStart = today;
 				eventsDateRangeEnd = dateForEndOfDay(now);
 			}
-			else if (arg_output_is_eventsNow)
+			else if (args.output_is_eventsNow)
 			{
 				eventsDateRangeStart = now;
 				eventsDateRangeEnd = now;
 			}
-			else if (arg_output_is_eventsFromTo)
+			else if (args.output_is_eventsFromTo)
 			{
-				eventsDateRangeStart = dateFromUserInput(arg_eventsFrom, @"start date");
-				eventsDateRangeEnd = dateFromUserInput(arg_eventsTo, @"end date");
+				eventsDateRangeStart = dateFromUserInput(args.eventsFrom, @"start date");
+				eventsDateRangeEnd = dateFromUserInput(args.eventsTo, @"end date");
 				
 				if (eventsDateRangeStart == nil || eventsDateRangeEnd == nil)
 				{
@@ -2075,12 +1706,12 @@ int main(int argc, char *argv[])
 			NSCAssert((eventsDateRangeStart != nil && eventsDateRangeEnd != nil), @"start or end date is nil");
 			
 			// expand end date if NUM in "eventsToday+NUM" is specified
-			if (arg_output_is_eventsToday)
+			if (args.output_is_eventsToday)
 			{
-				NSRange arg_output_plusSymbolRange = [arg_output rangeOfString:@"+"];
+				NSRange arg_output_plusSymbolRange = [args.output rangeOfString:@"+"];
 				if (arg_output_plusSymbolRange.location != NSNotFound)
 				{
-					NSInteger daysToAddToRange = [[arg_output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
+					NSInteger daysToAddToRange = [[args.output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
 					eventsDateRangeEnd = dateByAddingDays(eventsDateRangeEnd, daysToAddToRange);
 					events_printOptions &= ~PRINT_OPTION_SINGLE_DAY;
 				}
@@ -2090,7 +1721,7 @@ int main(int argc, char *argv[])
 			eventsDateRangeDaysSpan = getDayDiff(eventsDateRangeStart, eventsDateRangeEnd);
 			
 			
-			NSDate *predicateDateStart = ((arg_includeOnlyEventsFromNowOn)?now:eventsDateRangeStart);
+			NSDate *predicateDateStart = ((args.includeOnlyEventsFromNowOn)?now:eventsDateRangeStart);
 			NSDate *predicateDateEnd = eventsDateRangeEnd;
 			DebugPrintf(@"effective query start date: %@\n", predicateDateStart);
 			DebugPrintf(@"effective query end date:   %@\n", predicateDateEnd);
@@ -2109,11 +1740,11 @@ int main(int argc, char *argv[])
 			// make predicate for getting the desired tasks
 			NSPredicate *tasksPredicate = nil;
 			
-			if (arg_output_is_tasksDueBefore)
+			if (args.output_is_tasksDueBefore)
 			{
 				NSDate *dueBeforeDate = nil;
 				
-				NSString *dueBeforeDateStr = [arg_output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
+				NSString *dueBeforeDateStr = [args.output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
 				dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date");
 				
 				if (dueBeforeDate == nil)
@@ -2134,17 +1765,17 @@ int main(int argc, char *argv[])
 			uncompletedTasks = [[CalCalendarStore defaultCalendarStore] tasksWithPredicate:tasksPredicate];
 			
 			// sort the tasks
-			if (arg_sortTasksByDueDate || arg_sortTasksByDueDateAscending)
+			if (args.sortTasksByDueDate || args.sortTasksByDueDateAscending)
 			{
 				uncompletedTasks = [uncompletedTasks
 					sortedArrayUsingDescriptors:[NSArray
 						arrayWithObjects:
-							[[[NSSortDescriptor alloc] initWithKey:@"dueDate" ascending:arg_sortTasksByDueDateAscending] autorelease],
+							[[[NSSortDescriptor alloc] initWithKey:@"dueDate" ascending:args.sortTasksByDueDateAscending] autorelease],
 							nil
 						]
 					];
 				
-				if (arg_sortTasksByDueDateAscending)
+				if (args.sortTasksByDueDateAscending)
 				{
 					// put tasks with no due date last
 					NSArray *tasksWithNoDueDate = [uncompletedTasks
@@ -2164,17 +1795,17 @@ int main(int argc, char *argv[])
 				uncompletedTasks = [uncompletedTasks sortedArrayUsingFunction:prioritySort context:NULL];
 			
 			// default print options
-			tasks_printOptions = (arg_noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+			tasks_printOptions = (args.noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
 		}
 		
 		
 		// append to print options
-		if (arg_noPropNames)
+		if (args.noPropNames)
 		{
 			events_printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
 			tasks_printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
 		}
-		if (arg_separateByCalendar)
+		if (args.separateByCalendar)
 		{
 			events_printOptions |= PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES;
 			tasks_printOptions |= PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES;
@@ -2182,7 +1813,7 @@ int main(int argc, char *argv[])
 		
 		
 		// print the items
-		if (arg_separateByCalendar)
+		if (args.separateByCalendar)
 		{
 			NSMutableArray *byCalendarSections = [NSMutableArray arrayWithCapacity:[allCalendars count]];
 			
@@ -2209,7 +1840,7 @@ int main(int argc, char *argv[])
 			int thisPrintOptions = (printingEvents) ? events_printOptions : tasks_printOptions;
 			printItemSections(byCalendarSections, (thisPrintOptions | PRINT_OPTION_CALENDAR_AGNOSTIC));
 		}
-		else if (arg_separateByDate)
+		else if (args.separateByDate)
 		{
 			// keys: NSDates (representing *days* to use as sections),
 			// values: NSArrays of CalCalendarItems that match those days
@@ -2302,13 +1933,13 @@ int main(int argc, char *argv[])
 			[allDaysArr removeObjectIdenticalTo:[NSNull null]];
 			[allDaysArr sortUsingSelector:@selector(compare:)];
 			
-			if (arg_sectionsForEachDayInSpan)
+			if (args.sectionsForEachDayInSpan)
 			{
 				// fill the day span we have so that all days have an entry
 				NSDate *earliestDate = nil;
 				NSDate *latestDate = nil;
 				
-				if (arg_output_is_eventsFromTo || arg_output_is_eventsToday || arg_output_is_eventsNow)
+				if (args.output_is_eventsFromTo || args.output_is_eventsToday || args.output_is_eventsNow)
 				{
 					earliestDate = dateForStartOfDay(eventsDateRangeStart);
 					latestDate = dateForStartOfDay(eventsDateRangeEnd);
@@ -2452,9 +2083,9 @@ int main(int argc, char *argv[])
 	
 	// we've been buffering the output for stdout into an attributed string,
 	// now's the time to print out that buffer.
-	if ((arg_useFormatting && configDict != nil) &&
-		(arg_output_is_eventsToday || arg_output_is_eventsNow ||
-		arg_output_is_eventsFromTo || arg_output_is_uncompletedTasks)
+	if ((args.useFormatting && configDict != nil) &&
+		(args.output_is_eventsToday || args.output_is_eventsNow ||
+		args.output_is_eventsFromTo || args.output_is_uncompletedTasks)
 		)
 	{
 		NSDictionary *formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
@@ -2488,10 +2119,10 @@ int main(int argc, char *argv[])
 	
 	NSString *finalOutput;
 	
-	if (arg_useFormatting)
+	if (args.useFormatting)
 	{
 		processCustomStringAttributes(&stdoutBuffer);
-		finalOutput = [ansiEscapeHelper ansiEscapedStringWithAttributedString:stdoutBuffer];
+		finalOutput = ansiEscapedStringWithAttributedString(stdoutBuffer);
 	}
 	else
 		finalOutput = [stdoutBuffer string];
