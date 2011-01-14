@@ -47,10 +47,6 @@ THE SOFTWARE.
 
 
 
-
-
-
-
 const int VERSION_MAJOR = 1;
 const int VERSION_MINOR = 7;
 const int VERSION_BUILD = 14;
@@ -59,14 +55,6 @@ NSString* versionNumberStr()
 {
 	return [NSString stringWithFormat:@"%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD];
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -88,34 +76,6 @@ IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 // the formatting of the output right up until the
 // last minute.
 NSMutableAttributedString *stdoutBuffer;
-
-
-
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-// BEGIN: Misc. helper functions
-
-
-
-
-
-
-
-NSError *internalError(NSInteger code, NSString *description)
-{
-	return [NSError
-		errorWithDomain:kInternalErrorDomain
-		code:code
-		userInfo:[NSDictionary
-			dictionaryWithObject:description
-			forKey:NSLocalizedDescriptionKey
-			]
-		];
-}
-
-
-
 
 
 // sort function for sorting tasks:
@@ -161,22 +121,6 @@ NSInteger prioritySort(id task1, id task2, void *context)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals)
 {
 	if (includeCals != nil)
@@ -188,31 +132,14 @@ NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSAr
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 int main(int argc, char *argv[])
 {
 	NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
 	
-	
 	stdoutBuffer = kEmptyMutableAttributedString;
 	
-	
-	// set current datetime and day representations into globals
 	now = [NSDate date];
 	today = dateForStartOfDay(now);
-	
 	
 	autoUpdater = [[HGCLIAutoUpdater alloc]
 		initWithAppName:@"icalBuddy"
@@ -221,10 +148,7 @@ int main(int argc, char *argv[])
 	autoUpdaterDelegate = [[IcalBuddyAutoUpdaterDelegate alloc] init];
 	autoUpdater.delegate = autoUpdaterDelegate;
 	
-	
 	initPrettyPrint(now, today, stdoutBuffer);
-	
-	
 	
 	// read user arguments for specifying paths to the config and
 	// localization files before reading any other arguments (we
@@ -237,10 +161,7 @@ int main(int argc, char *argv[])
 	NSString *L10nFilePath = nil;
 	readConfigAndL10NFilePathArgs(argc, argv, &configFilePath, &L10nFilePath);
 	
-	
 	initL10N(L10nFilePath);
-	
-	
 	
 	// read and validate general configuration file
 	configDict = nil;
@@ -254,17 +175,12 @@ int main(int argc, char *argv[])
 			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
 	}
 	
-	
 	readArgs(argc, argv);
-	
 	
 	NSArray *propertySeparators = nil;
 	processArgs(&propertySeparators);
 	
-	
 	initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
-	
-	
 	
 	
 	// ------------------------------------------------------------------
