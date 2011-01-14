@@ -1,4 +1,4 @@
-// icalBuddy output formatting functions
+// icalBuddy arguments handling functions
 // 
 // http://hasseg.org/icalBuddy
 //
@@ -28,25 +28,44 @@ THE SOFTWARE.
 */
 
 #import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
 
-void initFormatting(NSDictionary *aFormattingConfigDict, NSArray *aPropertySeparators);
 
-NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground);
+// variables for arguments
+typedef struct {
+	BOOL separateByCalendar;
+	BOOL separateByDate;
+	BOOL updatesCheck;
+	BOOL printVersion;
+	BOOL includeOnlyEventsFromNowOn;
+	BOOL useFormatting;
+	BOOL noCalendarNames;
+	BOOL sortTasksByDueDate;
+	BOOL sortTasksByDueDateAscending;
+	BOOL sectionsForEachDayInSpan;
+	BOOL noPropNames;
+	
+	BOOL output_is_uncompletedTasks;
+	BOOL output_is_eventsToday;
+	BOOL output_is_eventsNow;
+	BOOL output_is_eventsFromTo;
+	BOOL output_is_tasksDueBefore;
+	
+	NSString *output;
+	NSArray *includeCals;
+	NSArray *excludeCals;
+	NSString *strEncoding;
+	NSString *propertyOrderStr;
+	NSString *propertySeparatorsStr;
+	NSString *eventsFrom;
+	NSString *eventsTo;
+} Arguments;
 
-NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig);
+extern Arguments args;
 
-void processCustomStringAttributes(NSMutableAttributedString **aAttributedString);
 
-NSDictionary* getStringAttributesForKey(NSString *key);
+void readArgsFromConfigFile(NSString *filePath, NSMutableDictionary **retConfigDict);
 
-NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle);
-NSDictionary* getFirstLineStringAttributes();
-NSDictionary* getBulletStringAttributes(BOOL isAlertBullet);
-NSDictionary* getCalNameInTitleStringAttributes();
-NSDictionary* getPropNameStringAttributes(NSString *propName);
-NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propValue);
-NSString* getPropSeparatorStr(NSUInteger propertyNumber);
+void readArgs(int argc, char *argv[]);
 
-NSString *ansiEscapedStringWithAttributedString(NSAttributedString *str);
+void processArgs(NSArray **retPropertySeparators);
 
