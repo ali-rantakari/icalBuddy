@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
 	}
 	
-	readArgs(&args, argc, argv);
+	readProgramArgs(&args, argc, argv);
 	
 	NSArray *propertySeparators = nil;
 	processArgs(&args, &propertySeparators);

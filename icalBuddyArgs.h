@@ -63,7 +63,7 @@ typedef struct {
 
 void readArgsFromConfigFile(Arguments *args, NSString *filePath, NSMutableDictionary **retConfigDict);
 
-void readArgs(Arguments *args, int argc, char *argv[]);
+void readProgramArgs(Arguments *args, int argc, char *argv[]);
 
 void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigFilePath, NSString **retL10NConfigFilePath);
 

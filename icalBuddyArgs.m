@@ -139,7 +139,7 @@ void readArgsFromConfigFile(Arguments *args, NSString *filePath, NSMutableDictio
 }
 
 
-void readArgs(Arguments *args, int argc, char *argv[])
+void readProgramArgs(Arguments *args, int argc, char *argv[])
 {
 	if (argc > 1)
 	{
