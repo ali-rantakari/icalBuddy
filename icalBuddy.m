@@ -122,14 +122,6 @@ NSInteger prioritySort(id task1, id task2, void *context)
 }
 
 
-NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals)
-{
-	if (includeCals != nil)
-		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", includeCals, includeCals]];
-	if (excludeCals != nil)
-		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", excludeCals, excludeCals]];
-	return cals;
-}
 
 
 
@@ -209,14 +201,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if ([args.output isEqualToString:@"strEncodings"])
 	{
-		Printf(@"\nAvailable String encodings (you can use one of these\nas an argument to the --strEncoding option):\n\n");
-		const NSStringEncoding *availableEncoding = [NSString availableStringEncodings];
-		while(*availableEncoding != 0)
-		{
-			Printf(@"%@\n", [NSString localizedNameOfStringEncoding: *availableEncoding]);
-			availableEncoding++;
-		}
-		Printf(@"\n");
+		printAvailableStringEncodings();
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
@@ -224,17 +209,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	else if ([args.output isEqualToString:@"calendars"])
 	{
-		// get all calendars
-		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
-		
-		// filter calendars based on arguments
-		allCalendars = filterCalendars(allCalendars, args.includeCals, args.excludeCals);
-		
-		CalCalendar *cal;
-		for (cal in allCalendars)
-		{
-			Printf(@"* %@\n  uid: %@\n", [cal title], [cal uid]);
-		}
+		printAllCalendars(&args);
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
@@ -702,8 +677,7 @@ int main(int argc, char *argv[])
 			// it seems we need to do some search & replace for the output
 			// before pushing the buffer to stdout.
 			
-			NSString *keyword;
-			for (keyword in [formattedKeywords allKeys])
+			for (NSString *keyword in [formattedKeywords allKeys])
 			{
 				NSDictionary* thisKeywordFormattingAttrs = formattingConfigToStringAttributes([formattedKeywords objectForKey:keyword]);
 				

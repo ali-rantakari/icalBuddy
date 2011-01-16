@@ -27,8 +27,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#import <Foundation/Foundation.h>
+#import <CalendarStore/CalendarStore.h>
+
+#import "icalBuddyFunctions.h"
 #import "icalBuddyMacros.h"
 #import "HGCLIUtils.h"
+
+
+
+NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals)
+{
+	if (includeCals != nil)
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", includeCals, includeCals]];
+	if (excludeCals != nil)
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", excludeCals, excludeCals]];
+	return cals;
+}
+
+
+void printAllCalendars(Arguments *args)
+{
+	// get all calendars
+	NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
+	
+	// filter calendars based on arguments
+	allCalendars = filterCalendars(allCalendars, args->includeCals, args->excludeCals);
+	
+	for (CalCalendar *cal in allCalendars)
+	{
+		Printf(@"* %@\n  uid: %@\n", [cal title], [cal uid]);
+	}
+}
+
+
+void printAvailableStringEncodings()
+{
+	Printf(@"\nAvailable String encodings (you can use one of these\nas an argument to the --strEncoding option):\n\n");
+	const NSStringEncoding *availableEncoding = [NSString availableStringEncodings];
+	while(*availableEncoding != 0)
+	{
+		Printf(@"%@\n", [NSString localizedNameOfStringEncoding: *availableEncoding]);
+		availableEncoding++;
+	}
+	Printf(@"\n");
+}
 
 
 void openConfigFileInEditor(NSString *configFilePath, BOOL openInCLIEditor)

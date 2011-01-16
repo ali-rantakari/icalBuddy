@@ -27,5 +27,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#import <Foundation/Foundation.h>
+#import "icalBuddyArgs.h"
+
+NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals);
+void printAllCalendars(Arguments *args);
+void printAvailableStringEncodings();
 void openConfigFileInEditor(NSString *configFilePath, BOOL openInCLIEditor);
 
