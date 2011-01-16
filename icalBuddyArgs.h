@@ -28,6 +28,7 @@ THE SOFTWARE.
 */
 
 #import <Foundation/Foundation.h>
+#import "icalBuddyPrettyPrint.h"
 
 
 // variables for arguments
@@ -61,11 +62,11 @@ typedef struct {
 } Arguments;
 
 
-void readArgsFromConfigFile(Arguments *args, NSString *filePath, NSMutableDictionary **retConfigDict);
+void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict);
 
-void readProgramArgs(Arguments *args, int argc, char *argv[]);
+void readProgramArgs(Arguments *args, PrettyPrintOptions *prettyPrintOptions, int argc, char *argv[]);
 
 void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigFilePath, NSString **retL10NConfigFilePath);
 
-void processArgs(Arguments *args, NSArray **retPropertySeparators);
+void processArgs(Arguments *args, PrettyPrintOptions *prettyPrintOptions, NSArray **retPropertySeparators);
 

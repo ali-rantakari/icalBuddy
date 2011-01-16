@@ -141,8 +141,6 @@ int main(int argc, char *argv[])
 	autoUpdaterDelegate = [[IcalBuddyAutoUpdaterDelegate alloc] init];
 	autoUpdater.delegate = autoUpdaterDelegate;
 	
-	initPrettyPrint(now, today, stdoutBuffer);
-	
 	// read user arguments for specifying paths to the config and
 	// localization files before reading any other arguments (we
 	// want to load the config first and then read the argv arguments
@@ -158,6 +156,7 @@ int main(int argc, char *argv[])
 	
 	
 	Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,nil,nil,nil,nil,nil,nil,nil,nil};
+	PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
 	
 	// read and validate general configuration file
 	configDict = nil;
@@ -166,17 +165,19 @@ int main(int argc, char *argv[])
 		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
 	if (configFilePath != nil && [configFilePath length] > 0)
 	{
-		readArgsFromConfigFile(&args, configFilePath, &configDict);
+		readArgsFromConfigFile(&args, &prettyPrintOptions, configFilePath, &configDict);
 		if (configDict != nil)
 			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
 	}
 	
-	readProgramArgs(&args, argc, argv);
+	readProgramArgs(&args, &prettyPrintOptions, argc, argv);
 	
 	NSArray *propertySeparators = nil;
-	processArgs(&args, &propertySeparators);
+	processArgs(&args, &prettyPrintOptions, &propertySeparators);
 	
 	initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
+	
+	initPrettyPrint(now, today, stdoutBuffer, prettyPrintOptions);
 	
 	
 	// ------------------------------------------------------------------

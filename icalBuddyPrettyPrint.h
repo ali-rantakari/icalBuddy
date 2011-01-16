@@ -57,7 +57,6 @@ typedef struct prettyPrintOptionsStruct
 	NSUInteger numPrintedItems;
 } PrettyPrintOptions;
 
-extern PrettyPrintOptions prettyPrintOptions;
 
 
 // printOptions for calendar item printing functions
@@ -80,7 +79,8 @@ typedef enum datePrintOption
 } DatePrintOption;
 
 
-void initPrettyPrint(NSDate *aNow, NSDate *aToday, NSMutableAttributedString *aOutputBuffer);
+void initPrettyPrint(NSDate *aNow, NSDate *aToday, NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts);
+PrettyPrintOptions getDefaultPrettyPrintOptions();
 
 NSString* dateStr(NSDate *date, DatePrintOption printOption);
 

@@ -48,34 +48,43 @@ NSMutableAttributedString *outputBuffer;
 
 
 
-void initPrettyPrint(NSDate *aNow, NSDate *aToday, NSMutableAttributedString *aOutputBuffer)
+void initPrettyPrint(NSDate *aNow, NSDate *aToday, NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts)
 {
 	outputBuffer = aOutputBuffer;
 	now = aNow;
 	today = aToday;
-	
-	// the order of properties in the output
-	prettyPrintOptions.propertyOrder = nil;
+	prettyPrintOptions = opts;
+}
+
+
+PrettyPrintOptions getDefaultPrettyPrintOptions()
+{
+	PrettyPrintOptions opts;
 	
 	// the prefix strings
-	prettyPrintOptions.prefixStrBullet = 		@"• ";
-	prettyPrintOptions.prefixStrBulletAlert = 	@"! ";
-	prettyPrintOptions.sectionSeparatorStr = 	@"\n------------------------";
+	opts.prefixStrBullet = 		@"• ";
+	opts.prefixStrBulletAlert = 	@"! ";
+	opts.sectionSeparatorStr = 	@"\n------------------------";
 	
-	prettyPrintOptions.timeFormatStr = nil;
-	prettyPrintOptions.dateFormatStr = nil;
-	prettyPrintOptions.includedEventProperties = nil;
-	prettyPrintOptions.excludedEventProperties = nil;
-	prettyPrintOptions.includedTaskProperties = nil;
-	prettyPrintOptions.excludedTaskProperties = nil;
-	prettyPrintOptions.notesNewlineReplacement = nil;
+	opts.timeFormatStr = nil;
+	opts.dateFormatStr = nil;
+	opts.includedEventProperties = nil;
+	opts.excludedEventProperties = nil;
+	opts.includedTaskProperties = nil;
+	opts.excludedTaskProperties = nil;
+	opts.notesNewlineReplacement = nil;
 	
-	prettyPrintOptions.displayRelativeDates = YES;
-	prettyPrintOptions.excludeEndDates = NO;
-	prettyPrintOptions.useCalendarColorsForTitles = YES;
-	prettyPrintOptions.showUIDs = NO;
-	prettyPrintOptions.maxNumPrintedItems = 0; // 0 = no limit
-	prettyPrintOptions.numPrintedItems = 0;
+	opts.displayRelativeDates = YES;
+	opts.excludeEndDates = NO;
+	opts.useCalendarColorsForTitles = YES;
+	opts.showUIDs = NO;
+	opts.maxNumPrintedItems = 0; // 0 = no limit
+	opts.numPrintedItems = 0;
+	
+	// the order of properties in the output
+	opts.propertyOrder = nil;
+	
+	return opts;
 }
 
 
