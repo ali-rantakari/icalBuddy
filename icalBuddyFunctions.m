@@ -49,7 +49,7 @@ NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSAr
 void printAllCalendars(Arguments *args)
 {
 	// get all calendars
-	NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
+	NSMutableArray *allCalendars = [[[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy] autorelease];
 	
 	// filter calendars based on arguments
 	allCalendars = filterCalendars(allCalendars, args->includeCals, args->excludeCals);

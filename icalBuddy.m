@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 		BOOL printingTasks = (args.output_is_uncompletedTasks || args.output_is_tasksDueBefore);
 		
 		// get all calendars
-		NSMutableArray *allCalendars = [[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy];
+		NSMutableArray *allCalendars = [[[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy] autorelease];
 		
 		// filter calendars based on arguments
 		allCalendars = filterCalendars(allCalendars, args.includeCals, args.excludeCals);
