@@ -163,6 +163,9 @@ int main(int argc, char *argv[])
 	
 	initL10N(L10nFilePath);
 	
+	
+	Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,nil,nil,nil,nil,nil,nil,nil,nil};
+	
 	// read and validate general configuration file
 	configDict = nil;
 	NSDictionary *userSuppliedFormattingConfigDict = nil;
@@ -170,15 +173,15 @@ int main(int argc, char *argv[])
 		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
 	if (configFilePath != nil && [configFilePath length] > 0)
 	{
-		readArgsFromConfigFile(configFilePath, &configDict);
+		readArgsFromConfigFile(&args, configFilePath, &configDict);
 		if (configDict != nil)
 			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
 	}
 	
-	readArgs(argc, argv);
+	readArgs(&args, argc, argv);
 	
 	NSArray *propertySeparators = nil;
-	processArgs(&propertySeparators);
+	processArgs(&args, &propertySeparators);
 	
 	initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
 	

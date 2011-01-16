@@ -60,14 +60,12 @@ typedef struct {
 	NSString *eventsTo;
 } Arguments;
 
-extern Arguments args;
 
+void readArgsFromConfigFile(Arguments *args, NSString *filePath, NSMutableDictionary **retConfigDict);
 
-void readArgsFromConfigFile(NSString *filePath, NSMutableDictionary **retConfigDict);
-
-void readArgs(int argc, char *argv[]);
+void readArgs(Arguments *args, int argc, char *argv[]);
 
 void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigFilePath, NSString **retL10NConfigFilePath);
 
-void processArgs(NSArray **retPropertySeparators);
+void processArgs(Arguments *args, NSArray **retPropertySeparators);
 

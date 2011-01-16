@@ -35,11 +35,8 @@ THE SOFTWARE.
 
 
 
-Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,nil,nil,nil,nil,nil,nil,nil,nil};
 
-
-
-void readArgsFromConfigFile(NSString *filePath, NSMutableDictionary **retConfigDict)
+void readArgsFromConfigFile(Arguments *args, NSString *filePath, NSMutableDictionary **retConfigDict)
 {
 	NSMutableDictionary *configDict = nil;
 	
@@ -100,41 +97,41 @@ void readArgsFromConfigFile(NSString *filePath, NSMutableDictionary **retConfigD
 	if ([allArgKeys containsObject:@"excludeTaskProps"])
 		prettyPrintOptions.excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeTaskProps"]);
 	if ([allArgKeys containsObject:@"includeCals"])
-		args.includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
+		args->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
 	if ([allArgKeys containsObject:@"excludeCals"])
-		args.excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
+		args->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
 	if ([allArgKeys containsObject:@"prettyPrintOptions.propertyOrder"])
-		args.propertyOrderStr = [constArgsDict objectForKey:@"prettyPrintOptions.propertyOrder"];
+		args->propertyOrderStr = [constArgsDict objectForKey:@"prettyPrintOptions.propertyOrder"];
 	if ([allArgKeys containsObject:@"strEncoding"])
-		args.strEncoding = [constArgsDict objectForKey:@"strEncoding"];
+		args->strEncoding = [constArgsDict objectForKey:@"strEncoding"];
 	if ([allArgKeys containsObject:@"separateByCalendar"])
-		args.separateByCalendar = [[constArgsDict objectForKey:@"separateByCalendar"] boolValue];
+		args->separateByCalendar = [[constArgsDict objectForKey:@"separateByCalendar"] boolValue];
 	if ([allArgKeys containsObject:@"separateByDate"])
-		args.separateByDate = [[constArgsDict objectForKey:@"separateByDate"] boolValue];
+		args->separateByDate = [[constArgsDict objectForKey:@"separateByDate"] boolValue];
 	if ([allArgKeys containsObject:@"includeOnlyEventsFromNowOn"])
-		args.includeOnlyEventsFromNowOn = [[constArgsDict objectForKey:@"includeOnlyEventsFromNowOn"] boolValue];
+		args->includeOnlyEventsFromNowOn = [[constArgsDict objectForKey:@"includeOnlyEventsFromNowOn"] boolValue];
 	if ([allArgKeys containsObject:@"formatOutput"])
-		args.useFormatting = [[constArgsDict objectForKey:@"formatOutput"] boolValue];
+		args->useFormatting = [[constArgsDict objectForKey:@"formatOutput"] boolValue];
 	if ([allArgKeys containsObject:@"noCalendarNames"])
-		args.noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
+		args->noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
 	if ([allArgKeys containsObject:@"noRelativeDates"])
 		prettyPrintOptions.displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
 	if ([allArgKeys containsObject:@"showEmptyDates"])
-		args.sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
+		args->sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
 	if ([allArgKeys containsObject:@"prettyPrintOptions.notesNewlineReplacement"])
 		prettyPrintOptions.notesNewlineReplacement = [constArgsDict objectForKey:@"prettyPrintOptions.notesNewlineReplacement"];
 	if ([allArgKeys containsObject:@"limitItems"])
 		prettyPrintOptions.maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 	if ([allArgKeys containsObject:@"propertySeparators"])
-		args.propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
+		args->propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
 	if ([allArgKeys containsObject:@"prettyPrintOptions.excludeEndDates"])
 		prettyPrintOptions.excludeEndDates = [[constArgsDict objectForKey:@"prettyPrintOptions.excludeEndDates"] boolValue];
 	if ([allArgKeys containsObject:@"sortTasksByDate"])
-		args.sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
+		args->sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
 	if ([allArgKeys containsObject:@"sortTasksByDateAscending"])
-		args.sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
+		args->sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
 	if ([allArgKeys containsObject:@"noPropNames"])
-		args.noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
+		args->noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
 	if ([allArgKeys containsObject:@"prettyPrintOptions.showUIDs"])
 		prettyPrintOptions.showUIDs = [[constArgsDict objectForKey:@"prettyPrintOptions.showUIDs"] boolValue];
 	if ([allArgKeys containsObject:@"debug"])
@@ -142,25 +139,25 @@ void readArgsFromConfigFile(NSString *filePath, NSMutableDictionary **retConfigD
 }
 
 
-void readArgs(int argc, char *argv[])
+void readArgs(Arguments *args, int argc, char *argv[])
 {
 	if (argc > 1)
 	{
-		args.output = [NSString stringWithCString: argv[argc-1] encoding: NSASCIIStringEncoding];
+		args->output = [NSString stringWithCString: argv[argc-1] encoding: NSASCIIStringEncoding];
 		
-		args.output_is_uncompletedTasks = [args.output isEqualToString:@"uncompletedTasks"];
-		args.output_is_eventsToday = [args.output hasPrefix:@"eventsToday"];
-		args.output_is_eventsNow = [args.output isEqualToString:@"eventsNow"];
-		args.output_is_tasksDueBefore = [args.output hasPrefix:@"tasksDueBefore:"];
+		args->output_is_uncompletedTasks = [args->output isEqualToString:@"uncompletedTasks"];
+		args->output_is_eventsToday = [args->output hasPrefix:@"eventsToday"];
+		args->output_is_eventsNow = [args->output isEqualToString:@"eventsNow"];
+		args->output_is_tasksDueBefore = [args->output hasPrefix:@"tasksDueBefore:"];
 		
-		if ([args.output hasPrefix:@"to:"] && argc > 2)
+		if ([args->output hasPrefix:@"to:"] && argc > 2)
 		{
 			NSString *secondToLastArg = [NSString stringWithCString: argv[argc-2] encoding: NSASCIIStringEncoding];
 			if ([secondToLastArg hasPrefix:@"eventsFrom:"])
 			{
-				args.eventsFrom = [secondToLastArg substringFromIndex:11]; // "eventsFrom:" has 11 chars
-				args.eventsTo = [args.output substringFromIndex:3]; // "to:" has 3 chars
-				args.output_is_eventsFromTo = YES;
+				args->eventsFrom = [secondToLastArg substringFromIndex:11]; // "eventsFrom:" has 11 chars
+				args->eventsTo = [args->output substringFromIndex:3]; // "to:" has 3 chars
+				args->output_is_eventsFromTo = YES;
 			}
 		}
 	}
@@ -168,35 +165,35 @@ void readArgs(int argc, char *argv[])
 	for (int i = 1; i < argc; i++)
 	{
 		if ((strcmp(argv[i], "-sc") == 0) || (strcmp(argv[i], "--separateByCalendar") == 0))
-			args.separateByCalendar = YES;
+			args->separateByCalendar = YES;
 		else if ((strcmp(argv[i], "-sd") == 0) || (strcmp(argv[i], "--separateByDate") == 0))
-			args.separateByDate = YES;
+			args->separateByDate = YES;
 		else if ((strcmp(argv[i], "-u") == 0) || (strcmp(argv[i], "--checkForUpdates") == 0))
-			args.updatesCheck = YES;
+			args->updatesCheck = YES;
 		else if ((strcmp(argv[i], "-V") == 0) || (strcmp(argv[i], "--version") == 0))
-			args.printVersion = YES;
+			args->printVersion = YES;
 		else if ((strcmp(argv[i], "-d") == 0) || (strcmp(argv[i], "--debug") == 0))
 			debugPrintEnabled = YES;
 		else if ((strcmp(argv[i], "-n") == 0) || (strcmp(argv[i], "--includeOnlyEventsFromNowOn") == 0))
-			args.includeOnlyEventsFromNowOn = YES;
+			args->includeOnlyEventsFromNowOn = YES;
 		else if ((strcmp(argv[i], "-f") == 0) || (strcmp(argv[i], "--formatOutput") == 0))
-			args.useFormatting = YES;
+			args->useFormatting = YES;
 		else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--noCalendarNames") == 0))
-			args.noCalendarNames = YES;
+			args->noCalendarNames = YES;
 		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
 			prettyPrintOptions.displayRelativeDates = NO;
 		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--prettyPrintOptions.excludeEndDates") == 0))
 			prettyPrintOptions.excludeEndDates = YES;
 		else if ((strcmp(argv[i], "-std") == 0) || (strcmp(argv[i], "--sortTasksByDate") == 0))
-			args.sortTasksByDueDate = YES;
+			args->sortTasksByDueDate = YES;
 		else if ((strcmp(argv[i], "-stda") == 0) || (strcmp(argv[i], "--sortTasksByDateAscending") == 0))
-			args.sortTasksByDueDateAscending = YES;
+			args->sortTasksByDueDateAscending = YES;
 		else if ((strcmp(argv[i], "-sed") == 0) || (strcmp(argv[i], "--showEmptyDates") == 0))
-			args.sectionsForEachDayInSpan = YES;
+			args->sectionsForEachDayInSpan = YES;
 		else if ((strcmp(argv[i], "-uid") == 0) || (strcmp(argv[i], "--prettyPrintOptions.showUIDs") == 0))
 			prettyPrintOptions.showUIDs = YES;
 		else if ((strcmp(argv[i], "-npn") == 0) || (strcmp(argv[i], "--noPropNames") == 0))
-			args.noPropNames = YES;
+			args->noPropNames = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prettyPrintOptions.prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
@@ -218,17 +215,17 @@ void readArgs(int argc, char *argv[])
 		else if (((strcmp(argv[i], "-nnr") == 0) || (strcmp(argv[i], "--prettyPrintOptions.notesNewlineReplacement") == 0)) && (i+1 < argc))
 			prettyPrintOptions.notesNewlineReplacement = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ic") == 0) || (strcmp(argv[i], "--includeCals") == 0)) && (i+1 < argc))
-			args.includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+			args->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-ec") == 0) || (strcmp(argv[i], "--excludeCals") == 0)) && (i+1 < argc))
-			args.excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
+			args->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-po") == 0) || (strcmp(argv[i], "--prettyPrintOptions.propertyOrder") == 0)) && (i+1 < argc))
-			args.propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+			args->propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
-			args.strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+			args->strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-li") == 0) || (strcmp(argv[i], "--limitItems") == 0)) && (i+1 < argc))
 			prettyPrintOptions.maxNumPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
 		else if (((strcmp(argv[i], "-ps") == 0) || (strcmp(argv[i], "--propertySeparators") == 0)) && (i+1 < argc))
-			args.propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+			args->propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 	}
 }
 
@@ -295,14 +292,14 @@ void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigF
 }
 
 
-void processArgs(NSArray **retPropertySeparators)
+void processArgs(Arguments *args, NSArray **retPropertySeparators)
 {
-	if (args.propertyOrderStr != nil)
+	if (args->propertyOrderStr != nil)
 	{
 		// if property order is specified, filter out property names that are not allowed (the allowed
 		// ones are all included in the NSArray specified by the kDefaultPropertyOrder macro definition)
 		// and then add to the list the omitted property names in the default order
-		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(args.propertyOrderStr);
+		NSArray *specifiedPropertyOrder = arrayFromCommaSeparatedStringTrimmingWhitespace(args->propertyOrderStr);
 		NSMutableArray *tempPropertyOrder = [NSMutableArray arrayWithCapacity:10];
 		[tempPropertyOrder
 			addObjectsFromArray:[specifiedPropertyOrder
@@ -321,10 +318,10 @@ void processArgs(NSArray **retPropertySeparators)
 	
 	
 	NSArray *propertySeparators = nil;
-	if (args.propertySeparatorsStr != nil)
+	if (args->propertySeparatorsStr != nil)
 	{
 		NSError *propertySeparatorsArgParseError = nil;
-		propertySeparators = arrayFromArbitrarilySeparatedString(args.propertySeparatorsStr, YES, &propertySeparatorsArgParseError);
+		propertySeparators = arrayFromArbitrarilySeparatedString(args->propertySeparatorsStr, YES, &propertySeparatorsArgParseError);
 		if (propertySeparators == nil && propertySeparatorsArgParseError != nil)
 		{
 			PrintfErr(
@@ -338,15 +335,15 @@ void processArgs(NSArray **retPropertySeparators)
 	if (retPropertySeparators != NULL)
 		*retPropertySeparators = propertySeparators;
 	
-	if (args.strEncoding != nil)
+	if (args->strEncoding != nil)
 	{
 		// process provided output string encoding argument
-		args.strEncoding = [args.strEncoding stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		args->strEncoding = [args->strEncoding stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		NSStringEncoding matchedEncoding = 0;
 		const NSStringEncoding *availableEncoding = [NSString availableStringEncodings];
 		while(*availableEncoding != 0)
 		{
-			if ([[NSString localizedNameOfStringEncoding: *availableEncoding] isEqualToString:args.strEncoding])
+			if ([[NSString localizedNameOfStringEncoding: *availableEncoding] isEqualToString:args->strEncoding])
 			{
 				matchedEncoding = *availableEncoding;
 				break;
@@ -357,7 +354,7 @@ void processArgs(NSArray **retPropertySeparators)
 			outputStrEncoding = matchedEncoding;
 		else
 		{
-			PrintfErr(@"* Error: Invalid string encoding argument: \"%@\".\n", args.strEncoding);
+			PrintfErr(@"* Error: Invalid string encoding argument: \"%@\".\n", args->strEncoding);
 			PrintfErr(@"  Run \"icalBuddy strEncodings\" to see all the possible values.\n");
 			PrintfErr(@"  Using default encoding \"%@\".\n\n", [NSString localizedNameOfStringEncoding: outputStrEncoding]);
 		}
