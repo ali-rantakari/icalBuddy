@@ -30,6 +30,15 @@ THE SOFTWARE.
 #import <Foundation/Foundation.h>
 #import "icalBuddyArgs.h"
 
+// todo: the right place for these?
+extern NSDate *now;
+extern NSDate *today;
+
+
+NSArray *getCalItems(Arguments *args);
+NSArray *sortCalItems(Arguments *args, NSArray *calItems);
+int getPrintOptions(Arguments *args);
+
 NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals);
 void printAllCalendars(Arguments *args);
 void printAvailableStringEncodings();

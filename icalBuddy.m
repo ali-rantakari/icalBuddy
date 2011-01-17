@@ -59,9 +59,6 @@ NSString* versionNumberStr()
 
 
 
-NSDate *now;
-NSDate *today;
-
 
 // dictionary for configuration values
 NSMutableDictionary *configDict;
@@ -78,48 +75,6 @@ IcalBuddyAutoUpdaterDelegate *autoUpdaterDelegate;
 // last minute.
 NSMutableAttributedString *stdoutBuffer;
 
-
-// sort function for sorting tasks:
-// - sort numerically by priority except treat CalPriorityNone (0) as a special case
-// - if priorities match, sort tasks that are late from their due date to be first and then
-//   order alphabetically by title
-NSInteger prioritySort(id task1, id task2, void *context)
-{
-    if ([task1 priority] < [task2 priority])
-	{
-		if ([task1 priority] == CalPriorityNone)
-			return NSOrderedDescending;
-		else
-			return NSOrderedAscending;
-	}
-    else if ([task1 priority] > [task2 priority])
-		if ([task2 priority] == CalPriorityNone)
-			return NSOrderedAscending;
-		else
-			return NSOrderedDescending;
-    else
-	{
-		// check if one task is late and the other is not
-		BOOL task1late = NO;
-		BOOL task2late = NO;
-		if ([task1 dueDate] != nil &&
-			[now compare:[task1 dueDate]] == NSOrderedDescending
-			)
-			task1late = YES;
-		if ([task2 dueDate] != nil &&
-			[now compare:[task2 dueDate]] == NSOrderedDescending
-			)
-			task2late = YES;
-		
-		if (task1late && !task2late)
-			return NSOrderedAscending;
-		else if (task2late && !task1late)
-			return NSOrderedDescending;
-		
-		// neither task is, or both tasks are late -> order alphabetically by title
-        return [[task1 title] compare:[task2 title]];
-	}
-}
 
 
 
@@ -177,7 +132,7 @@ int main(int argc, char *argv[])
 	
 	initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
 	
-	initPrettyPrint(now, today, stdoutBuffer, prettyPrintOptions);
+	initPrettyPrint(stdoutBuffer, prettyPrintOptions);
 	
 	
 	// ------------------------------------------------------------------
@@ -227,18 +182,42 @@ int main(int argc, char *argv[])
 	else if (args.output_is_eventsToday || args.output_is_eventsNow || args.output_is_eventsFromTo
 			 || args.output_is_uncompletedTasks || args.output_is_tasksDueBefore)
 	{
-		BOOL printingEvents = (args.output_is_eventsToday || args.output_is_eventsNow || args.output_is_eventsFromTo);
-		BOOL printingAlsoPastEvents = (args.output_is_eventsFromTo);
-		BOOL printingTasks = (args.output_is_uncompletedTasks || args.output_is_tasksDueBefore);
+		BOOL usingSubheadings = (args.separateByCalendar || args.separateByDate);
 		
-		// get all calendars
-		NSMutableArray *allCalendars = [[[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy] autorelease];
+		NSArray *calItems = getCalItems(&args);
+		if (calItems == nil)
+			return 0;
 		
-		// filter calendars based on arguments
-		allCalendars = filterCalendars(allCalendars, args.includeCals, args.excludeCals);
+		int printOptions = getPrintOptions(&args);
 		
-		int tasks_printOptions = PRINT_OPTION_NONE;
-		int events_printOptions = PRINT_OPTION_NONE;
+		if (usingSubheadings)
+		{
+			// organize items under subheadings
+			// TODO
+			// sort items within subheadings
+			// TODO
+			// print items
+			// TODO
+		}
+		else
+		{
+			calItems = sortCalItems(&args, calItems);
+			
+			for (CalCalendarItem *item in calItems)
+			{
+				if ([item isKindOfClass:[CalEvent class]])
+					printCalEvent((CalEvent *)item, printOptions, now);
+				else
+					printCalTask((CalTask *)item, printOptions);
+			}
+		}
+		
+		
+		
+		/*
+		if (1 == 2)
+		{
+		
 		NSArray *uncompletedTasks = nil;
 		NSArray *eventsArr = nil;
 		
@@ -605,6 +584,9 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+		
+		} // ---
+		*/
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------

@@ -33,6 +33,271 @@ THE SOFTWARE.
 #import "icalBuddyFunctions.h"
 #import "icalBuddyMacros.h"
 #import "HGCLIUtils.h"
+#import "HGDateFunctions.h"
+#import "icalBuddyPrettyPrint.h"
+
+
+
+// todo: the right place for these?
+NSDate *now;
+NSDate *today;
+
+
+
+
+
+BOOL areWePrintingEvents(Arguments *args)
+{
+	return (args->output_is_eventsToday || args->output_is_eventsNow || args->output_is_eventsFromTo);
+}
+
+BOOL areWePrintingTasks(Arguments *args)
+{
+	return (args->output_is_uncompletedTasks || args->output_is_tasksDueBefore);
+}
+
+BOOL areWePrintingAlsoPastEvents(Arguments *args)
+{
+	return (args->output_is_eventsFromTo);
+}
+
+
+NSArray *getEvents(Arguments *args, NSArray *calendars)
+{
+	NSDate *dateRangeStart = nil;
+	NSDate *dateRangeEnd = nil;
+	
+	// get start and end dates for predicate
+	if (args->output_is_eventsToday)
+	{
+		dateRangeStart = today;
+		dateRangeEnd = dateForEndOfDay(now);
+	}
+	else if (args->output_is_eventsNow)
+	{
+		dateRangeStart = now;
+		dateRangeEnd = now;
+	}
+	else if (args->output_is_eventsFromTo)
+	{
+		dateRangeStart = dateFromUserInput(args->eventsFrom, @"start date");
+		dateRangeEnd = dateFromUserInput(args->eventsTo, @"end date");
+		
+		if (dateRangeStart == nil || dateRangeEnd == nil)
+		{
+			PrintfErr(@"\n");
+			printDateFormatInfo();
+			return nil;
+		}
+		
+		if ([dateRangeStart compare:dateRangeEnd] == NSOrderedDescending)
+		{
+			// start date occurs before end date --> swap them
+			NSDate *tempSwapDate = dateRangeStart;
+			dateRangeStart = dateRangeEnd;
+			dateRangeEnd = tempSwapDate;
+		}
+	}
+	NSCAssert((dateRangeStart != nil && dateRangeEnd != nil), @"start or end date is nil");
+	
+	// expand end date if NUM in "eventsToday+NUM" is specified
+	if (args->output_is_eventsToday)
+	{
+		NSRange arg_output_plusSymbolRange = [args->output rangeOfString:@"+"];
+		if (arg_output_plusSymbolRange.location != NSNotFound)
+		{
+			NSInteger daysToAddToRange = [[args->output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
+			dateRangeEnd = dateByAddingDays(dateRangeEnd, daysToAddToRange);
+		}
+	}
+	
+	NSDate *predicateDateStart = ((args->includeOnlyEventsFromNowOn)?now:dateRangeStart);
+	NSDate *predicateDateEnd = dateRangeEnd;
+	DebugPrintf(@"effective query start date: %@\n", predicateDateStart);
+	DebugPrintf(@"effective query end date:   %@\n", predicateDateEnd);
+	
+	// make predicate for getting all events between start and end dates + use it to get the events
+	NSPredicate *eventsPredicate = [CalCalendarStore
+		eventPredicateWithStartDate:predicateDateStart
+		endDate:predicateDateEnd
+		calendars:calendars
+		];
+	return [[CalCalendarStore defaultCalendarStore] eventsWithPredicate:eventsPredicate];
+}
+
+
+NSArray *getTasks(Arguments *args, NSArray *calendars)
+{
+	NSPredicate *tasksPredicate = nil;
+	
+	if (args->output_is_tasksDueBefore)
+	{
+		NSDate *dueBeforeDate = nil;
+		
+		NSString *dueBeforeDateStr = [args->output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
+		dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date");
+		
+		if (dueBeforeDate == nil)
+		{
+			PrintfErr(@"\n");
+			printDateFormatInfo();
+			return nil;
+		}
+		
+		DebugPrintf(@"effective query 'due before' date: %@\n", dueBeforeDate);
+		tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:calendars];
+	}
+	else // all uncompleted tasks
+		tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasks:calendars];
+	
+	return [[CalCalendarStore defaultCalendarStore] tasksWithPredicate:tasksPredicate];
+}
+
+
+NSArray *getCalItems(Arguments *args)
+{
+	NSMutableArray *calendars = [[[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy] autorelease];
+	calendars = filterCalendars(calendars, args->includeCals, args->excludeCals);
+	
+	BOOL printingEvents = areWePrintingEvents(args);
+	BOOL printingTasks = areWePrintingTasks(args);
+	
+	if (printingEvents)
+		return getEvents(args, calendars);
+	else if (printingTasks)
+		return getTasks(args, calendars);
+	
+	return nil;
+}
+
+
+
+
+// sort function for sorting tasks:
+// - sort numerically by priority except treat CalPriorityNone (0) as a special case
+// - if priorities match, sort tasks that are late from their due date to be first and then
+//   order alphabetically by title
+NSInteger prioritySort(id task1, id task2, void *context)
+{
+    if ([task1 priority] < [task2 priority])
+	{
+		if ([task1 priority] == CalPriorityNone)
+			return NSOrderedDescending;
+		else
+			return NSOrderedAscending;
+	}
+    else if ([task1 priority] > [task2 priority])
+		if ([task2 priority] == CalPriorityNone)
+			return NSOrderedAscending;
+		else
+			return NSOrderedDescending;
+    else
+	{
+		// check if one task is late and the other is not
+		BOOL task1late = NO;
+		BOOL task2late = NO;
+		if ([task1 dueDate] != nil &&
+			[now compare:[task1 dueDate]] == NSOrderedDescending
+			)
+			task1late = YES;
+		if ([task2 dueDate] != nil &&
+			[now compare:[task2 dueDate]] == NSOrderedDescending
+			)
+			task2late = YES;
+		
+		if (task1late && !task2late)
+			return NSOrderedAscending;
+		else if (task2late && !task1late)
+			return NSOrderedDescending;
+		
+		// neither task is, or both tasks are late -> order alphabetically by title
+        return [[task1 title] compare:[task2 title]];
+	}
+}
+
+
+
+NSArray *sortCalItems(Arguments *args, NSArray *calItems)
+{
+	NSArray *retCalItems = nil;
+	
+	BOOL printingTasks = areWePrintingTasks(args);
+	
+	if (printingTasks)
+	{
+		if (args->sortTasksByDueDate || args->sortTasksByDueDateAscending)
+		{
+			retCalItems = [calItems
+				sortedArrayUsingDescriptors:[NSArray
+					arrayWithObjects:
+						[[[NSSortDescriptor alloc] initWithKey:@"dueDate" ascending:args->sortTasksByDueDateAscending] autorelease],
+						nil
+					]
+				];
+			
+			if (args->sortTasksByDueDateAscending)
+			{
+				// put tasks with no due date last
+				NSArray *tasksWithNoDueDate = [retCalItems
+					filteredArrayUsingPredicate:[NSPredicate
+						predicateWithFormat:@"dueDate == nil"
+						]
+					];
+				retCalItems = [retCalItems
+					filteredArrayUsingPredicate:[NSPredicate
+						predicateWithFormat:@"dueDate != nil"
+						]
+					];
+				retCalItems = [retCalItems arrayByAddingObjectsFromArray:tasksWithNoDueDate];
+			}
+		}
+		else
+			retCalItems = [calItems sortedArrayUsingFunction:prioritySort context:NULL];
+	}
+	
+	return (retCalItems == nil) ? calItems : retCalItems;
+}
+
+
+int getPrintOptions(Arguments *args)
+{
+	BOOL printingEvents = areWePrintingEvents(args);
+	BOOL printingTasks = areWePrintingTasks(args);
+	
+	int printOptions = PRINT_OPTION_NONE;
+	
+	if (printingEvents)
+	{
+		// default print options
+		printOptions = 
+			PRINT_OPTION_SINGLE_DAY | 
+			(args->noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+		
+		if (args->output_is_eventsFromTo)
+			printOptions &= ~PRINT_OPTION_SINGLE_DAY;
+		else if (args->output_is_eventsToday)
+		{
+			NSRange arg_output_plusSymbolRange = [args->output rangeOfString:@"+"];
+			if (arg_output_plusSymbolRange.location != NSNotFound)
+				printOptions &= ~PRINT_OPTION_SINGLE_DAY;
+		}
+	}
+	else if (printingTasks)
+	{
+		printOptions = (args->noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+	}
+	
+	if (args->noPropNames)
+		printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
+	
+	if (args->separateByCalendar)
+		printOptions |= PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES | PRINT_OPTION_CALENDAR_AGNOSTIC;
+	else if (args->separateByDate)
+		printOptions |= PRINT_OPTION_SINGLE_DAY;
+	
+	return printOptions;
+}
+
 
 
 

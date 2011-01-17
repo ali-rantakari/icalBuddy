@@ -79,7 +79,7 @@ typedef enum datePrintOption
 } DatePrintOption;
 
 
-void initPrettyPrint(NSDate *aNow, NSDate *aToday, NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts);
+void initPrettyPrint(NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts);
 PrettyPrintOptions getDefaultPrettyPrintOptions();
 
 NSString* dateStr(NSDate *date, DatePrintOption printOption);

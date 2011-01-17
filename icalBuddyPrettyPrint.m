@@ -35,12 +35,10 @@ THE SOFTWARE.
 #import "icalBuddyFormatting.h"
 #import "HGUtils.h"
 #import "HGDateFunctions.h"
+#import "icalBuddyFunctions.h" // today, now
 
 
 PrettyPrintOptions prettyPrintOptions;
-
-NSDate *now;
-NSDate *today;
 
 NSMutableAttributedString *outputBuffer;
 
@@ -48,11 +46,9 @@ NSMutableAttributedString *outputBuffer;
 
 
 
-void initPrettyPrint(NSDate *aNow, NSDate *aToday, NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts)
+void initPrettyPrint(NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts)
 {
 	outputBuffer = aOutputBuffer;
-	now = aNow;
-	today = aToday;
 	prettyPrintOptions = opts;
 }
 
@@ -62,9 +58,9 @@ PrettyPrintOptions getDefaultPrettyPrintOptions()
 	PrettyPrintOptions opts;
 	
 	// the prefix strings
-	opts.prefixStrBullet = 		@"• ";
+	opts.prefixStrBullet = 			@"• ";
 	opts.prefixStrBulletAlert = 	@"! ";
-	opts.sectionSeparatorStr = 	@"\n------------------------";
+	opts.sectionSeparatorStr = 		@"\n------------------------";
 	
 	opts.timeFormatStr = nil;
 	opts.dateFormatStr = nil;
