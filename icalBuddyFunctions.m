@@ -368,17 +368,20 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 				
 				NSDate *thisEventStartDate = [anEvent startDate];
 				
+				NSDate *fullDaysStartDate = dateForStartOfDay(args->startDate);
+				NSDate *fullDaysEndDate = dateForEndOfDay(args->endDate);
+				
 				for (NSUInteger i = 0; i <= anEventDaysSpanToConsider; i++)
 				{
 					NSDate *dayToAdd = dateForStartOfDay(dateByAddingDays(thisEventStartDate, i));
 					
-					NSComparisonResult dayToAddToEndComparisonResult = [dayToAdd compare:args->endDate];
+					NSComparisonResult dayToAddToEndComparisonResult = [dayToAdd compare:fullDaysEndDate];
 					if (dayToAddToEndComparisonResult == NSOrderedDescending
 						|| dayToAddToEndComparisonResult == NSOrderedSame
 						)
 						break;
 					
-					if ([dayToAdd compare:args->startDate] == NSOrderedAscending)
+					if ([dayToAdd compare:fullDaysStartDate] == NSOrderedAscending)
 						continue;
 					
 					NSComparisonResult dayToAddToNowComparisonResult = [dayToAdd compare:today];
