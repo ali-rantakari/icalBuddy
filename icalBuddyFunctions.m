@@ -436,10 +436,20 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 				earliestDate = dateForStartOfDay(args->startDate);
 				latestDate = dateForStartOfDay(args->endDate);
 			}
-			else
+			else if (args->output_is_tasksDueBefore)
+			{
+				earliestDate = [allDaysArr objectAtIndex:0];
+				latestDate = dateForStartOfDay(args->dueBeforeDate);
+			}
+			else if (args->output_is_uncompletedTasks)
 			{
 				earliestDate = [allDaysArr objectAtIndex:0];
 				latestDate = [allDaysArr lastObject];
+			}
+			else
+			{
+				PrintfErr(@"No case defined for given output arg.\n");
+				exit(1);
 			}
 			
 			NSDate *iterDate = earliestDate;
