@@ -29,6 +29,7 @@ test.m
 a.out
 testConfig.plist
 log.txt
+tests/regression/*.log
 
 # other
 deploymentScpTarget

@@ -1,0 +1,115 @@
+icalBuddy -cf "" -sc eventsToday+3
+icalBuddy -cf "" -sc eventsToday
+icalBuddy -cf "" -sc uncompletedTasks
+icalBuddy -cf "" -sc tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -sc eventsNow
+icalBuddy -cf "" -sc eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -sd eventsToday+3
+icalBuddy -cf "" -sd eventsToday
+icalBuddy -cf "" -sd uncompletedTasks
+icalBuddy -cf "" -sd tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -sd eventsNow
+icalBuddy -cf "" -sd eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -sd -ss '****\n' eventsToday+3
+icalBuddy -cf "" -sd -ss '****\n' eventsToday
+icalBuddy -cf "" -sd -ss '****\n' uncompletedTasks
+icalBuddy -cf "" -sd -ss '****\n' tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -sd -ss '****\n' eventsNow
+icalBuddy -cf "" -sd -ss '****\n' eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -sd -sed eventsToday+3
+icalBuddy -cf "" -sd -sed eventsToday
+#these hang:
+#icalBuddy -cf "" -sd -sed uncompletedTasks
+#icalBuddy -cf "" -sd -sed tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -sd -sed eventsNow
+icalBuddy -cf "" -sd -sed eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" eventsToday+3
+icalBuddy -cf "" eventsToday
+icalBuddy -cf "" uncompletedTasks
+icalBuddy -cf "" tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" eventsNow
+icalBuddy -cf "" eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -f -sc -nrd eventsToday+3
+icalBuddy -cf "" -f -sc -nrd eventsToday
+icalBuddy -cf "" -f -sc -nrd uncompletedTasks
+icalBuddy -cf "" -f -sc -nrd tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -f -sc -nrd eventsNow
+icalBuddy -cf "" -f -sc -nrd eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -f -sc -nc eventsToday+3
+icalBuddy -cf "" -f -sc -nc eventsToday
+icalBuddy -cf "" -f -sc -nc uncompletedTasks
+icalBuddy -cf "" -f -sc -nc tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -f -sc -nc eventsNow
+icalBuddy -cf "" -f -sc -nc eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -f -sc -npn eventsToday+3
+icalBuddy -cf "" -f -sc -npn eventsToday
+icalBuddy -cf "" -f -sc -npn uncompletedTasks
+icalBuddy -cf "" -f -sc -npn tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -f -sc -npn eventsNow
+icalBuddy -cf "" -f -sc -npn eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -li 3 eventsToday+3
+icalBuddy -cf "" -li 3 eventsToday
+icalBuddy -cf "" -li 3 uncompletedTasks
+icalBuddy -cf "" -li 3 tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -li 3 eventsNow
+icalBuddy -cf "" -li 3 eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -uid eventsToday+3
+icalBuddy -cf "" -uid eventsToday
+icalBuddy -cf "" -uid uncompletedTasks
+icalBuddy -cf "" -uid tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -uid eventsNow
+icalBuddy -cf "" -uid eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -eed eventsToday+3
+icalBuddy -cf "" -eed eventsToday
+icalBuddy -cf "" -eed uncompletedTasks
+icalBuddy -cf "" -eed tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -eed eventsNow
+icalBuddy -cf "" -eed eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -n eventsToday+3
+icalBuddy -cf "" -n eventsToday
+
+icalBuddy -cf "" -iep 'url,datetime' eventsToday+3
+icalBuddy -cf "" -eep 'location,datetime' eventsToday+3
+
+icalBuddy -cf "" -std uncompletedTasks
+icalBuddy -cf "" -std tasksDueBefore:'2010-07-15'
+
+icalBuddy -cf "" -stda uncompletedTasks
+icalBuddy -cf "" -stda tasksDueBefore:'2010-07-15'
+
+icalBuddy -cf "" -itp 'url,datetime' uncompletedTasks
+icalBuddy -cf "" -etp 'location,datetime' uncompletedTasks
+
+icalBuddy -cf "" -ic "Home,Work" eventsToday+10
+icalBuddy -cf "" -ec "Home" eventsToday+10
+
+icalBuddy -cf "" -b 'x-' -ab 'åå' eventsToday+3
+icalBuddy -cf "" -b 'x-' -ab 'åå' uncompletedTasks
+
+icalBuddy -cf "" -ps '|--| ;; |' eventsToday+3
+icalBuddy -cf "" -ps '|--| ;; |' eventsToday
+icalBuddy -cf "" -ps '|--| ;; |' uncompletedTasks
+icalBuddy -cf "" -ps '|--| ;; |' tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -ps '|--| ;; |' eventsNow
+icalBuddy -cf "" -ps '|--| ;; |' eventsFrom:2010-09-10 to:2010-09-13
+
+icalBuddy -cf "" -nnr ';;' eventsToday+3
+icalBuddy -cf "" -nnr ';;' eventsToday
+icalBuddy -cf "" -nnr ';;' uncompletedTasks
+icalBuddy -cf "" -nnr ';;' tasksDueBefore:'2010-07-15'
+icalBuddy -cf "" -nnr ';;' eventsNow
+icalBuddy -cf "" -nnr ';;' eventsFrom:2010-09-10 to:2010-09-13
+
+
+
