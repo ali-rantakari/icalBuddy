@@ -128,11 +128,11 @@ As of version 1.7.13 you can specify relative dates such as these in the argumen
 
 Example: get events for tomorrow:
 
-    icalBuddy eventsFrom:tomorrow to:tomorrow+1
+    icalBuddy eventsFrom:tomorrow to:tomorrow
 
 Example: get events for tomorrow and the day after tomorrow:
 
-    icalBuddy eventsFrom:tomorrow to:'day after tomorrow+1'
+    icalBuddy eventsFrom:tomorrow to:'day after tomorrow'
 
 
 ## Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
