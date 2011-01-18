@@ -47,14 +47,16 @@ THE SOFTWARE.
 #import "IcalBuddyAutoUpdaterDelegate.h"
 
 
-
-const int VERSION_MAJOR = 1;
-const int VERSION_MINOR = 7;
-const int VERSION_BUILD = 14;
+struct
+{
+	int major;
+	int minor;
+	int build;
+} version = {1,7,14};
 
 NSString* versionNumberStr()
 {
-	return [NSString stringWithFormat:@"%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD];
+	return [NSString stringWithFormat:@"%i.%i.%i", version.major, version.minor, version.build];
 }
 
 
