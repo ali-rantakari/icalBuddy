@@ -438,16 +438,8 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 			}
 			else
 			{
-				if ([allDaysArr count] > 1)
-				{
-					earliestDate = [allDaysArr objectAtIndex:0];
-					latestDate = [allDaysArr lastObject];
-				}
-				else
-				{
-					earliestDate = today;
-					latestDate = today;
-				}
+				earliestDate = [allDaysArr objectAtIndex:0];
+				latestDate = [allDaysArr lastObject];
 			}
 			
 			NSDate *iterDate = earliestDate;
@@ -463,7 +455,7 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 		}
 		
 		// reinsert NSNull ("no due date") at the bottom if needed
-		if ([allDays objectForKey:[NSNull null]] != nil)
+		if (printingTasks && [allDays objectForKey:[NSNull null]] != nil)
 			[allDaysArr addObject:[NSNull null]];
 		
 		for (id aDayKey in allDaysArr)
