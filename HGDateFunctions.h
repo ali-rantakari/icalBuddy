@@ -44,7 +44,7 @@ NSInteger getNumWeeksInYear(NSInteger year);
 NSInteger getWeekDiff(NSDate *date1, NSDate *date2);
 NSInteger getDayDiff(NSDate *date1, NSDate *date2);
 
-NSDate *dateFromUserInput(NSString *input, NSString *inputName);
+NSDate *dateFromUserInput(NSString *input, NSString *inputName, BOOL endOfDay);
 void printDateFormatInfo();
 
 

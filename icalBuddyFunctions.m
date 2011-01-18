@@ -87,8 +87,8 @@ NSArray *getEvents(Arguments *args, NSArray *calendars)
 	}
 	else if (args->output_is_eventsFromTo)
 	{
-		dateRangeStart = dateFromUserInput(args->eventsFrom, @"start date");
-		dateRangeEnd = dateFromUserInput(args->eventsTo, @"end date");
+		dateRangeStart = dateFromUserInput(args->eventsFrom, @"start date", NO);
+		dateRangeEnd = dateFromUserInput(args->eventsTo, @"end date", YES);
 		
 		if (dateRangeStart == nil || dateRangeEnd == nil)
 		{
@@ -142,7 +142,7 @@ NSArray *getTasks(Arguments *args, NSArray *calendars)
 		NSDate *dueBeforeDate = nil;
 		
 		NSString *dueBeforeDateStr = [args->output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
-		dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date");
+		dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date", NO);
 		
 		if (dueBeforeDate == nil)
 		{
@@ -370,9 +370,16 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 				
 				for (NSUInteger i = 0; i <= anEventDaysSpanToConsider; i++)
 				{
-					NSDate *thisEventStartDatePlusi = dateByAddingDays(thisEventStartDate, i);
+					NSDate *dayToAdd = dateForStartOfDay(dateByAddingDays(thisEventStartDate, i));
 					
-					NSDate *dayToAdd = dateForStartOfDay(thisEventStartDatePlusi);
+					NSComparisonResult dayToAddToEndComparisonResult = [dayToAdd compare:args->endDate];
+					if (dayToAddToEndComparisonResult == NSOrderedDescending
+						|| dayToAddToEndComparisonResult == NSOrderedSame
+						)
+						break;
+					
+					if ([dayToAdd compare:args->startDate] == NSOrderedAscending)
+						continue;
 					
 					NSComparisonResult dayToAddToNowComparisonResult = [dayToAdd compare:today];
 					

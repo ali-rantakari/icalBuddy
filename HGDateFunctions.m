@@ -193,14 +193,77 @@ NSInteger getDayDiff(NSDate *date1, NSDate *date2)
 }
 
 
-
-NSDate *dateFromUserInput(NSString *input, NSString *inputName)
+BOOL naturalLanguageDateSpecifiesTime(NSString *input, NSDate *resultDate)
 {
+	// the time is set to 12:00:00 in returned dates when no time is specified,
+	// but mind that the timezone may not be the user locale's default (!)
+	// --sometimes it seems to be +0000 (GMT) (e.g. if you give a date in
+	// the format 'YYYY-MM-DD'). we'll check both cases -- if the time is
+	// *not* 12:00:00, we assume it has been specified by the user.
+	
+	NSDateComponents *resultComps = [[NSCalendar currentCalendar]
+		components:(NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit
+					|NSHourCalendarUnit|NSMinuteCalendarUnit|NSSecondCalendarUnit)
+		fromDate:resultDate
+		];
+	
+	BOOL timeIsNoon = ([resultComps hour] == 12 && [resultComps minute] == 0 && [resultComps second] == 0);
+	BOOL dateWasInterpretedAsGMT = [[resultDate description] hasSuffix:@" 12:00:00 +0000"];
+	if (!dateWasInterpretedAsGMT && !timeIsNoon)
+		return YES;
+	
+	NSCalendar *gmtCalendar = [NSCalendar currentCalendar];
+	[gmtCalendar setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"GMT"]];
+	NSDateComponents *resultCompsGMT = [gmtCalendar
+		components:(NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit
+					|NSHourCalendarUnit|NSMinuteCalendarUnit|NSSecondCalendarUnit)
+		fromDate:resultDate
+		];
+	BOOL timeIsNoonGMT = ([resultCompsGMT hour] == 12 && [resultCompsGMT minute] == 0 && [resultCompsGMT second] == 0);
+	if (dateWasInterpretedAsGMT && !timeIsNoonGMT)
+		return YES;
+	
+	// if the time is 12, we try to check if the user has actually specified the
+	// time as such.
+	
+	// occurrences of these phrases mean the user has specified it
+	if (countOccurrences(input, @"noon", NSCaseInsensitiveSearch) > 0
+		|| countOccurrences(input, @"lunch", NSCaseInsensitiveSearch) > 0
+		|| countOccurrences(input, @"midday", NSCaseInsensitiveSearch) > 0
+		)
+		return YES;
+	
+	// if '12' occurs in the input (apart from occurring in the year, month and
+	// day), we assume the user has specified it as the time.
+	// this part is quite susceptible to breakage since there are lots of corner
+	// cases where this fails, e.g. if the user specifies the date 'monday at 12',
+	// and the monday happens to be the 12th day of the month.
+	// given the usage context of this program, I still think it's better to lean
+	// towards falsely assuming that no time has been specified than the other
+	// way.
+	NSUInteger occurrencesOf12InDate = 0;
+	occurrencesOf12InDate = countOccurrences([NSString stringWithFormat:@"%i-%i-%i %i",
+												[resultComps year], [resultComps month], [resultComps day]],
+											 @"12", NSLiteralSearch);
+	if (countOccurrences(input, @"12", NSLiteralSearch) > occurrencesOf12InDate)
+		return YES;
+	
+	return NO;
+}
+
+
+
+NSDate *dateFromUserInput(NSString *input, NSString *inputName, BOOL endOfDay)
+{
+	// If the input specifies only a date (i.e. no time), we set the time
+	// in the returned date as 00:00:00 if endOfDay is NO or 23:59:59 otherwise.
+	
+	// attempt to parse format YYYY-MM-DD HH:MM:SS ±HHMM
 	NSDate *result = [NSDate dateWithString:input];
 	
 	if (result == nil)
 	{
-		// custom relative dates
+		// attempt to parse custom relative dates (these specify only date)
 		
 		NSString *trimmedInput = [[input stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
 		NSDate *now = [NSDate date];
@@ -231,11 +294,21 @@ NSDate *dateFromUserInput(NSString *input, NSString *inputName)
 				NSInteger daysToAdd = [[trimmedInput substringFromIndex:plusOrMinusSymbolRange.location] integerValue];
 				result = dateByAddingDays(result, daysToAdd);
 			}
+			
+			if (endOfDay)
+				result = dateForEndOfDay(result);
 		}
 	}
 	
 	if (result == nil)
+	{
+		// attempt to parse natural language input
+		
 		result = [NSDate dateWithNaturalLanguageString:input];
+		
+		if (result != nil && !naturalLanguageDateSpecifiesTime(input, result))
+			result = (endOfDay) ? dateForEndOfDay(result) : dateForStartOfDay(result);
+	}
 	
 	NSString *inputDateName = (inputName == nil) ? @"date" : inputName;
 	if (result == nil)

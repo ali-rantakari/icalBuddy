@@ -180,9 +180,7 @@ int main(int argc, char *argv[])
 		
 		if (usingSubheadings)
 		{
-			// organize items under subheadings
 			NSArray *sections = putItemsUnderSections(&args, calItems);
-			
 			printItemSections(sections, printOptions);
 		}
 		else

@@ -192,6 +192,29 @@ NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
 
 
 
+NSUInteger countOccurrences(NSString *haystack, NSString *needle, NSStringCompareOptions options)
+{
+	NSInteger count = -1;
+	
+	NSRange searchRange = NSMakeRange(0, [haystack length]);
+	NSRange result;
+	do
+	{
+		count++;
+		result = [haystack rangeOfString:needle options:options range:searchRange];
+		if (result.location != NSNotFound)
+		{
+			searchRange.location = NSMaxRange(result);
+			searchRange.length = [haystack length] - searchRange.location;
+		}
+	}
+	while (result.location != NSNotFound);
+	
+	return count;
+}
+
+
+
 // returns YES if success, NO if failure
 BOOL moveFileToTrash(NSString *filePath)
 {

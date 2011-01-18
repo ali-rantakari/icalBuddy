@@ -51,6 +51,8 @@ NSSet *setFromCommaSeparatedStringTrimmingWhitespace(NSString *str);
 NSArray *arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str);
 NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscapeSequences, NSError **error);
 
+NSUInteger countOccurrences(NSString *haystack, NSString *needle, NSStringCompareOptions options);
+
 BOOL moveFileToTrash(NSString *filePath);
 
 
