@@ -36,6 +36,7 @@ NSDate *dateForStartOfDay(NSDate *date);
 NSDate *dateForEndOfDay(NSDate *date);
 
 NSDate *dateByAddingDays(NSDate *date, NSInteger days);
+NSDate *dateByAddingMinutes(NSDate *date, NSInteger minutes);
 
 BOOL datesRepresentSameDay(NSDate *date1, NSDate *date2);
 

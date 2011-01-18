@@ -61,6 +61,18 @@ NSDate *dateByAddingDays(NSDate *date, NSInteger days)
 }
 
 
+NSDate *dateByAddingMinutes(NSDate *date, NSInteger minutes)
+{
+	NSDateComponents *addDaysComponents = [[[NSDateComponents alloc] init] autorelease];
+    [addDaysComponents setMinute:minutes];
+    return [[NSCalendar currentCalendar]
+		dateByAddingComponents:addDaysComponents
+		toDate:date
+		options:0
+		];
+}
+
+
 // whether the two specified dates represent the same calendar day
 BOOL datesRepresentSameDay(NSDate *date1, NSDate *date2)
 {
