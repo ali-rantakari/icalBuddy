@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 	initL10N(L10nFilePath);
 	
 	
-	Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,nil,nil,nil,nil,nil,nil,nil,nil};
+	Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil};
 	PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
 	
 	// read and validate general configuration file
@@ -179,25 +179,25 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print events or tasks
 	// ------------------------------------------------------------------
-	else if (args.output_is_eventsToday || args.output_is_eventsNow || args.output_is_eventsFromTo
-			 || args.output_is_uncompletedTasks || args.output_is_tasksDueBefore)
+	else if (areWePrintingItems(&args))
 	{
 		BOOL usingSubheadings = (args.separateByCalendar || args.separateByDate);
 		
 		NSArray *calItems = getCalItems(&args);
 		if (calItems == nil)
-			return 0;
+			return 1;
 		
 		int printOptions = getPrintOptions(&args);
 		
 		if (usingSubheadings)
 		{
 			// organize items under subheadings
-			// TODO
+			NSArray *sections = putItemsUnderSections(&args, calItems);
+			
 			// sort items within subheadings
 			// TODO
-			// print items
-			// TODO
+			
+			printItemSections(sections, printOptions);
 		}
 		else
 		{

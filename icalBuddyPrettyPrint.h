@@ -31,7 +31,7 @@ THE SOFTWARE.
 #import <CalendarStore/CalendarStore.h>
 
 
-typedef struct prettyPrintOptionsStruct
+typedef struct
 {
 	// the order of properties in the output
 	NSArray *propertyOrder;
@@ -57,6 +57,16 @@ typedef struct prettyPrintOptionsStruct
 	NSUInteger numPrintedItems;
 } PrettyPrintOptions;
 
+
+#define SECTION_TO_NSVALUE(x)		[NSValue valueWithBytes:&(x) objCType:@encode(PrintSection)]
+#define NSVALUE_TO_SECTION(x, y)	[(x) getValue:&(y)]
+
+typedef struct
+{
+	NSString *title;
+	NSArray *items;
+	NSDate *eventsContextDay;
+} PrintSection;
 
 
 // printOptions for calendar item printing functions

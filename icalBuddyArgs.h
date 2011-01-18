@@ -32,7 +32,8 @@ THE SOFTWARE.
 
 
 // variables for arguments
-typedef struct {
+typedef struct
+{
 	BOOL separateByCalendar;
 	BOOL separateByDate;
 	BOOL updatesCheck;
@@ -59,6 +60,10 @@ typedef struct {
 	NSString *propertySeparatorsStr;
 	NSString *eventsFrom;
 	NSString *eventsTo;
+	
+	NSDate *startDate;
+	NSDate *endDate;
+	NSDate *dueBeforeDate;
 } Arguments;
 
 

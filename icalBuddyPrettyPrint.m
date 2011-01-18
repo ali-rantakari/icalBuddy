@@ -848,23 +848,22 @@ void printItemSections(NSArray *sections, int printOptions)
 {
 	BOOL currentIsFirstPrintedSection = YES;
 	
-	NSDictionary *sectionDict;
-	for (sectionDict in sections)
+	for (NSValue *nsValue in sections)
 	{
 		if (prettyPrintOptions.maxNumPrintedItems > 0 && prettyPrintOptions.maxNumPrintedItems <= prettyPrintOptions.numPrintedItems)
-			continue;
+			break;
 		
-		NSArray *sectionItems = [sectionDict objectForKey:kSectionDictKey_items];
+		PrintSection section;
+		NSVALUE_TO_SECTION(nsValue, section);
 		
 		// print section title
-		NSString *sectionTitle = [sectionDict objectForKey:kSectionDictKey_title];
 		if (!currentIsFirstPrintedSection)
 			ADD_TO_OUTPUT_BUFFER(M_ATTR_STR(@"\n"));
 		NSMutableAttributedString *thisOutput = M_ATTR_STR(
-			strConcat(sectionTitle, @":", prettyPrintOptions.sectionSeparatorStr, nil)
+			strConcat(section.title, @":", prettyPrintOptions.sectionSeparatorStr, nil)
 			);
 		[thisOutput
-			addAttributes:getSectionTitleStringAttributes(sectionTitle)
+			addAttributes:getSectionTitleStringAttributes(section.title)
 			range:NSMakeRange(0,[thisOutput length])
 			];
 		
@@ -873,12 +872,12 @@ void printItemSections(NSArray *sections, int printOptions)
 		if ((printOptions & PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES)
 			&& prettyPrintOptions.useCalendarColorsForTitles
 			&& ![[[thisOutput attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
-			&& sectionItems != nil && [sectionItems count] > 0
+			&& section.items != nil && [section.items count] > 0
 			)
 		{
 			[thisOutput
 				addAttribute:NSForegroundColorAttributeName
-				value:getClosestAnsiColorForColor([[((CalCalendarItem *)[sectionItems objectAtIndex:0]) calendar] color], YES)
+				value:getClosestAnsiColorForColor([[((CalCalendarItem *)[section.items objectAtIndex:0]) calendar] color], YES)
 				range:NSMakeRange(0, [thisOutput length])
 				];
 		}
@@ -887,7 +886,7 @@ void printItemSections(NSArray *sections, int printOptions)
 		ADD_TO_OUTPUT_BUFFER(M_ATTR_STR(@"\n"));
 		currentIsFirstPrintedSection = NO;
 		
-		if (sectionItems == nil || [sectionItems count] == 0)
+		if (section.items == nil || [section.items count] == 0)
 		{
 			// print the "no items" text
 			NSMutableAttributedString *noItemsTextOutput = M_ATTR_STR(
@@ -902,11 +901,11 @@ void printItemSections(NSArray *sections, int printOptions)
 		}
 		
 		// print items in section
-		for (CalCalendarItem *item in sectionItems)
+		for (CalCalendarItem *item in section.items)
 		{
 			if ([item isKindOfClass:[CalEvent class]])
 			{
-				NSDate *contextDay = [sectionDict objectForKey:kSectionDictKey_eventsContextDay];
+				NSDate *contextDay = section.eventsContextDay;
 				if (contextDay == nil)
 					contextDay = now;
 				printCalEvent((CalEvent*)item, printOptions, contextDay);

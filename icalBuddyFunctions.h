@@ -35,11 +35,15 @@ extern NSDate *now;
 extern NSDate *today;
 
 
+BOOL areWePrintingItems(Arguments *args);
+
 NSArray *getCalItems(Arguments *args);
 NSArray *sortCalItems(Arguments *args, NSArray *calItems);
-int getPrintOptions(Arguments *args);
+NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems);
 
-NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals);
+int getPrintOptions(Arguments *args);
+NSArray *getCalendars(Arguments *args);
+
 void printAllCalendars(Arguments *args);
 void printAvailableStringEncodings();
 void openConfigFileInEditor(NSString *configFilePath, BOOL openInCLIEditor);
