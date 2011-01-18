@@ -189,6 +189,8 @@ int main(int argc, char *argv[])
 		
 		int printOptions = getPrintOptions(&args);
 		
+		calItems = sortCalItems(&args, calItems);
+		
 		if (usingSubheadings)
 		{
 			// organize items under subheadings
@@ -201,8 +203,6 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			calItems = sortCalItems(&args, calItems);
-			
 			for (CalCalendarItem *item in calItems)
 			{
 				if ([item isKindOfClass:[CalEvent class]])
