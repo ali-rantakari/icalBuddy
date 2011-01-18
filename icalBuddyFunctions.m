@@ -31,7 +31,8 @@ THE SOFTWARE.
 #import <CalendarStore/CalendarStore.h>
 
 #import "icalBuddyFunctions.h"
-#import "icalBuddyMacros.h"
+#import "icalBuddyDefines.h"
+
 #import "HGCLIUtils.h"
 #import "HGDateFunctions.h"
 #import "icalBuddyPrettyPrint.h"

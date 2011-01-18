@@ -37,7 +37,8 @@ THE SOFTWARE.
 #import "HGCLIAutoUpdater.h"
 #import "HGDateFunctions.h"
 
-#import "icalBuddyMacros.h"
+#import "icalBuddyDefines.h"
+
 #import "icalBuddyL10N.h"
 #import "icalBuddyFormatting.h"
 #import "icalBuddyPrettyPrint.h"
@@ -256,50 +257,10 @@ int main(int argc, char *argv[])
 	
 	// we've been buffering the output for stdout into an attributed string,
 	// now's the time to print out that buffer.
-	if ((args.useFormatting && configDict != nil) &&
-		(args.output_is_eventsToday || args.output_is_eventsNow ||
-		args.output_is_eventsFromTo || args.output_is_uncompletedTasks)
-		)
-	{
-		NSDictionary *formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
-		if (formattedKeywords != nil)
-		{
-			// it seems we need to do some search & replace for the output
-			// before pushing the buffer to stdout.
-			
-			for (NSString *keyword in [formattedKeywords allKeys])
-			{
-				NSDictionary* thisKeywordFormattingAttrs = formattingConfigToStringAttributes([formattedKeywords objectForKey:keyword]);
-				
-				NSString *cleanStdoutBuffer = [stdoutBuffer string];
-				NSRange searchRange = NSMakeRange(0,[stdoutBuffer length]);
-				NSRange foundRange;
-				do
-				{
-					foundRange = [cleanStdoutBuffer rangeOfString:keyword options:NSLiteralSearch range:searchRange];
-					if (foundRange.location != NSNotFound)
-					{
-						[stdoutBuffer addAttributes:thisKeywordFormattingAttrs range:foundRange];
-						searchRange.location = NSMaxRange(foundRange);
-						searchRange.length = [stdoutBuffer length]-searchRange.location;
-					}
-				}
-				while (foundRange.location != NSNotFound);
-			}
-		}
-	}
-	
-	NSString *finalOutput;
-	
-	if (args.useFormatting)
-	{
-		processCustomStringAttributes(&stdoutBuffer);
-		finalOutput = ansiEscapedStringWithAttributedString(stdoutBuffer);
-	}
-	else
-		finalOutput = [stdoutBuffer string];
-	
-	Print(finalOutput);
+	NSDictionary *formattedKeywords = nil;
+	if (configDict != nil)
+		formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
+	flushOutputBuffer(stdoutBuffer, &args, formattedKeywords);
 	
 	
 	[autoReleasePool release];

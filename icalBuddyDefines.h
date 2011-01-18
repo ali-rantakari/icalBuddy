@@ -1,4 +1,4 @@
-// icalBuddy helper macros
+// icalBuddy definitions
 // 
 // http://hasseg.org/icalBuddy
 //
@@ -115,4 +115,40 @@ THE SOFTWARE.
 						 [NSDictionary dictionary], @"formatting",\
 						 nil\
 						]
+
+// variables for arguments
+typedef struct
+{
+	BOOL separateByCalendar;
+	BOOL separateByDate;
+	BOOL updatesCheck;
+	BOOL printVersion;
+	BOOL includeOnlyEventsFromNowOn;
+	BOOL useFormatting;
+	BOOL noCalendarNames;
+	BOOL sortTasksByDueDate;
+	BOOL sortTasksByDueDateAscending;
+	BOOL sectionsForEachDayInSpan;
+	BOOL noPropNames;
+	
+	BOOL output_is_uncompletedTasks;
+	BOOL output_is_eventsToday;
+	BOOL output_is_eventsNow;
+	BOOL output_is_eventsFromTo;
+	BOOL output_is_tasksDueBefore;
+	
+	NSString *output;
+	NSArray *includeCals;
+	NSArray *excludeCals;
+	NSString *strEncoding;
+	NSString *propertyOrderStr;
+	NSString *propertySeparatorsStr;
+	NSString *eventsFrom;
+	NSString *eventsTo;
+	
+	NSDate *startDate;
+	NSDate *endDate;
+	NSDate *dueBeforeDate;
+} Arguments;
+
 

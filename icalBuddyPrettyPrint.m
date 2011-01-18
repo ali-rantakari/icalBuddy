@@ -30,10 +30,12 @@ THE SOFTWARE.
 #import <AddressBook/AddressBook.h>
 
 #import "icalBuddyPrettyPrint.h"
-#import "icalBuddyMacros.h"
+#import "icalBuddyDefines.h"
+
 #import "icalBuddyL10N.h"
 #import "icalBuddyFormatting.h"
 #import "HGUtils.h"
+#import "HGCLIUtils.h"
 #import "HGDateFunctions.h"
 #import "icalBuddyFunctions.h" // today, now
 
@@ -917,7 +919,50 @@ void printItemSections(NSArray *sections, int printOptions)
 }
 
 
-
+void flushOutputBuffer(NSMutableAttributedString *buffer, Arguments *args, NSDictionary *formattedKeywords)
+{
+	if (args->useFormatting
+		&& formattedKeywords != nil
+		&& (args->output_is_eventsToday || args->output_is_eventsNow
+			|| args->output_is_eventsFromTo || args->output_is_uncompletedTasks)
+		)
+	{
+		// it seems we need to do some search & replace for the output
+		// before pushing the buffer to stdout.
+		
+		for (NSString *keyword in [formattedKeywords allKeys])
+		{
+			NSDictionary* thisKeywordFormattingAttrs = formattingConfigToStringAttributes([formattedKeywords objectForKey:keyword]);
+			
+			NSString *cleanStdoutBuffer = [buffer string];
+			NSRange searchRange = NSMakeRange(0,[buffer length]);
+			NSRange foundRange;
+			do
+			{
+				foundRange = [cleanStdoutBuffer rangeOfString:keyword options:NSLiteralSearch range:searchRange];
+				if (foundRange.location != NSNotFound)
+				{
+					[buffer addAttributes:thisKeywordFormattingAttrs range:foundRange];
+					searchRange.location = NSMaxRange(foundRange);
+					searchRange.length = [buffer length]-searchRange.location;
+				}
+			}
+			while (foundRange.location != NSNotFound);
+		}
+	}
+	
+	NSString *finalOutput = nil;
+	
+	if (args->useFormatting)
+	{
+		processCustomStringAttributes(&buffer);
+		finalOutput = ansiEscapedStringWithAttributedString(buffer);
+	}
+	else
+		finalOutput = [buffer string];
+	
+	Print(finalOutput);
+}
 
 
 

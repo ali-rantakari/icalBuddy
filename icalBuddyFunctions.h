@@ -28,7 +28,7 @@ THE SOFTWARE.
 */
 
 #import <Foundation/Foundation.h>
-#import "icalBuddyArgs.h"
+#import "icalBuddyDefines.h"
 
 // todo: the right place for these?
 extern NSDate *now;

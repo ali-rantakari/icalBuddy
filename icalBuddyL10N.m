@@ -30,7 +30,8 @@ THE SOFTWARE.
 #import <Foundation/Foundation.h>
 #import "HGCLIUtils.h"
 #import "icalBuddyL10N.h"
-#import "icalBuddyMacros.h"
+#import "icalBuddyDefines.h"
+
 
 // dictionary for localization values
 NSDictionary *L10nStringsDict;

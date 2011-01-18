@@ -29,7 +29,8 @@ THE SOFTWARE.
 
 #import "icalBuddyFormatting.h"
 #import "HGCLIUtils.h"
-#import "icalBuddyMacros.h"
+#import "icalBuddyDefines.h"
+
 #import "icalBuddyL10N.h"
 #import "ANSIEscapeHelper.h"
 

@@ -29,42 +29,7 @@ THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
 #import "icalBuddyPrettyPrint.h"
-
-
-// variables for arguments
-typedef struct
-{
-	BOOL separateByCalendar;
-	BOOL separateByDate;
-	BOOL updatesCheck;
-	BOOL printVersion;
-	BOOL includeOnlyEventsFromNowOn;
-	BOOL useFormatting;
-	BOOL noCalendarNames;
-	BOOL sortTasksByDueDate;
-	BOOL sortTasksByDueDateAscending;
-	BOOL sectionsForEachDayInSpan;
-	BOOL noPropNames;
-	
-	BOOL output_is_uncompletedTasks;
-	BOOL output_is_eventsToday;
-	BOOL output_is_eventsNow;
-	BOOL output_is_eventsFromTo;
-	BOOL output_is_tasksDueBefore;
-	
-	NSString *output;
-	NSArray *includeCals;
-	NSArray *excludeCals;
-	NSString *strEncoding;
-	NSString *propertyOrderStr;
-	NSString *propertySeparatorsStr;
-	NSString *eventsFrom;
-	NSString *eventsTo;
-	
-	NSDate *startDate;
-	NSDate *endDate;
-	NSDate *dueBeforeDate;
-} Arguments;
+#import "icalBuddyDefines.h"
 
 
 void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict);

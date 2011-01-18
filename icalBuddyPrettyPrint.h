@@ -29,6 +29,7 @@ THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
 #import <CalendarStore/CalendarStore.h>
+#import "icalBuddyDefines.h"
 
 
 typedef struct
@@ -96,8 +97,10 @@ NSString* dateStr(NSDate *date, DatePrintOption printOption);
 
 NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions, NSDate *contextDay);
 NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions);
+
 void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay);
 void printCalTask(CalTask *task, int printOptions);
-
 void printItemSections(NSArray *sections, int printOptions);
+
+void flushOutputBuffer(NSMutableAttributedString *buffer, Arguments *args, NSDictionary *formattedKeywords);
 
