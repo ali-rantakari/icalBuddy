@@ -49,9 +49,9 @@ typedef enum {
 
 @interface MockCalCalendarStore : NSObject
 {
-    @private
     NSMutableArray *calendarsArr;
     NSMutableArray *itemsArr;
+    @private
     void *_reserved;
 }
 

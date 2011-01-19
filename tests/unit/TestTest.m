@@ -29,6 +29,8 @@ THE SOFTWARE.
 
 #import "TestTest.h"
 #import "../../HGCLIUtils.h"
+#import "../../calendarStoreImport.h"
+#import "../../calendarStoreMock/mockHelperFunctions.h"
 
 
 @implementation TestTest
@@ -48,7 +50,19 @@ THE SOFTWARE.
 
 - (void) setUp
 {
+	CalCalendar *homeCal = newCalendar(@"Home", [NSColor greenColor]);
+	CalCalendar *workCal = newCalendar(@"Work", [NSColor blueColor]);
+	[CALENDAR_STORE defaultCalendarStore].calendarsArr = [NSMutableArray arrayWithObjects:
+		homeCal, workCal,
+		nil
+		];
 	
+	[CALENDAR_STORE defaultCalendarStore].itemsArr = [NSMutableArray arrayWithObjects:
+		newAllDayEvent(homeCal, @"Off from work", nil, @"2010-10-22", @"2010-10-23", nil, nil),
+		newEvent(homeCal, @"Feed the cat", @"apartment", @"2010-10-21 15", @"2010-10-21 15", nil, nil),
+		newEvent(homeCal, @"Watch the game", @"apartment", @"2010-10-22 16", @"2010-10-22 17", nil, nil),
+		nil
+		];
 }
 
 - (HG_TEST_RETURN_TYPE) testEventsNow
@@ -60,30 +74,17 @@ THE SOFTWARE.
 	
 	NSArray *items = getCalItems(&args);
 	
-	HG_ASSERT_EQUALS([items count], 1);
-	HG_ASSERT_OBJ_EQUALS([[items lastObject] title], @"Watch the game");
+	HG_ASSERT_EQUALS([items count], 2);
+	HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:0] title], @"Off from work");
+	HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:1] title], @"Watch the game");
 	
-	HG_TEST_DONE;
-}
-
-- (HG_TEST_RETURN_TYPE) testNumberEquality
-{
-	HG_ASSERT_EQUALS(1, 1);
-	HG_ASSERT_EQUALS(2, 3);
-	HG_TEST_DONE;
-}
-
-- (HG_TEST_RETURN_TYPE) testObjectEquality
-{
-	HG_ASSERT_OBJ_EQUALS([NSNumber numberWithInt:1], [NSNumber numberWithInt:1]);
-	HG_ASSERT_OBJ_EQUALS([NSNumber numberWithInt:2], [NSNumber numberWithInt:3]);
 	HG_TEST_DONE;
 }
 
 - (void) tearDown
 {
-	
+	[CALENDAR_STORE defaultCalendarStore].calendarsArr = nil;
+	[CALENDAR_STORE defaultCalendarStore].itemsArr = nil;
 }
-
 
 @end

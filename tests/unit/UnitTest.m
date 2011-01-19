@@ -91,7 +91,7 @@ THE SOFTWARE.
 	
 	if ([self respondsToSelector:setUpSel])
 	{
-		PRINTLN_B(@"* Running setUp.");
+		PRINTLN_B(@"* setUp");
 		[self performSelector:setUpSel];
 	}
 	
@@ -113,7 +113,7 @@ THE SOFTWARE.
 	
 	if ([self respondsToSelector:tearDownSel])
 	{
-		PRINTLN_B(@"* Running tearDown.");
+		PRINTLN_B(@"* tearDown");
 		[self performSelector:tearDownSel];
 	}
 	

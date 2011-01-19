@@ -32,67 +32,6 @@ THE SOFTWARE.
 #import "../HGDateFunctions.h"
 
 
-NSDate *dateFromStr(NSString *str)
-{
-	NSString *dateStr = nil;
-	if ([str length] == 25)
-		dateStr = str;
-	else if ([str length] == 19)
-		dateStr = strConcat(str, @" +0200", nil);
-	else if ([str length] == 16)
-		dateStr = strConcat(str, @":00 +0200", nil);
-	else if ([str length] == 13)
-		dateStr = strConcat(str, @":00:00 +0200", nil);
-	else if ([str length] == 10)
-		dateStr = strConcat(str, @" 12:00:00 +0200", nil);
-	return [NSDate dateWithString:dateStr];
-}
-
-CalCalendar *newCalendar(NSString *title, NSColor *color)
-{
-	CalCalendar *cal = [CalCalendar calendar];
-	cal.title = title;
-	cal.color = color;
-	return cal;
-}
-
-CalEvent *newEvent(CalCalendar *calendar,
-	NSString *title, NSString *location,
-	NSString *start, NSString *end,
-	NSString *notes, NSURL *url
-	)
-{
-	CalEvent *event = [CalEvent event];
-	event.calendar = calendar;
-	event.title = title;
-	event.location = location;
-	event.isAllDay = NO;
-	event.startDate = dateFromStr(start);
-	event.endDate = dateFromStr(end);
-	event.notes = notes;
-	event.url = url;
-	return event;
-}
-
-CalEvent *newAllDayEvent(CalCalendar *calendar,
-	NSString *title, NSString *location,
-	NSString *start, NSString *end,
-	NSString *notes, NSURL *url
-	)
-{
-	CalEvent *event = [CalEvent event];
-	event.calendar = calendar;
-	event.title = title;
-	event.location = location;
-	event.isAllDay = YES;
-	event.startDate = dateFromStr(start);
-	event.endDate = dateByAddingDays(dateFromStr(end), 1);
-	event.notes = notes;
-	event.url = url;
-	return event;
-}
-
-
 
 @implementation MockCalCalendarStore
 
@@ -104,19 +43,8 @@ CalEvent *newAllDayEvent(CalCalendar *calendar,
 	if (!(self = [super init]))
 		return nil;
 	
-	CalCalendar *homeCal = newCalendar(@"Home", [NSColor greenColor]);
-	CalCalendar *workCal = newCalendar(@"Work", [NSColor blueColor]);
-	self.calendarsArr = [NSMutableArray arrayWithObjects:
-		homeCal, workCal,
-		nil
-		];
-	
-	self.itemsArr = [NSMutableArray arrayWithObjects:
-		newAllDayEvent(homeCal, @"Off from work", nil, @"2010-10-22", @"2010-10-23", nil, nil),
-		newEvent(homeCal, @"Feed the cat", @"apartment", @"2010-10-21 15", @"2010-10-21 15", nil, nil),
-		newEvent(homeCal, @"Watch the game", @"apartment", @"2010-10-22 16", @"2010-10-22 17", nil, nil),
-		nil
-		];
+	self.calendarsArr = [NSMutableArray array];
+	self.itemsArr = [NSMutableArray array];
 	
 	return self;
 }
@@ -258,7 +186,11 @@ CalEvent *newAllDayEvent(CalCalendar *calendar,
 
 + (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate calendars:(NSArray *)calendars
 {
-	NSPredicate *pred = [NSPredicate predicateWithFormat:@"calendar IN %@ AND startDate >= %@ AND endDate <= %@", calendars, startDate, endDate];
+	NSPredicate *pred = [NSPredicate
+		predicateWithFormat:
+			@"calendar IN %@ AND (endDate >= %@ AND startDate <= %@)",
+			calendars, startDate, endDate
+		];
 	return pred;
 }
 
