@@ -124,12 +124,12 @@ NSArray *getEvents(Arguments *args, NSArray *calendars)
 	DebugPrintf(@"effective query end date:   %@\n", args->endDate);
 	
 	// make predicate for getting all events between start and end dates + use it to get the events
-	NSPredicate *eventsPredicate = [CalCalendarStore
+	NSPredicate *eventsPredicate = [CALENDAR_STORE
 		eventPredicateWithStartDate:args->startDate
 		endDate:args->endDate
 		calendars:calendars
 		];
-	return [CALENDAR_STORE eventsWithPredicate:eventsPredicate];
+	return [[CALENDAR_STORE defaultCalendarStore] eventsWithPredicate:eventsPredicate];
 }
 
 
@@ -153,12 +153,12 @@ NSArray *getTasks(Arguments *args, NSArray *calendars)
 		
 		args->dueBeforeDate = dueBeforeDate;
 		DebugPrintf(@"effective query 'due before' date: %@\n", dueBeforeDate);
-		tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:calendars];
+		tasksPredicate = [CALENDAR_STORE taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:calendars];
 	}
 	else // all uncompleted tasks
-		tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasks:calendars];
+		tasksPredicate = [CALENDAR_STORE taskPredicateWithUncompletedTasks:calendars];
 	
-	return [CALENDAR_STORE tasksWithPredicate:tasksPredicate];
+	return [[CALENDAR_STORE defaultCalendarStore] tasksWithPredicate:tasksPredicate];
 }
 
 
@@ -517,7 +517,7 @@ NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSAr
 
 NSArray *getCalendars(Arguments *args)
 {
-	NSMutableArray *calendars = [[[CALENDAR_STORE calendars] mutableCopy] autorelease];
+	NSMutableArray *calendars = [[[[CALENDAR_STORE defaultCalendarStore] calendars] mutableCopy] autorelease];
 	return filterCalendars(calendars, args->includeCals, args->excludeCals);
 }
 

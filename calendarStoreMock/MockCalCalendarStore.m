@@ -28,22 +28,274 @@ THE SOFTWARE.
 */
 
 #import "MockCalCalendarStore.h"
+#import "../HGUtils.h"
+#import "../HGDateFunctions.h"
+
+
+NSDate *dateFromStr(NSString *str)
+{
+	NSString *dateStr = nil;
+	if ([str length] == 25)
+		dateStr = str;
+	else if ([str length] == 19)
+		dateStr = strConcat(str, @" +0200", nil);
+	else if ([str length] == 16)
+		dateStr = strConcat(str, @":00 +0200", nil);
+	else if ([str length] == 13)
+		dateStr = strConcat(str, @":00:00 +0200", nil);
+	else if ([str length] == 10)
+		dateStr = strConcat(str, @" 12:00:00 +0200", nil);
+	return [NSDate dateWithString:dateStr];
+}
+
+CalCalendar *newCalendar(NSString *title, NSColor *color)
+{
+	CalCalendar *cal = [CalCalendar calendar];
+	cal.title = title;
+	cal.color = color;
+	return cal;
+}
+
+CalEvent *newEvent(CalCalendar *calendar,
+	NSString *title, NSString *location,
+	NSString *start, NSString *end,
+	NSString *notes, NSURL *url
+	)
+{
+	CalEvent *event = [CalEvent event];
+	event.calendar = calendar;
+	event.title = title;
+	event.location = location;
+	event.isAllDay = NO;
+	event.startDate = dateFromStr(start);
+	event.endDate = dateFromStr(end);
+	event.notes = notes;
+	event.url = url;
+	return event;
+}
+
+CalEvent *newAllDayEvent(CalCalendar *calendar,
+	NSString *title, NSString *location,
+	NSString *start, NSString *end,
+	NSString *notes, NSURL *url
+	)
+{
+	CalEvent *event = [CalEvent event];
+	event.calendar = calendar;
+	event.title = title;
+	event.location = location;
+	event.isAllDay = YES;
+	event.startDate = dateFromStr(start);
+	event.endDate = dateByAddingDays(dateFromStr(end), 1);
+	event.notes = notes;
+	event.url = url;
+	return event;
+}
+
 
 
 @implementation MockCalCalendarStore
+
+@synthesize calendarsArr;
+@synthesize itemsArr;
 
 - (id) init
 {
 	if (!(self = [super init]))
 		return nil;
 	
+	CalCalendar *homeCal = newCalendar(@"Home", [NSColor greenColor]);
+	CalCalendar *workCal = newCalendar(@"Work", [NSColor blueColor]);
+	self.calendarsArr = [NSMutableArray arrayWithObjects:
+		homeCal, workCal,
+		nil
+		];
+	
+	self.itemsArr = [NSMutableArray arrayWithObjects:
+		newAllDayEvent(homeCal, @"Off from work", nil, @"2010-10-22", @"2010-10-23", nil, nil),
+		newEvent(homeCal, @"Feed the cat", @"apartment", @"2010-10-21 15", @"2010-10-21 15", nil, nil),
+		newEvent(homeCal, @"Watch the game", @"apartment", @"2010-10-22 16", @"2010-10-22 17", nil, nil),
+		nil
+		];
+	
 	return self;
 }
 
 - (void) dealloc
 {
+	self.calendarsArr = nil;
+	self.itemsArr = nil;
 	[super dealloc];
 }
+
+
+
+
+
+//  An array of all the user's calendars, represented as CalCalendars. If the user has iCal data from a previous
+//  version of Mac OS X, but has not launched iCal in 10.5, this will return an array of empty calendars. iCal needs
+//  to be launched at least once in order to migrate the user's calendar data.
+//
+//  If no calendar data from any version of Mac OS X exists, then this method will create and return two default
+//  calendars, named Home and Work.
+- (NSArray *)calendars
+{
+	return self.calendarsArr;
+}
+
+
+//  The calendar associated with the specific UID. If no record with this UID exists, nil is returned.
+- (CalCalendar *)calendarWithUID:(NSString *)UID
+{
+	// not implemented
+	return nil;
+}
+
+
+- (BOOL)saveCalendar:(CalCalendar *)calendar error:(NSError **)error
+{
+	// not implemented
+	return NO;
+}
+- (BOOL)removeCalendar:(CalCalendar *)calendar error:(NSError **)error
+{
+	// not implemented
+	return NO;
+}
+
+
+//  - (NSArray *)eventsWithPredicate:(NSPredicate *)predicate;
+//
+//  This method returns an array of all the CalEvents which match the conditions described in the predicate that is 
+//  passed. At this time, eventsWithPredicate: only suppports predicates generated with one of the class methods added 
+//  to NSPredicate below.
+//  
+//  If the predicate passed to eventsWithPredicate: was not created with one of the class methods included in this file, 
+//  nil is returned. If nil is passed as the predicate, an exception will be raised.
+//
+//  For performance reasons, this method will only return occurrences of repeating events that fall within a specific 
+//  four year timespan. If the date range between the startDate and endDate is greater than four years, then the 
+//  timespan containing recurrences is always the first four years of date range.
+- (NSArray *)eventsWithPredicate:(NSPredicate *)predicate
+{
+	NSMutableArray *arr = [NSMutableArray array];
+	
+	for (CalCalendarItem *item in self.itemsArr)
+	{
+		if (![item isKindOfClass:[CalEvent class]])
+			continue;
+		CalEvent *event = (CalEvent *)item;
+		if ([predicate evaluateWithObject:event])
+			[arr addObject:event];
+	}
+	
+	return arr;
+}
+
+- (CalEvent *)eventWithUID:(NSString *)uid occurrence:(NSDate *)date
+{
+	// not implemented
+	return nil;
+}
+
+
+//  - (NSArray *)tasksWithPredicate:(NSPredicate *)predicate;
+//
+//  This method returns an array of all the CalTasks which match the conditions described in the predicate that is 
+//  passed. At this time, tasksWithPredicate: only suppports predicates generated with one of the class methods added to 
+//  NSPredicate below.
+//
+//  If the predicate passed to tasksWithPredicate: was not created with one of the class methods included in thsi file, 
+//  nil is returned. If nil is passed as the predicate, an exception will be raised.
+- (NSArray *)tasksWithPredicate:(NSPredicate *)predicate
+{
+	NSMutableArray *arr = [NSMutableArray array];
+	
+	for (CalCalendarItem *item in self.itemsArr)
+	{
+		if (![item isKindOfClass:[CalTask class]])
+			continue;
+		CalTask *task = (CalTask *)item;
+		if ([predicate evaluateWithObject:task])
+			[arr addObject:task];
+	}
+	
+	return arr;
+}
+
+- (CalTask *)taskWithUID:(NSString *)uid
+{
+	// not implemented
+	return nil;
+}
+
+
+- (BOOL)saveEvent:(CalEvent *)event span:(CalSpan)span error:(NSError **)error
+{
+	// not implemented
+	return NO;
+}
+- (BOOL)removeEvent:(CalEvent *)event span:(CalSpan)span error:(NSError **)error
+{
+	// not implemented
+	return NO;
+}
+
+
+- (BOOL)saveTask:(CalTask *)task error:(NSError **)error
+{
+	// not implemented
+	return NO;
+}
+- (BOOL)removeTask:(CalTask *)task error:(NSError **)error
+{
+	// not implemented
+	return NO;
+}
+
+
+//  A predicate passed to eventsWithPredicate: or tasksWithPredicate: must be returned from one of these methods.
+
++ (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate calendars:(NSArray *)calendars
+{
+	NSPredicate *pred = [NSPredicate predicateWithFormat:@"calendar IN %@ AND startDate >= %@ AND endDate <= %@", calendars, startDate, endDate];
+	return pred;
+}
+
++ (NSPredicate *)taskPredicateWithUncompletedTasks:(NSArray *)calendars
+{
+	// TODO
+	return nil;
+}
+
++ (NSPredicate *)taskPredicateWithUncompletedTasksDueBefore:(NSDate *)dueDate calendars:(NSArray *)calendars
+{
+	// TODO
+	return nil;
+}
+
++ (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate UID:(NSString *)UID calendars:(NSArray *)calendars
+{
+	// not implemented
+	return nil;
+}
+
++ (NSPredicate *)taskPredicateWithCalendars:(NSArray *)calendars //  This will return all tasks, completed and uncompleted, for a set of calendars
+{
+	// not implemented
+	return nil;
+}
+
++ (NSPredicate *)taskPredicateWithTasksCompletedSince:(NSDate *)completedSince calendars:(NSArray *)calendars
+{
+	// not implemented
+	return nil;
+}
+
+
+
+
+// ----------- singleton implementation:
 
 
 static MockCalCalendarStore *sharedInstance = NULL;
@@ -99,154 +351,6 @@ static MockCalCalendarStore *sharedInstance = NULL;
 
 
 
-
-
-
-
-
-//  An array of all the user's calendars, represented as CalCalendars. If the user has iCal data from a previous
-//  version of Mac OS X, but has not launched iCal in 10.5, this will return an array of empty calendars. iCal needs
-//  to be launched at least once in order to migrate the user's calendar data.
-//
-//  If no calendar data from any version of Mac OS X exists, then this method will create and return two default
-//  calendars, named Home and Work.
-- (NSArray *)calendars
-{
-	return [NSArray arrayWithObjects:@"eka", @"toka", nil];
-	
-	
-	// TODO
-	//return nil;
-}
-
-
-//  The calendar associated with the specific UID. If no record with this UID exists, nil is returned.
-- (CalCalendar *)calendarWithUID:(NSString *)UID
-{
-	// not implemented
-	return nil;
-}
-
-
-- (BOOL)saveCalendar:(CalCalendar *)calendar error:(NSError **)error
-{
-	// not implemented
-	return NO;
-}
-- (BOOL)removeCalendar:(CalCalendar *)calendar error:(NSError **)error
-{
-	// not implemented
-	return NO;
-}
-
-
-//  - (NSArray *)eventsWithPredicate:(NSPredicate *)predicate;
-//
-//  This method returns an array of all the CalEvents which match the conditions described in the predicate that is 
-//  passed. At this time, eventsWithPredicate: only suppports predicates generated with one of the class methods added 
-//  to NSPredicate below.
-//  
-//  If the predicate passed to eventsWithPredicate: was not created with one of the class methods included in this file, 
-//  nil is returned. If nil is passed as the predicate, an exception will be raised.
-//
-//  For performance reasons, this method will only return occurrences of repeating events that fall within a specific 
-//  four year timespan. If the date range between the startDate and endDate is greater than four years, then the 
-//  timespan containing recurrences is always the first four years of date range.
-- (NSArray *)eventsWithPredicate:(NSPredicate *)predicate
-{
-	// TODO
-	return nil;
-}
-
-- (CalEvent *)eventWithUID:(NSString *)uid occurrence:(NSDate *)date
-{
-	// not implemented
-	return nil;
-}
-
-
-//  - (NSArray *)tasksWithPredicate:(NSPredicate *)predicate;
-//
-//  This method returns an array of all the CalTasks which match the conditions described in the predicate that is 
-//  passed. At this time, tasksWithPredicate: only suppports predicates generated with one of the class methods added to 
-//  NSPredicate below.
-//
-//  If the predicate passed to tasksWithPredicate: was not created with one of the class methods included in thsi file, 
-//  nil is returned. If nil is passed as the predicate, an exception will be raised.
-- (NSArray *)tasksWithPredicate:(NSPredicate *)predicate
-{
-	// TODO
-	return nil;
-}
-
-- (CalTask *)taskWithUID:(NSString *)uid
-{
-	// not implemented
-	return nil;
-}
-
-
-- (BOOL)saveEvent:(CalEvent *)event span:(CalSpan)span error:(NSError **)error
-{
-	// not implemented
-	return NO;
-}
-- (BOOL)removeEvent:(CalEvent *)event span:(CalSpan)span error:(NSError **)error
-{
-	// not implemented
-	return NO;
-}
-
-
-- (BOOL)saveTask:(CalTask *)task error:(NSError **)error
-{
-	// not implemented
-	return NO;
-}
-- (BOOL)removeTask:(CalTask *)task error:(NSError **)error
-{
-	// not implemented
-	return NO;
-}
-
-
-//  A predicate passed to eventsWithPredicate: or tasksWithPredicate: must be returned from one of these methods.
-
-+ (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate calendars:(NSArray *)calendars
-{
-	// TODO
-	return nil;
-}
-
-+ (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate UID:(NSString *)UID calendars:(NSArray *)calendars
-{
-	// TODO
-	return nil;
-}
-
-+ (NSPredicate *)taskPredicateWithCalendars:(NSArray *)calendars //  This will return all tasks, completed and uncompleted, for a set of calendars
-{
-	// TODO
-	return nil;
-}
-
-+ (NSPredicate *)taskPredicateWithUncompletedTasks:(NSArray *)calendars
-{
-	// TODO
-	return nil;
-}
-
-+ (NSPredicate *)taskPredicateWithUncompletedTasksDueBefore:(NSDate *)dueDate calendars:(NSArray *)calendars
-{
-	// TODO
-	return nil;
-}
-
-+ (NSPredicate *)taskPredicateWithTasksCompletedSince:(NSDate *)completedSince calendars:(NSArray *)calendars
-{
-	// TODO
-	return nil;
-}
 
 
 @end

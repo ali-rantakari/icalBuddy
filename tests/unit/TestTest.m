@@ -30,6 +30,7 @@ THE SOFTWARE.
 #import "TestTest.h"
 #import "../../HGCLIUtils.h"
 
+
 @implementation TestTest
 
 - (id) init
@@ -47,26 +48,41 @@ THE SOFTWARE.
 
 - (void) setUp
 {
-	Printf(@"set up!\n");
+	
 }
 
-- (NSNumber *) testNumberEquality
+- (HG_TEST_RETURN_TYPE) testEventsNow
 {
-	HG_ASSERT_EQUALS(1, 1, @"1 should be 1 but was %d instead");
-	HG_ASSERT_EQUALS(2, 3, @"2 should be 2 but was %d instead");
-	HG_UNITTEST_DONE;
+	Arguments args = [self
+		setUpWithNowDate:DATE(@"2010-10-22 16:30:00 +0200")
+		args:ARR(@"-sd", @"eventsNow")
+		];
+	
+	NSArray *items = getCalItems(&args);
+	
+	HG_ASSERT_EQUALS([items count], 1);
+	HG_ASSERT_OBJ_EQUALS([[items lastObject] title], @"Watch the game");
+	
+	HG_TEST_DONE;
 }
 
-- (NSNumber *) testObjectEquality
+- (HG_TEST_RETURN_TYPE) testNumberEquality
 {
-	HG_ASSERT_OBJ_EQUALS([NSNumber numberWithInt:1], [NSNumber numberWithInt:1], @"1 should be 1 but was %@ instead");
-	HG_ASSERT_OBJ_EQUALS([NSNumber numberWithInt:2], [NSNumber numberWithInt:3], @"2 should be 2 but was %@ instead");
-	HG_UNITTEST_DONE;
+	HG_ASSERT_EQUALS(1, 1);
+	HG_ASSERT_EQUALS(2, 3);
+	HG_TEST_DONE;
+}
+
+- (HG_TEST_RETURN_TYPE) testObjectEquality
+{
+	HG_ASSERT_OBJ_EQUALS([NSNumber numberWithInt:1], [NSNumber numberWithInt:1]);
+	HG_ASSERT_OBJ_EQUALS([NSNumber numberWithInt:2], [NSNumber numberWithInt:3]);
+	HG_TEST_DONE;
 }
 
 - (void) tearDown
 {
-	Printf(@"tear down!\n");
+	
 }
 
 

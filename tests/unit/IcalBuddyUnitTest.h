@@ -1,4 +1,4 @@
-// icalBuddy test unit test
+// icalBuddy-specific unit test
 // 
 // http://hasseg.org/icalBuddy
 //
@@ -27,10 +27,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#import "IcalBuddyUnitTest.h"
+#import <Foundation/Foundation.h>
+#import "UnitTest.h"
 
-@interface TestTest : IcalBuddyUnitTest
+#import "../../HGUtils.h"
+#import "../../HGCLIUtils.h"
+#import "../../HGCLIAutoUpdater.h"
+#import "../../HGDateFunctions.h"
+
+#import "../../icalBuddyDefines.h"
+
+#import "../../icalBuddyL10N.h"
+#import "../../icalBuddyFormatting.h"
+#import "../../icalBuddyPrettyPrint.h"
+#import "../../icalBuddyArgs.h"
+#import "../../icalBuddyFunctions.h"
+
+
+@interface IcalBuddyUnitTest : UnitTest
 {
+	
 }
+
+- (Arguments) setUpWithNowDate:(NSDate *)date args:(NSArray *)argsArr;
+
 
 @end

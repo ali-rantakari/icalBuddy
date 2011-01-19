@@ -50,8 +50,13 @@ typedef enum {
 @interface MockCalCalendarStore : NSObject
 {
     @private
+    NSMutableArray *calendarsArr;
+    NSMutableArray *itemsArr;
     void *_reserved;
 }
+
+@property(retain) NSMutableArray *calendarsArr;
+@property(retain) NSMutableArray *itemsArr;
 
 //  Returns an instance of the calendar store.
 
