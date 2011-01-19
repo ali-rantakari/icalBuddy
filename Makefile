@@ -14,6 +14,7 @@ TEMP_DEPLOYMENT_MANFILE="deployment/man.html"
 TEMP_DEPLOYMENT_L10NMANFILE="deployment/localization-man.html"
 TEMP_DEPLOYMENT_CONFIGMANFILE="deployment/config-man.html"
 TEMP_DEPLOYMENT_FAQFILE="deployment/faq.html"
+FILES_TO_PACKAGE="$(TEMP_DEPLOYMENT_FAQFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyLocalization.pdf Manual-icalBuddyConfig.pdf"
 VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
 SCP_TARGET=$(shell cat ./deploymentScpTarget)
@@ -186,7 +187,7 @@ package: icalBuddy docs
 	
 # create zip archive
 	mkdir -p $(TEMP_DEPLOYMENT_DIR)
-	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) $(TEMP_DEPLOYMENT_FAQFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyLocalization.pdf Manual-icalBuddyConfig.pdf icalBuddy.m ANSIEscapeHelper.h ANSIEscapeHelper.m" | xargs zip
+	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) $(FILES_TO_PACKAGE)" | xargs zip
 	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
 	
 # if changelog doesn't already exist in the deployment dir
@@ -203,7 +204,7 @@ package: icalBuddy docs
 	else\
 		echo "changelog.html exists for $(APP_VERSION) - opening it for editing";\
 	fi )
-	@open -a Smultron $(VERSIONCHANGELOGFILELOC)
+	@open -a Fraise $(VERSIONCHANGELOGFILELOC)
 
 
 
@@ -238,6 +239,10 @@ clean:
 	@echo ======================================
 	-rm -Rf icalBuddy
 	-rm -Rf icalBuddy.1
+	-rm -Rf icalBuddy*.plist
+	-rm -Rf IcalBuddy*.plist
+	-rm -Rf HG*.plist
+	-rm -Rf ANSIEscape*.plist
 	-rm -Rf Manual-icalBuddy.pdf
 	-rm -Rf icalBuddyConfig.1
 	-rm -Rf Manual-icalBuddyConfig.pdf
