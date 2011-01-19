@@ -4,7 +4,7 @@
 icalBuddy*.plist
 ANSIEscapeHelper.plist
 HG*.plist
-IcalBuddyAutoUpdaterDelegate.plist
+IcalBuddy*.plist
 
 # OS X junk
 Icon*
@@ -14,10 +14,10 @@ Icon*
 \#*#
 
 # generated files
-htmlEntitiesPHPCode.m
 deployment
 changelog.*
 icalBuddy
+testRunner
 icalBuddy.1
 icalBuddyLocalization.1
 icalBuddyConfig.1

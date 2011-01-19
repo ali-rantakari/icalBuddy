@@ -28,7 +28,7 @@ THE SOFTWARE.
 */
 
 #import <Foundation/Foundation.h>
-#import <CalendarStore/CalendarStore.h>
+#import "calendarStoreImport.h"
 
 #import "icalBuddyFunctions.h"
 #import "icalBuddyDefines.h"
@@ -129,7 +129,7 @@ NSArray *getEvents(Arguments *args, NSArray *calendars)
 		endDate:args->endDate
 		calendars:calendars
 		];
-	return [[CalCalendarStore defaultCalendarStore] eventsWithPredicate:eventsPredicate];
+	return [CALENDAR_STORE eventsWithPredicate:eventsPredicate];
 }
 
 
@@ -158,7 +158,7 @@ NSArray *getTasks(Arguments *args, NSArray *calendars)
 	else // all uncompleted tasks
 		tasksPredicate = [CalCalendarStore taskPredicateWithUncompletedTasks:calendars];
 	
-	return [[CalCalendarStore defaultCalendarStore] tasksWithPredicate:tasksPredicate];
+	return [CALENDAR_STORE tasksWithPredicate:tasksPredicate];
 }
 
 
@@ -517,7 +517,7 @@ NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSAr
 
 NSArray *getCalendars(Arguments *args)
 {
-	NSMutableArray *calendars = [[[[CalCalendarStore defaultCalendarStore] calendars] mutableCopy] autorelease];
+	NSMutableArray *calendars = [[[CALENDAR_STORE calendars] mutableCopy] autorelease];
 	return filterCalendars(calendars, args->includeCals, args->excludeCals);
 }
 

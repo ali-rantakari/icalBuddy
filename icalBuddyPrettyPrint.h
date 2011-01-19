@@ -28,7 +28,7 @@ THE SOFTWARE.
 */
 
 #import <Foundation/Foundation.h>
-#import <CalendarStore/CalendarStore.h>
+#import "calendarStoreImport.h"
 #import "icalBuddyDefines.h"
 
 

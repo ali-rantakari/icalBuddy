@@ -30,7 +30,7 @@ else
 	ARCH_64BIT=
 endif
 
-SOURCE_FILES=icalBuddy*.m ANSIEscapeHelper.m HG*.m IcalBuddy*.m
+SOURCE_FILES=icalBuddy[ABCDEFGHIJKLMNOPQRSTUVWXYZ]*.m ANSIEscapeHelper.m HG*.m IcalBuddy*.m
 
 
 
@@ -46,7 +46,7 @@ icalBuddy: $(SOURCE_FILES)
 	@echo
 	@echo ---- Compiling main app:
 	@echo ======================================
-	$(COMPILER) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ $(SOURCE_FILES)
+	$(COMPILER) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m $(SOURCE_FILES)
 
 
 
@@ -59,8 +59,21 @@ analyze:
 	@echo
 	@echo ---- Analyzing:
 	@echo ======================================
-	$(COMPILER_CLANG) --analyze $(SOURCE_FILES)
+	$(COMPILER_CLANG) --analyze icalBuddy.m $(SOURCE_FILES)
 
+
+
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# compile the test runner
+#-------------------------------------------------------------------------
+testRunner: $(SOURCE_FILES)
+	@echo
+	@echo ---- Compiling test runner:
+	@echo ======================================
+	$(COMPILER) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ testRunner.m $(SOURCE_FILES) calendarStoreMock/*.m
 
 
 
