@@ -91,21 +91,21 @@ THE SOFTWARE.
 	
 	if ([self respondsToSelector:setUpSel])
 	{
-		PRINTLN_B(@"* setUp");
+		PRINTLN_B(@"• setUp");
 		[self performSelector:setUpSel];
 	}
 	
 	NSArray *testMethods = [self getTestMethodNames];
 	for (NSString *name in testMethods)
 	{
-		PRINTLN_B(@"+ Running test: %@", name);
+		PRINTLN_B(@"• Running test: %@", name);
 		BOOL success = [[self performSelector:NSSelectorFromString(name)] boolValue];
 		
 		testInfo.numTests++;
 		if (success)
 		{
 			testInfo.numSuccesses++;
-			PRINTLN_G(@"- TEST %@ OK.", name);
+			PRINTLN_G(@"+ TEST %@ OK.", name);
 		}
 		else
 			PRINTLN_R(@"- TEST %@ FAILED.", name);
@@ -113,7 +113,7 @@ THE SOFTWARE.
 	
 	if ([self respondsToSelector:tearDownSel])
 	{
-		PRINTLN_B(@"* tearDown");
+		PRINTLN_B(@"• tearDown");
 		[self performSelector:tearDownSel];
 	}
 	

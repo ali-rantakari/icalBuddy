@@ -1,4 +1,4 @@
-// icalBuddy test unit test
+// icalBuddy events test
 // 
 // http://hasseg.org/icalBuddy
 //
@@ -27,26 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#import "TestTest.h"
-#import "../../HGCLIUtils.h"
-#import "../../calendarStoreImport.h"
-#import "../../calendarStoreMock/mockHelperFunctions.h"
+#import "EventsTest.h"
 
-
-@implementation TestTest
-
-- (id) init
-{
-	if (!(self = [super init]))
-		return nil;
-	
-	return self;
-}
-
-- (void) dealloc
-{
-	[super dealloc];
-}
+@implementation EventsTest
 
 - (void) setUp
 {

@@ -29,7 +29,7 @@ THE SOFTWARE.
 
 #import "allTests.h"
 
-#import "TestTest.h"
+#import "EventsTest.h"
 
 
 
@@ -37,7 +37,7 @@ NSArray *getAllTests()
 {
 	NSMutableArray *allTests = [NSMutableArray array];
 	
-	[allTests addObject:[TestTest new]];
+	[allTests addObject:[EventsTest new]];
 	
 	return allTests;
 }

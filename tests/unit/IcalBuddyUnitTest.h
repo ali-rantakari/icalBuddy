@@ -43,6 +43,9 @@ THE SOFTWARE.
 #import "../../icalBuddyArgs.h"
 #import "../../icalBuddyFunctions.h"
 
+#import "../../calendarStoreImport.h"
+#import "../../calendarStoreMock/mockHelperFunctions.h"
+
 
 @interface IcalBuddyUnitTest : UnitTest
 {

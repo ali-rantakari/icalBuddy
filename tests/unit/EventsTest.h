@@ -1,4 +1,4 @@
-// icalBuddy test unit test
+// icalBuddy events test
 // 
 // http://hasseg.org/icalBuddy
 //
@@ -29,7 +29,7 @@ THE SOFTWARE.
 
 #import "IcalBuddyUnitTest.h"
 
-@interface TestTest : IcalBuddyUnitTest
+@interface EventsTest : IcalBuddyUnitTest
 {
 }
 
