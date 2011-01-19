@@ -46,7 +46,8 @@ THE SOFTWARE.
 #import "icalBuddyArgs.h"
 #import "icalBuddyFunctions.h"
 
-//#import "tests/allTests.h"
+#import "tests/unit/UnitTest.h"
+#import "tests/unit/allTests.h"
 
 
 
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
 {
 	NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
 	
+	/*
 	NSMutableAttributedString *stdoutBuffer = kEmptyMutableAttributedString;
 	
 	now = [NSDate date];
@@ -71,9 +73,24 @@ int main(int argc, char *argv[])
 	processArgs(&args, &prettyPrintOptions, &propertySeparators);
 	initFormatting(nil, propertySeparators);
 	initPrettyPrint(stdoutBuffer, prettyPrintOptions);
+	*/
 	
 	
-	Printf(@"calendars: %@\n", [CALENDAR_STORE calendars]);
+	NSUInteger totalNumTests = 0;
+	NSUInteger totalNumSuccesses = 0;
+	
+	NSArray *allTests = getAllTests();
+	for (UnitTest *test in allTests)
+	{
+		TestInfo *info = [test runTests];
+		totalNumTests += info.numTests;
+		totalNumSuccesses += info.numSuccesses;
+	}
+	
+	Printf(@"\n");
+	PRINTLN_Y(@"%i/%i tests succeeded.", totalNumSuccesses, totalNumTests);
+	
+	
 	
 	
 	[autoReleasePool release];
