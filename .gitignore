@@ -1,6 +1,7 @@
 # ignored patterns
 
-# clang --analyze plist files
+# compiler-generated
+*.dSYM
 icalBuddy*.plist
 ANSIEscapeHelper.plist
 HG*.plist
