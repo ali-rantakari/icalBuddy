@@ -70,14 +70,12 @@ typedef struct
 } PrintSection;
 
 
-// printOptions for calendar item printing functions
-enum calItemPrintOption
+typedef struct
 {
-	PRINT_OPTION_NONE = 				0,
-	PRINT_OPTION_SINGLE_DAY = 			(1 << 0),	// in the contex of a single day (for events) (i.e. don't print out full dates)
-	PRINT_OPTION_CALENDAR_AGNOSTIC = 	(1 << 1),	// calendar-agnostic (i.e. don't print out the calendar name)
-	PRINT_OPTION_WITHOUT_PROP_NAMES =	(1 << 2),	// without property names (i.e. print only the values)
-	PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES = (1 << 3)
+	BOOL singleDay;			// in the contex of a single day (for events) (i.e. don't print out full dates)
+	BOOL calendarAgnostic;	// calendar-agnostic (i.e. don't print out the calendar name)
+	BOOL withoutPropNames;	// without property names (i.e. print only the values)
+	BOOL calendarColorsForSectionTitles;
 } CalItemPrintOption;
 
 
@@ -95,12 +93,12 @@ PrettyPrintOptions getDefaultPrettyPrintOptions();
 
 NSString* dateStr(NSDate *date, DatePrintOption printOption);
 
-NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions, NSDate *contextDay);
-NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions);
+NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay);
+NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, CalItemPrintOption printOptions);
 
-void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay);
-void printCalTask(CalTask *task, int printOptions);
-void printItemSections(NSArray *sections, int printOptions);
+void printCalEvent(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay);
+void printCalTask(CalTask *task, CalItemPrintOption printOptions);
+void printItemSections(NSArray *sections, CalItemPrintOption printOptions);
 
 void flushOutputBuffer(NSMutableAttributedString *buffer, Arguments *args, NSDictionary *formattedKeywords);
 

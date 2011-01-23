@@ -35,7 +35,6 @@ THE SOFTWARE.
 
 #import "HGCLIUtils.h"
 #import "HGDateFunctions.h"
-#import "icalBuddyPrettyPrint.h"
 #import "icalBuddyL10N.h"
 
 
@@ -266,41 +265,45 @@ NSArray *sortCalItems(Arguments *args, NSArray *calItems)
 }
 
 
-int getPrintOptions(Arguments *args)
+CalItemPrintOption getPrintOptions(Arguments *args)
 {
 	BOOL printingEvents = areWePrintingEvents(args);
 	BOOL printingTasks = areWePrintingTasks(args);
 	
-	int printOptions = PRINT_OPTION_NONE;
+	CalItemPrintOption printOptions = {NO,NO,NO,NO};
 	
+	// set default print options
 	if (printingEvents)
 	{
-		// default print options
-		printOptions = 
-			PRINT_OPTION_SINGLE_DAY | 
-			(args->noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+		printOptions.singleDay = YES;
+		if (args->noCalendarNames)
+			printOptions.calendarAgnostic = YES;
 		
 		if (args->output_is_eventsFromTo)
-			printOptions &= ~PRINT_OPTION_SINGLE_DAY;
+			printOptions.singleDay = NO;
 		else if (args->output_is_eventsToday)
 		{
 			NSRange arg_output_plusSymbolRange = [args->output rangeOfString:@"+"];
 			if (arg_output_plusSymbolRange.location != NSNotFound)
-				printOptions &= ~PRINT_OPTION_SINGLE_DAY;
+				printOptions.singleDay = NO;
 		}
 	}
 	else if (printingTasks)
 	{
-		printOptions = (args->noCalendarNames ? PRINT_OPTION_CALENDAR_AGNOSTIC : PRINT_OPTION_NONE);
+		if (args->noCalendarNames)
+			printOptions.calendarAgnostic = YES;
 	}
 	
 	if (args->noPropNames)
-		printOptions |= PRINT_OPTION_WITHOUT_PROP_NAMES;
+		printOptions.withoutPropNames = YES;
 	
 	if (args->separateByCalendar)
-		printOptions |= PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES | PRINT_OPTION_CALENDAR_AGNOSTIC;
+	{
+		printOptions.calendarColorsForSectionTitles = YES;
+		printOptions.calendarAgnostic = YES;
+	}
 	else if (args->separateByDate)
-		printOptions |= PRINT_OPTION_SINGLE_DAY;
+		printOptions.singleDay = YES;
 	
 	return printOptions;
 }

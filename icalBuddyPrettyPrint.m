@@ -267,7 +267,7 @@ NSString* dateStr(NSDate *date, DatePrintOption printOption)
 
 
 // returns a pretty-printed string representation of the specified event property
-NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, int printOptions, NSDate *contextDay)
+NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
 {
 	if (event == nil)
 		return nil;
@@ -318,7 +318,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		
 		thisPropOutputValue = M_ATTR_STR(thisPropTempValue);
 		
-		if (!(printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC))
+		if (!printOptions.calendarAgnostic)
 		{
 			thisPropOutputValueSuffix = M_ATTR_STR(@" ");
 			[thisPropOutputValueSuffix
@@ -384,7 +384,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 	{
 		if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
 		{
-			if (!(printOptions & PRINT_OPTION_SINGLE_DAY))
+			if (!printOptions.singleDay)
 				thisPropOutputValue = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
 		}
 		else
@@ -396,7 +396,6 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 			// doesn't start or end on context day) and then combine them together
 			// based on what we want to display.
 			
-			BOOL singleDayContext = (printOptions & PRINT_OPTION_SINGLE_DAY);
 			BOOL startsOnContextDay = NO;
 			BOOL endsOnContextDay = NO;
 			if (contextDay != nil)
@@ -405,18 +404,20 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				endsOnContextDay = datesRepresentSameDay(contextDay, [event endDate]);
 			}
 			
-			if ( !singleDayContext || (singleDayContext && ![event isAllDay]) )
+			BOOL printDatetime = (!printOptions.singleDay || (printOptions.singleDay && ![event isAllDay]));
+			
+			if (printDatetime)
 			{
-				if (prettyPrintOptions.excludeEndDates || [[event startDate] isEqualToDate:[event endDate]])
+				BOOL printOnlyStartDatetime = (prettyPrintOptions.excludeEndDates
+											   || [[event startDate] isEqualToDate:[event endDate]]);
+				if (printOnlyStartDatetime)
 				{
-					// -> we only want to show the start datetime
-					
-					if (singleDayContext && !startsOnContextDay)
+					if (printOptions.singleDay && !startsOnContextDay)
 						thisPropOutputValue = M_ATTR_STR(@"...");
 					else
 					{
 						DatePrintOption datePrintOpt = DATE_PRINT_OPTION_NONE;
-						BOOL printDate = !singleDayContext;
+						BOOL printDate = !printOptions.singleDay;
 						BOOL printTime = ![event isAllDay];
 						
 						if (printDate && printTime)
@@ -434,7 +435,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 				}
 				else
 				{
-					if (singleDayContext)
+					if (printOptions.singleDay)
 					{
 						if (startsOnContextDay && endsOnContextDay)
 							thisPropOutputValue = M_ATTR_STR((
@@ -526,7 +527,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 	
 	NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 	
-	if (thisPropOutputName != nil && !(printOptions & PRINT_OPTION_WITHOUT_PROP_NAMES))
+	if (thisPropOutputName != nil && !printOptions.withoutPropNames)
 	{
 		[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
 		[retVal appendAttributedString:thisPropOutputName];
@@ -541,7 +542,7 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 
 
 // pretty-prints out the specified event
-void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay)
+void printCalEvent(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
 {
 	if (prettyPrintOptions.maxNumPrintedItems > 0 && prettyPrintOptions.maxNumPrintedItems <= prettyPrintOptions.numPrintedItems)
 		return;
@@ -620,7 +621,7 @@ void printCalEvent(CalEvent *event, int printOptions, NSDate *contextDay)
 
 
 // returns a pretty-printed string representation of the specified task property
-NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int printOptions)
+NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, CalItemPrintOption printOptions)
 {
 	if (task == nil)
 		return nil;
@@ -633,7 +634,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 	{
 		thisPropOutputValue = M_ATTR_STR([task title]);
 		
-		if (!(printOptions & PRINT_OPTION_CALENDAR_AGNOSTIC))
+		if (!printOptions.calendarAgnostic)
 		{
 			thisPropOutputValueSuffix = M_ATTR_STR(@" ");
 			[thisPropOutputValueSuffix
@@ -688,7 +689,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 	{
 		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
 		
-		if ([task dueDate] != nil && !(printOptions & PRINT_OPTION_SINGLE_DAY))
+		if ([task dueDate] != nil && !printOptions.singleDay)
 			thisPropOutputValue = M_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
 	}
 	else if ([propName isEqualToString:kPropName_priority])
@@ -747,7 +748,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 	
 	NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 	
-	if (thisPropOutputName != nil && !(printOptions & PRINT_OPTION_WITHOUT_PROP_NAMES))
+	if (thisPropOutputName != nil && !printOptions.withoutPropNames)
 	{
 		[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
 		[retVal appendAttributedString:thisPropOutputName];
@@ -762,7 +763,7 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, int
 
 
 // pretty-prints out the specified task
-void printCalTask(CalTask *task, int printOptions)
+void printCalTask(CalTask *task, CalItemPrintOption printOptions)
 {
 	if (prettyPrintOptions.maxNumPrintedItems > 0 && prettyPrintOptions.maxNumPrintedItems <= prettyPrintOptions.numPrintedItems)
 		return;
@@ -842,11 +843,7 @@ void printCalTask(CalTask *task, int printOptions)
 
 
 
-// prints a bunch of sections each of which has a title and some calendar
-// items.
-// each object in the sections array must be an NSDictionary with keys
-// sectionTitle (NSString) and sectionItems (NSArray of CalCalendarItems.)
-void printItemSections(NSArray *sections, int printOptions)
+void printItemSections(NSArray *sections, CalItemPrintOption printOptions)
 {
 	BOOL currentIsFirstPrintedSection = YES;
 	
@@ -871,7 +868,7 @@ void printItemSections(NSArray *sections, int printOptions)
 		
 		// if the section title has no foreground color and we're told to
 		// use calendar colors for them, do so
-		if ((printOptions & PRINT_OPTION_CAL_COLORS_FOR_SECTION_TITLES)
+		if (printOptions.calendarColorsForSectionTitles
 			&& prettyPrintOptions.useCalendarColorsForTitles
 			&& ![[[thisOutput attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
 			&& section.items != nil && [section.items count] > 0

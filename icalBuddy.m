@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 		if (calItems == nil)
 			return 1;
 		
-		int printOptions = getPrintOptions(&args);
+		CalItemPrintOption printOptions = getPrintOptions(&args);
 		
 		calItems = sortCalItems(&args, calItems);
 		

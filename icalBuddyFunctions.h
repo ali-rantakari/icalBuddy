@@ -29,6 +29,7 @@ THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
 #import "icalBuddyDefines.h"
+#import "icalBuddyPrettyPrint.h"
 
 // todo: the right place for these?
 extern NSDate *now;
@@ -41,7 +42,7 @@ NSArray *getCalItems(Arguments *args);
 NSArray *sortCalItems(Arguments *args, NSArray *calItems);
 NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems);
 
-int getPrintOptions(Arguments *args);
+CalItemPrintOption getPrintOptions(Arguments *args);
 NSArray *getCalendars(Arguments *args);
 
 void printAllCalendars(Arguments *args);
