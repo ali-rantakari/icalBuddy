@@ -213,7 +213,7 @@ package: icalBuddy docs
 # create zip archive
 	mkdir -p $(TEMP_DEPLOYMENT_DIR)
 	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) $(FILES_TO_PACKAGE)" | xargs zip
-	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
+	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -x *.DS_Store -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
 	
 # if changelog doesn't already exist in the deployment dir
 # for this version, get 'general' changelog file from root if
