@@ -264,6 +264,8 @@ clean:
 	@echo ======================================
 	-rm -Rf icalBuddy
 	-rm -Rf icalBuddy.1
+	-rm -Rf testIcalBuddy
+	-rm -Rf testRunner
 	-rm -Rf icalBuddy*.plist
 	-rm -Rf IcalBuddy*.plist
 	-rm -Rf HG*.plist
