@@ -266,274 +266,335 @@ NSString* dateStr(NSDate *date, DatePrintOption printOption)
 
 
 
+@interface PropertyPresentationElements : NSObject
+{
+	NSMutableAttributedString *name;
+	NSMutableAttributedString *value;
+	NSMutableAttributedString *valueSuffix;
+}
+@property(retain) NSMutableAttributedString *name;
+@property(retain) NSMutableAttributedString *value;
+@property(retain) NSMutableAttributedString *valueSuffix;
+@end
+
+@implementation PropertyPresentationElements
+@synthesize name;
+@synthesize value;
+@synthesize valueSuffix;
+@end
+
+
+
+PropertyPresentationElements *getEventTitlePresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	NSString *thisPropTempValue = nil;
+	
+	if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
+	{
+		// special case for events in the Birthdays calendar (they don't seem to have titles
+		// so we have to use the URI to find the ABPerson from the Address Book
+		// and print their name from there)
+		
+		NSString *personId = [[NSString stringWithFormat:@"%@", [event url]]
+			stringByReplacingOccurrencesOfString:@"addressbook://"
+			withString:@""
+			];
+		ABRecord *person = [[ABAddressBook sharedAddressBook] recordForUniqueId:personId];
+		
+		if (person != nil && [person isMemberOfClass: [ABPerson class]])
+		{
+			NSString *thisTitle = nil;
+			if ([person isEqual:[[ABAddressBook sharedAddressBook] me]])
+				thisTitle = localizedStr(kL10nKeyMyBirthday);
+			else
+			{
+				NSString *contactFullName = strConcat(
+					[person valueForProperty:kABFirstNameProperty],
+					@" ",
+					[person valueForProperty:kABLastNameProperty],
+					nil
+					);
+				thisTitle = [NSString stringWithFormat:localizedStr(kL10nKeySomeonesBirthday), contactFullName];
+			}
+			thisPropTempValue = thisTitle;
+		}
+	}
+	else
+		thisPropTempValue = [event title];
+	
+	elements.value = M_ATTR_STR(thisPropTempValue);
+	
+	if (!printOptions.calendarAgnostic)
+	{
+		elements.valueSuffix = M_ATTR_STR(@" ");
+		[elements.valueSuffix
+			appendAttributedString: mutableAttrStrWithAttrs(
+				strConcat(@"(", [[event calendar] title], @")", nil),
+				getCalNameInTitleStringAttributes()
+				)
+			];
+	}
+	
+	return elements;
+}
+
+PropertyPresentationElements *getEventLocationPresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameLocation), @":", nil));
+	
+	if ([event location] != nil &&
+		![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
+		)
+		elements.value = M_ATTR_STR([event location]);
+	
+	return elements;
+}
+
+PropertyPresentationElements *getEventNotesPresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
+	
+	if ([event notes] != nil &&
+		![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
+		)
+	{
+		NSString *thisNewlineReplacement = nil;
+		if (prettyPrintOptions.notesNewlineReplacement == nil)
+		{
+			NSInteger thisNewlinesIndentModifier = [elements.name length]+1;
+			thisNewlineReplacement = strConcat(@"\n", WHITESPACE(thisNewlinesIndentModifier), nil);
+		}
+		else
+			thisNewlineReplacement = prettyPrintOptions.notesNewlineReplacement;
+		
+		elements.value = M_ATTR_STR(
+			[[event notes]
+				stringByReplacingOccurrencesOfString:@"\n"
+				withString:thisNewlineReplacement
+				]
+			);
+	}
+	
+	return elements;
+}
+
+PropertyPresentationElements *getEventURLPresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
+	
+	if ([event url] != nil &&
+		![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday]
+		)
+		elements.value = M_ATTR_STR(([NSString stringWithFormat: @"%@", [event url]]));
+	
+	return elements;
+}
+
+PropertyPresentationElements *getEventUIDPresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
+	elements.value = M_ATTR_STR([event uid]);
+	
+	return elements;
+}
+
+PropertyPresentationElements *getEventDatetimePresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
+	{
+		if (!printOptions.singleDay)
+			elements.value = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
+		return elements;
+	}
+	
+	BOOL startsOnContextDay = NO;
+	BOOL endsOnContextDay = NO;
+	if (contextDay != nil)
+	{
+		startsOnContextDay = datesRepresentSameDay(contextDay, [event startDate]);
+		endsOnContextDay = datesRepresentSameDay(contextDay, [event endDate]);
+	}
+	
+	BOOL printDatetime = (!printOptions.singleDay || (printOptions.singleDay && ![event isAllDay]));
+	
+	if (!printDatetime)
+		return elements;
+	
+	BOOL printOnlyStartDatetime = (prettyPrintOptions.excludeEndDates
+								   || [[event startDate] isEqualToDate:[event endDate]]);
+	if (printOnlyStartDatetime)
+	{
+		if (printOptions.singleDay && !startsOnContextDay)
+			elements.value = M_ATTR_STR(@"...");
+		else
+		{
+			DatePrintOption datePrintOpt = DATE_PRINT_OPTION_NONE;
+			BOOL printDate = !printOptions.singleDay;
+			BOOL printTime = ![event isAllDay];
+			
+			if (printDate && printTime)
+				datePrintOpt = DATE_AND_TIME;
+			else if (printDate)
+				datePrintOpt = ONLY_DATE;
+			else if (printTime)
+				datePrintOpt = ONLY_TIME;
+			
+			if (datePrintOpt != DATE_PRINT_OPTION_NONE)
+				elements.value = M_ATTR_STR(
+					dateStr([event startDate], datePrintOpt)
+					);
+		}
+		
+		return elements;
+	}
+	
+	if (printOptions.singleDay)
+	{
+		if (startsOnContextDay && endsOnContextDay)
+			elements.value = M_ATTR_STR((
+				strConcat(
+					dateStr([event startDate], ONLY_TIME),
+					@" - ",
+					dateStr([event endDate], ONLY_TIME),
+					nil
+					)
+				));
+		else if (startsOnContextDay)
+			elements.value = M_ATTR_STR((
+				strConcat(dateStr([event startDate], ONLY_TIME), @" - ...", nil)
+				));
+		else if (endsOnContextDay)
+			elements.value = M_ATTR_STR((
+				strConcat(@"... - ", dateStr([event endDate], ONLY_TIME), nil)
+				));
+		else
+			elements.value = M_ATTR_STR(@"... - ...");
+		
+		return elements;
+	}
+	
+	if ([event isAllDay])
+	{
+		// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
+		// we want them displayed as only spanning from <start day> to <end day>
+		NSDate *endDateMinusOneDay = dateByAddingDays([event endDate], -1);
+		NSInteger daysDiff = getDayDiff([event startDate], endDateMinusOneDay);
+		
+		if (daysDiff > 0)
+		{
+			elements.value = M_ATTR_STR((
+				strConcat(
+					dateStr([event startDate], ONLY_DATE),
+					@" - ",
+					dateStr(endDateMinusOneDay, ONLY_DATE),
+					nil
+					)
+				));
+		}
+		else
+			elements.value = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
+		
+		return elements;
+	}
+	
+	NSString *startDateFormattedStr = dateStr([event startDate], DATE_AND_TIME);
+	
+	DatePrintOption datePrintOpt = datesRepresentSameDay([event startDate], [event endDate]) ? ONLY_TIME : DATE_AND_TIME;
+	NSString *endDateFormattedStr = dateStr([event endDate], datePrintOpt);
+	
+	elements.value = M_ATTR_STR(strConcat(startDateFormattedStr, @" - ", endDateFormattedStr, nil));
+	
+	return elements;
+}
+
+
 // returns a pretty-printed string representation of the specified event property
 NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
 {
 	if (event == nil)
 		return nil;
 	
-	NSMutableAttributedString *thisPropOutputName = nil;
-	NSMutableAttributedString *thisPropOutputValue = nil;
-	NSMutableAttributedString *thisPropOutputValueSuffix = nil;
+	PropertyPresentationElements *elements = nil;
 	
 	if ([propName isEqualToString:kPropName_title])
 	{
-		NSString *thisPropTempValue = nil;
-		
-		if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
-		{
-			// special case for events in the Birthdays calendar (they don't seem to have titles
-			// so we have to use the URI to find the ABPerson from the Address Book
-			// and print their name from there)
-			
-			NSString *personId = [[NSString stringWithFormat:@"%@", [event url]]
-				stringByReplacingOccurrencesOfString:@"addressbook://"
-				withString:@""
-				];
-			ABRecord *person = [[ABAddressBook sharedAddressBook] recordForUniqueId:personId];
-			
-			if (person != nil)
-			{
-				if ([person isMemberOfClass: [ABPerson class]])
-				{
-					NSString *thisTitle;
-					if ([person isEqual:[[ABAddressBook sharedAddressBook] me]])
-						thisTitle = localizedStr(kL10nKeyMyBirthday);
-					else
-					{
-						NSString *contactFullName = strConcat(
-							[person valueForProperty:kABFirstNameProperty],
-							@" ",
-							[person valueForProperty:kABLastNameProperty],
-							nil
-							);
-						thisTitle = [NSString stringWithFormat:localizedStr(kL10nKeySomeonesBirthday), contactFullName];
-					}
-					thisPropTempValue = thisTitle;
-				}
-			}
-		}
-		else
-			thisPropTempValue = [event title];
-		
-		thisPropOutputValue = M_ATTR_STR(thisPropTempValue);
-		
-		if (!printOptions.calendarAgnostic)
-		{
-			thisPropOutputValueSuffix = M_ATTR_STR(@" ");
-			[thisPropOutputValueSuffix
-				appendAttributedString: mutableAttrStrWithAttrs(
-					strConcat(@"(", [[event calendar] title], @")", nil),
-					getCalNameInTitleStringAttributes()
-					)
-				];
-		}
+		elements = getEventTitlePresentation(event, printOptions, contextDay);
 	}
 	else if ([propName isEqualToString:kPropName_location])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameLocation), @":", nil));
-		
-		if ([event location] != nil &&
-			![[[event location] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
-			)
-			thisPropOutputValue = M_ATTR_STR([event location]);
+		elements = getEventLocationPresentation(event, printOptions, contextDay);
 	}
 	else if ([propName isEqualToString:kPropName_notes])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
-		
-		if ([event notes] != nil &&
-			![[[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
-			)
-		{
-			NSString *thisNewlineReplacement;
-			if (prettyPrintOptions.notesNewlineReplacement == nil)
-			{
-				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1;
-				thisNewlineReplacement = [NSString
-					stringWithFormat:@"\n%@",
-						WHITESPACE(thisNewlinesIndentModifier)
-					];
-			}
-			else
-				thisNewlineReplacement = prettyPrintOptions.notesNewlineReplacement;
-			
-			thisPropOutputValue = M_ATTR_STR(
-				[[event notes]
-					stringByReplacingOccurrencesOfString:@"\n"
-					withString:thisNewlineReplacement
-					]
-				);
-		}
+		elements = getEventNotesPresentation(event, printOptions, contextDay);
 	}
 	else if ([propName isEqualToString:kPropName_url])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
-		
-		if ([event url] != nil &&
-			![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday]
-			)
-			thisPropOutputValue = M_ATTR_STR(([NSString stringWithFormat: @"%@", [event url]]));
+		elements = getEventURLPresentation(event, printOptions, contextDay);
 	}
 	else if ([propName isEqualToString:kPropName_UID])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
-		thisPropOutputValue = M_ATTR_STR([event uid]);
+		elements = getEventUIDPresentation(event, printOptions, contextDay);
 	}
 	else if ([propName isEqualToString:kPropName_datetime])
 	{
-		if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
-		{
-			if (!printOptions.singleDay)
-				thisPropOutputValue = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
-		}
-		else
-		{
-			// TODO:
-			// fix the convoluted control flow here.
-			// should probably determine the start and end datetime strings
-			// first (i.e. make them "..." if singleDayContext and the event
-			// doesn't start or end on context day) and then combine them together
-			// based on what we want to display.
-			
-			BOOL startsOnContextDay = NO;
-			BOOL endsOnContextDay = NO;
-			if (contextDay != nil)
-			{
-				startsOnContextDay = datesRepresentSameDay(contextDay, [event startDate]);
-				endsOnContextDay = datesRepresentSameDay(contextDay, [event endDate]);
-			}
-			
-			BOOL printDatetime = (!printOptions.singleDay || (printOptions.singleDay && ![event isAllDay]));
-			
-			if (printDatetime)
-			{
-				BOOL printOnlyStartDatetime = (prettyPrintOptions.excludeEndDates
-											   || [[event startDate] isEqualToDate:[event endDate]]);
-				if (printOnlyStartDatetime)
-				{
-					if (printOptions.singleDay && !startsOnContextDay)
-						thisPropOutputValue = M_ATTR_STR(@"...");
-					else
-					{
-						DatePrintOption datePrintOpt = DATE_PRINT_OPTION_NONE;
-						BOOL printDate = !printOptions.singleDay;
-						BOOL printTime = ![event isAllDay];
-						
-						if (printDate && printTime)
-							datePrintOpt = DATE_AND_TIME;
-						else if (printDate)
-							datePrintOpt = ONLY_DATE;
-						else if (printTime)
-							datePrintOpt = ONLY_TIME;
-						
-						if (datePrintOpt != DATE_PRINT_OPTION_NONE)
-							thisPropOutputValue = M_ATTR_STR(
-								dateStr([event startDate], datePrintOpt)
-								);
-					}
-				}
-				else
-				{
-					if (printOptions.singleDay)
-					{
-						if (startsOnContextDay && endsOnContextDay)
-							thisPropOutputValue = M_ATTR_STR((
-								strConcat(
-									dateStr([event startDate], ONLY_TIME),
-									@" - ",
-									dateStr([event endDate], ONLY_TIME),
-									nil
-									)
-								));
-						else if (startsOnContextDay)
-							thisPropOutputValue = M_ATTR_STR((
-								strConcat(dateStr([event startDate], ONLY_TIME), @" - ...", nil)
-								));
-						else if (endsOnContextDay)
-							thisPropOutputValue = M_ATTR_STR((
-								strConcat(@"... - ", dateStr([event endDate], ONLY_TIME), nil)
-								));
-						else
-							thisPropOutputValue = M_ATTR_STR(@"... - ...");
-					}
-					else
-					{
-						if ([event isAllDay])
-						{
-							// all-day events technically span from <start day> at 00:00 to <end day+1> at 00:00 even though
-							// we want them displayed as only spanning from <start day> to <end day>
-							NSDate *endDateMinusOneDay = dateByAddingDays([event endDate], -1);
-							NSInteger daysDiff = getDayDiff([event startDate], endDateMinusOneDay);
-							
-							if (daysDiff > 0)
-							{
-								thisPropOutputValue = M_ATTR_STR((
-									strConcat(
-										dateStr([event startDate], ONLY_DATE),
-										@" - ",
-										dateStr(endDateMinusOneDay, ONLY_DATE),
-										nil
-										)
-									));
-							}
-							else
-								thisPropOutputValue = M_ATTR_STR(dateStr([event startDate], ONLY_DATE));
-						}
-						else
-						{
-							NSString *startDateFormattedStr = dateStr([event startDate], DATE_AND_TIME);
-							
-							DatePrintOption datePrintOpt = datesRepresentSameDay([event startDate], [event endDate]) ? ONLY_TIME : DATE_AND_TIME;
-							NSString *endDateFormattedStr = dateStr([event endDate], datePrintOpt);
-							
-							thisPropOutputValue = M_ATTR_STR(strConcat(startDateFormattedStr, @" - ", endDateFormattedStr, nil));
-						}
-					}
-				}
-			}
-		}
+		elements = getEventDatetimePresentation(event, printOptions, contextDay);
 	}
-	
-	if (thisPropOutputValue == nil)
+	else
 		return nil;
 	
-	if (thisPropOutputName != nil)
+	
+	if (elements.value == nil)
+		return nil;
+	
+	if (elements.name != nil)
 	{
-		[thisPropOutputName
+		[elements.name
 			setAttributes:getPropNameStringAttributes(propName)
-			range:NSMakeRange(0, [thisPropOutputName length])
+			range:NSMakeRange(0, [elements.name length])
 			];
 	}
 	
-	[thisPropOutputValue
-		setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
-		range:NSMakeRange(0, [thisPropOutputValue length])
+	[elements.value
+		setAttributes:getPropValueStringAttributes(propName, [elements.value string])
+		range:NSMakeRange(0, [elements.value length])
 		];
 	
 	// if no foreground color for title, use calendar color by default
 	if ([propName isEqualToString:kPropName_title]
 		&& prettyPrintOptions.useCalendarColorsForTitles
-		&& ![[[thisPropOutputValue attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
+		&& ![[[elements.value attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
 		)
-		[thisPropOutputValue
+		[elements.value
 			addAttribute:NSForegroundColorAttributeName
 			value:getClosestAnsiColorForColor([[event calendar] color], YES)
-			range:NSMakeRange(0, [thisPropOutputValue length])
+			range:NSMakeRange(0, [elements.value length])
 			];
 	
-	if (thisPropOutputValueSuffix != nil)
-		[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
+	if (elements.valueSuffix != nil)
+		[elements.value appendAttributedString:elements.valueSuffix];
 	
 	NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 	
-	if (thisPropOutputName != nil && !printOptions.withoutPropNames)
+	if (elements.name != nil && !printOptions.withoutPropNames)
 	{
-		[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
-		[retVal appendAttributedString:thisPropOutputName];
+		[elements.name appendAttributedString:ATTR_STR(@" ")];
+		[retVal appendAttributedString:elements.name];
 	}
 	
-	[retVal appendAttributedString:thisPropOutputValue];
+	[retVal appendAttributedString:elements.value];
 	
 	return retVal;
 }
@@ -547,75 +608,188 @@ void printCalEvent(CalEvent *event, CalItemPrintOption printOptions, NSDate *con
 	if (prettyPrintOptions.maxNumPrintedItems > 0 && prettyPrintOptions.maxNumPrintedItems <= prettyPrintOptions.numPrintedItems)
 		return;
 	
-	if (event != nil)
+	if (event == nil)
+		return;
+	
+	NSUInteger numPrintedProps = 0;
+	
+	for (NSString *thisProp in prettyPrintOptions.propertyOrder)
 	{
-		NSUInteger numPrintedProps = 0;
+		if (!shouldPrintProperty(thisProp, prettyPrintOptions.includedEventProperties, prettyPrintOptions.excludedEventProperties))
+			continue;
 		
-		for (NSString *thisProp in prettyPrintOptions.propertyOrder)
+		NSMutableAttributedString *thisPropStr = getEventPropStr(thisProp, event, printOptions, contextDay);
+		if (thisPropStr == nil || [thisPropStr length] <= 0)
+			continue;
+		
+		NSMutableAttributedString *prefixStr;
+		if (numPrintedProps == 0)
+			prefixStr = mutableAttrStrWithAttrs(prettyPrintOptions.prefixStrBullet, getBulletStringAttributes(NO));
+		else
+			prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+		
+		// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
+		// with a number of whitespace characters ("indentation") that matches the
+		// length of prefixStr's contents after the last newline
+		NSRange prefixStrLastNewlineRange = [[prefixStr string]
+			rangeOfString:@"\n"
+			options:(NSLiteralSearch|NSBackwardsSearch)
+			range:NSMakeRange(0,[prefixStr length])
+			];
+		if (prefixStrLastNewlineRange.location != NSNotFound)
 		{
-			if (!shouldPrintProperty(thisProp, prettyPrintOptions.includedEventProperties, prettyPrintOptions.excludedEventProperties))
-				continue;
-			
-			NSMutableAttributedString *thisPropStr = getEventPropStr(thisProp, event, printOptions, contextDay);
-			if (thisPropStr == nil || [thisPropStr length] <= 0)
-				continue;
-			
-			NSMutableAttributedString *prefixStr;
-			if (numPrintedProps == 0)
-				prefixStr = mutableAttrStrWithAttrs(prettyPrintOptions.prefixStrBullet, getBulletStringAttributes(NO));
-			else
-				prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
-			
-			// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
-			// with a number of whitespace characters ("indentation") that matches the
-			// length of prefixStr's contents after the last newline
-			NSRange prefixStrLastNewlineRange = [[prefixStr string]
-				rangeOfString:@"\n"
-				options:(NSLiteralSearch|NSBackwardsSearch)
-				range:NSMakeRange(0,[prefixStr length])
-				];
-			if (prefixStrLastNewlineRange.location != NSNotFound)
-			{
-				replaceInMutableAttrStr(
-					thisPropStr,
-					@"\n",
-					ATTR_STR(
-						strConcat(
-							@"\n",
-							WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
-							nil
-							)
+			replaceInMutableAttrStr(
+				thisPropStr,
+				@"\n",
+				ATTR_STR(
+					strConcat(
+						@"\n",
+						WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
+						nil
 						)
-					);
-			}
-			
-			NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
-			[thisOutput appendAttributedString:prefixStr];
-			[thisOutput appendAttributedString:thisPropStr];
-			
-			if (numPrintedProps == 0)
-				[thisOutput
-					addAttributes:getFirstLineStringAttributes()
-					range:NSMakeRange(0,[thisOutput length])
-					];
-			
-			ADD_TO_OUTPUT_BUFFER(thisOutput);
-			
-			numPrintedProps++;
+					)
+				);
 		}
 		
-		if (numPrintedProps > 0)
-			ADD_TO_OUTPUT_BUFFER(M_ATTR_STR(@"\n"));
+		NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
+		[thisOutput appendAttributedString:prefixStr];
+		[thisOutput appendAttributedString:thisPropStr];
 		
-		prettyPrintOptions.numPrintedItems++;
+		if (numPrintedProps == 0)
+			[thisOutput
+				addAttributes:getFirstLineStringAttributes()
+				range:NSMakeRange(0,[thisOutput length])
+				];
+		
+		ADD_TO_OUTPUT_BUFFER(thisOutput);
+		
+		numPrintedProps++;
 	}
+	
+	if (numPrintedProps > 0)
+		ADD_TO_OUTPUT_BUFFER(M_ATTR_STR(@"\n"));
+	
+	prettyPrintOptions.numPrintedItems++;
 }
 
 
 
 
 
+PropertyPresentationElements *getTaskTitlePresentation(CalTask *task, CalItemPrintOption printOptions)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.value = M_ATTR_STR([task title]);
+	
+	if (!printOptions.calendarAgnostic)
+	{
+		elements.valueSuffix = M_ATTR_STR(@" ");
+		[elements.valueSuffix
+			appendAttributedString: mutableAttrStrWithAttrs(
+				strConcat(@"(", [[task calendar] title], @")", nil),
+				getCalNameInTitleStringAttributes()
+				)
+			];
+	}
+	
+	return elements;
+}
 
+PropertyPresentationElements *getTaskNotesPresentation(CalTask *task, CalItemPrintOption printOptions)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
+	
+	if ([task notes] == nil
+		|| [[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] == 0
+		)
+		return elements;
+	
+	NSString *thisNewlineReplacement;
+	if (prettyPrintOptions.notesNewlineReplacement == nil)
+	{
+		NSInteger thisNewlinesIndentModifier = [elements.name length]+1;
+		thisNewlineReplacement = [NSString
+			stringWithFormat:@"\n%@",
+				WHITESPACE(thisNewlinesIndentModifier)
+			];
+	}
+	else
+		thisNewlineReplacement = prettyPrintOptions.notesNewlineReplacement;
+	
+	elements.value = M_ATTR_STR((
+		[[task notes]
+			stringByReplacingOccurrencesOfString:@"\n"
+			withString:thisNewlineReplacement
+			]
+		));
+	
+	return elements;
+}
+
+PropertyPresentationElements *getTaskURLPresentation(CalTask *task, CalItemPrintOption printOptions)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
+	
+	if ([task url] != nil)
+		elements.value = M_ATTR_STR(([NSString stringWithFormat:@"%@", [task url]]));
+	
+	return elements;
+}
+
+PropertyPresentationElements *getTaskUIDPresentation(CalTask *task, CalItemPrintOption printOptions)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
+	elements.value = M_ATTR_STR([task uid]);
+	
+	return elements;
+}
+
+PropertyPresentationElements *getTaskDatetimePresentation(CalTask *task, CalItemPrintOption printOptions)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
+	
+	if ([task dueDate] != nil && !printOptions.singleDay)
+		elements.value = M_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
+	
+	return elements;
+}
+
+PropertyPresentationElements *getTaskPriorityPresentation(CalTask *task, CalItemPrintOption printOptions)
+{
+	PropertyPresentationElements *elements = [PropertyPresentationElements new];
+	
+	elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNamePriority), @":", nil));
+	
+	if ([task priority] == CalPriorityNone)
+		return elements;
+	
+	switch([task priority])
+	{
+		case CalPriorityHigh:
+			elements.value = M_ATTR_STR(localizedStr(kL10nKeyPriorityHigh));
+			break;
+		case CalPriorityMedium:
+			elements.value = M_ATTR_STR(localizedStr(kL10nKeyPriorityMedium));
+			break;
+		case CalPriorityLow:
+			elements.value = M_ATTR_STR(localizedStr(kL10nKeyPriorityLow));
+			break;
+		default:
+			elements.value = M_ATTR_STR(([NSString stringWithFormat:@"%d", [task priority]]));
+			break;
+	}
+	
+	return elements;
+}
 
 
 
@@ -626,135 +800,74 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, Cal
 	if (task == nil)
 		return nil;
 	
-	NSMutableAttributedString *thisPropOutputName = nil;
-	NSMutableAttributedString *thisPropOutputValue = nil;
-	NSMutableAttributedString *thisPropOutputValueSuffix = nil;
+	PropertyPresentationElements *elements = nil;
 	
 	if ([propName isEqualToString:kPropName_title])
 	{
-		thisPropOutputValue = M_ATTR_STR([task title]);
-		
-		if (!printOptions.calendarAgnostic)
-		{
-			thisPropOutputValueSuffix = M_ATTR_STR(@" ");
-			[thisPropOutputValueSuffix
-				appendAttributedString: mutableAttrStrWithAttrs(
-					strConcat(@"(", [[task calendar] title], @")", nil),
-					getCalNameInTitleStringAttributes()
-					)
-				];
-		}
+		elements = getTaskTitlePresentation(task, printOptions);
 	}
 	else if ([propName isEqualToString:kPropName_notes])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameNotes), @":", nil));
-		
-		if ([task notes] != nil &&
-			![[[task notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
-			)
-		{
-			NSString *thisNewlineReplacement;
-			if (prettyPrintOptions.notesNewlineReplacement == nil)
-			{
-				NSInteger thisNewlinesIndentModifier = [thisPropOutputName length]+1;
-				thisNewlineReplacement = [NSString
-					stringWithFormat:@"\n%@",
-						WHITESPACE(thisNewlinesIndentModifier)
-					];
-			}
-			else
-				thisNewlineReplacement = prettyPrintOptions.notesNewlineReplacement;
-			
-			thisPropOutputValue = M_ATTR_STR((
-				[[task notes]
-					stringByReplacingOccurrencesOfString:@"\n"
-					withString:thisNewlineReplacement
-					]
-				));
-		}
+		elements = getTaskNotesPresentation(task, printOptions);
 	}
 	else if ([propName isEqualToString:kPropName_url])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUrl), @":", nil));
-		
-		if ([task url] != nil)
-			thisPropOutputValue = M_ATTR_STR(([NSString stringWithFormat:@"%@", [task url]]));
+		elements = getTaskURLPresentation(task, printOptions);
 	}
 	else if ([propName isEqualToString:kPropName_UID])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameUID), @":", nil));
-		thisPropOutputValue = M_ATTR_STR([task uid]);
+		elements = getTaskUIDPresentation(task, printOptions);
 	}
 	else if ([propName isEqualToString:kPropName_datetime])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
-		
-		if ([task dueDate] != nil && !printOptions.singleDay)
-			thisPropOutputValue = M_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
+		elements = getTaskDatetimePresentation(task, printOptions);
 	}
 	else if ([propName isEqualToString:kPropName_priority])
 	{
-		thisPropOutputName = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNamePriority), @":", nil));
-		
-		if ([task priority] != CalPriorityNone)
-		{
-			switch([task priority])
-			{
-				case CalPriorityHigh:
-					thisPropOutputValue = M_ATTR_STR(localizedStr(kL10nKeyPriorityHigh));
-					break;
-				case CalPriorityMedium:
-					thisPropOutputValue = M_ATTR_STR(localizedStr(kL10nKeyPriorityMedium));
-					break;
-				case CalPriorityLow:
-					thisPropOutputValue = M_ATTR_STR(localizedStr(kL10nKeyPriorityLow));
-					break;
-				default:
-					thisPropOutputValue = M_ATTR_STR(([NSString stringWithFormat:@"%d", [task priority]]));
-					break;
-			}
-		}
+		elements = getTaskPriorityPresentation(task, printOptions);
 	}
-	
-	if (thisPropOutputValue == nil)
+	else
 		return nil;
 	
-	if (thisPropOutputName != nil)
+	if (elements.value == nil)
+		return nil;
+	
+	if (elements.name != nil)
 	{
-		[thisPropOutputName
+		[elements.name
 			setAttributes:getPropNameStringAttributes(propName)
-			range:NSMakeRange(0, [thisPropOutputName length])
+			range:NSMakeRange(0, [elements.name length])
 			];
 	}
 	
-	[thisPropOutputValue
-		setAttributes:getPropValueStringAttributes(propName, [thisPropOutputValue string])
-		range:NSMakeRange(0, [thisPropOutputValue length])
+	[elements.value
+		setAttributes:getPropValueStringAttributes(propName, [elements.value string])
+		range:NSMakeRange(0, [elements.value length])
 		];
 	
 	// if no foreground color for title, use calendar color by default
 	if ([propName isEqualToString:kPropName_title]
 		&& prettyPrintOptions.useCalendarColorsForTitles
-		&& ![[[thisPropOutputValue attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
+		&& ![[[elements.value attributesAtIndex:0 effectiveRange:NULL] allKeys] containsObject:NSForegroundColorAttributeName]
 		)
-		[thisPropOutputValue
+		[elements.value
 			addAttribute:NSForegroundColorAttributeName
 			value:getClosestAnsiColorForColor([[task calendar] color], YES)
-			range:NSMakeRange(0, [thisPropOutputValue length])
+			range:NSMakeRange(0, [elements.value length])
 			];
 	
-	if (thisPropOutputValueSuffix != nil)
-		[thisPropOutputValue appendAttributedString:thisPropOutputValueSuffix];
+	if (elements.valueSuffix != nil)
+		[elements.value appendAttributedString:elements.valueSuffix];
 	
 	NSMutableAttributedString *retVal = kEmptyMutableAttributedString;
 	
-	if (thisPropOutputName != nil && !printOptions.withoutPropNames)
+	if (elements.name != nil && !printOptions.withoutPropNames)
 	{
-		[thisPropOutputName appendAttributedString:ATTR_STR(@" ")];
-		[retVal appendAttributedString:thisPropOutputName];
+		[elements.name appendAttributedString:ATTR_STR(@" ")];
+		[retVal appendAttributedString:elements.name];
 	}
 	
-	[retVal appendAttributedString:thisPropOutputValue];
+	[retVal appendAttributedString:elements.value];
 	
 	return retVal;
 }
@@ -768,75 +881,75 @@ void printCalTask(CalTask *task, CalItemPrintOption printOptions)
 	if (prettyPrintOptions.maxNumPrintedItems > 0 && prettyPrintOptions.maxNumPrintedItems <= prettyPrintOptions.numPrintedItems)
 		return;
 	
-	if (task != nil)
+	if (task == nil)
+		return;
+	
+	NSUInteger numPrintedProps = 0;
+	
+	for (NSString *thisProp in prettyPrintOptions.propertyOrder)
 	{
-		NSUInteger numPrintedProps = 0;
+		if (!shouldPrintProperty(thisProp, prettyPrintOptions.includedTaskProperties, prettyPrintOptions.excludedTaskProperties))
+			continue;
 		
-		for (NSString *thisProp in prettyPrintOptions.propertyOrder)
+		NSMutableAttributedString *thisPropStr = getTaskPropStr(thisProp, task, printOptions);
+		if (thisPropStr == nil || [thisPropStr length] <= 0)
+			continue;
+		
+		NSMutableAttributedString *prefixStr;
+		if (numPrintedProps == 0)
 		{
-			if (!shouldPrintProperty(thisProp, prettyPrintOptions.includedTaskProperties, prettyPrintOptions.excludedTaskProperties))
-				continue;
-			
-			NSMutableAttributedString *thisPropStr = getTaskPropStr(thisProp, task, printOptions);
-			if (thisPropStr == nil || [thisPropStr length] <= 0)
-				continue;
-			
-			NSMutableAttributedString *prefixStr;
-			if (numPrintedProps == 0)
-			{
-				BOOL useAlertBullet = 	([task dueDate] != nil &&
-										 [now compare:[task dueDate]] == NSOrderedDescending);
-				prefixStr = mutableAttrStrWithAttrs(
-					((useAlertBullet)?prettyPrintOptions.prefixStrBulletAlert:prettyPrintOptions.prefixStrBullet),
-					getBulletStringAttributes(useAlertBullet)
-					);
-			}
-			else
-				prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
-			
-			// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
-			// with a number of whitespace characters ("indentation") that matches the
-			// length of prefixStr's contents after the last newline
-			NSRange prefixStrLastNewlineRange = [[prefixStr string]
-				rangeOfString:@"\n"
-				options:(NSLiteralSearch|NSBackwardsSearch)
-				range:NSMakeRange(0,[prefixStr length])
-				];
-			if (prefixStrLastNewlineRange.location != NSNotFound)
-			{
-				replaceInMutableAttrStr(
-					thisPropStr,
-					@"\n",
-					ATTR_STR(
-						strConcat(
-							@"\n",
-							WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
-							nil
-							)
+			BOOL useAlertBullet = 	([task dueDate] != nil &&
+									 [now compare:[task dueDate]] == NSOrderedDescending);
+			prefixStr = mutableAttrStrWithAttrs(
+				((useAlertBullet)?prettyPrintOptions.prefixStrBulletAlert:prettyPrintOptions.prefixStrBullet),
+				getBulletStringAttributes(useAlertBullet)
+				);
+		}
+		else
+			prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
+		
+		// if prefixStr contains at least one newline, prefix all newlines in thisPropStr
+		// with a number of whitespace characters ("indentation") that matches the
+		// length of prefixStr's contents after the last newline
+		NSRange prefixStrLastNewlineRange = [[prefixStr string]
+			rangeOfString:@"\n"
+			options:(NSLiteralSearch|NSBackwardsSearch)
+			range:NSMakeRange(0,[prefixStr length])
+			];
+		if (prefixStrLastNewlineRange.location != NSNotFound)
+		{
+			replaceInMutableAttrStr(
+				thisPropStr,
+				@"\n",
+				ATTR_STR(
+					strConcat(
+						@"\n",
+						WHITESPACE([prefixStr length]-NSMaxRange(prefixStrLastNewlineRange)),
+						nil
 						)
-					);
-			}
-			
-			NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
-			[thisOutput appendAttributedString:prefixStr];
-			[thisOutput appendAttributedString:thisPropStr];
-			
-			if (numPrintedProps == 0)
-				[thisOutput
-					addAttributes:getFirstLineStringAttributes()
-					range:NSMakeRange(0,[thisOutput length])
-					];
-			
-			ADD_TO_OUTPUT_BUFFER(thisOutput);
-			
-			numPrintedProps++;
+					)
+				);
 		}
 		
-		if (numPrintedProps > 0)
-			ADD_TO_OUTPUT_BUFFER(M_ATTR_STR(@"\n"));
+		NSMutableAttributedString *thisOutput = kEmptyMutableAttributedString;
+		[thisOutput appendAttributedString:prefixStr];
+		[thisOutput appendAttributedString:thisPropStr];
 		
-		prettyPrintOptions.numPrintedItems++;
+		if (numPrintedProps == 0)
+			[thisOutput
+				addAttributes:getFirstLineStringAttributes()
+				range:NSMakeRange(0,[thisOutput length])
+				];
+		
+		ADD_TO_OUTPUT_BUFFER(thisOutput);
+		
+		numPrintedProps++;
 	}
+	
+	if (numPrintedProps > 0)
+		ADD_TO_OUTPUT_BUFFER(M_ATTR_STR(@"\n"));
+	
+	prettyPrintOptions.numPrintedItems++;
 }
 
 
