@@ -98,8 +98,8 @@ void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOpti
 		opts->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
 	if ([allArgKeys containsObject:@"excludeCals"])
 		opts->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
-	if ([allArgKeys containsObject:@"prettyPrintOptions->propertyOrder"])
-		opts->propertyOrderStr = [constArgsDict objectForKey:@"prettyPrintOptions->propertyOrder"];
+	if ([allArgKeys containsObject:@"propertyOrder"])
+		opts->propertyOrderStr = [constArgsDict objectForKey:@"propertyOrder"];
 	if ([allArgKeys containsObject:@"strEncoding"])
 		opts->strEncoding = [constArgsDict objectForKey:@"strEncoding"];
 	if ([allArgKeys containsObject:@"separateByCalendar"])
@@ -116,22 +116,22 @@ void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOpti
 		prettyPrintOptions->displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
 	if ([allArgKeys containsObject:@"showEmptyDates"])
 		opts->sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
-	if ([allArgKeys containsObject:@"prettyPrintOptions->notesNewlineReplacement"])
-		prettyPrintOptions->notesNewlineReplacement = [constArgsDict objectForKey:@"prettyPrintOptions->notesNewlineReplacement"];
+	if ([allArgKeys containsObject:@"notesNewlineReplacement"])
+		prettyPrintOptions->notesNewlineReplacement = [constArgsDict objectForKey:@"notesNewlineReplacement"];
 	if ([allArgKeys containsObject:@"limitItems"])
 		prettyPrintOptions->maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
 	if ([allArgKeys containsObject:@"propertySeparators"])
 		opts->propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
-	if ([allArgKeys containsObject:@"prettyPrintOptions->excludeEndDates"])
-		prettyPrintOptions->excludeEndDates = [[constArgsDict objectForKey:@"prettyPrintOptions->excludeEndDates"] boolValue];
+	if ([allArgKeys containsObject:@"excludeEndDates"])
+		prettyPrintOptions->excludeEndDates = [[constArgsDict objectForKey:@"excludeEndDates"] boolValue];
 	if ([allArgKeys containsObject:@"sortTasksByDate"])
 		opts->sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
 	if ([allArgKeys containsObject:@"sortTasksByDateAscending"])
 		opts->sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
 	if ([allArgKeys containsObject:@"noPropNames"])
 		opts->noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
-	if ([allArgKeys containsObject:@"prettyPrintOptions->showUIDs"])
-		prettyPrintOptions->showUIDs = [[constArgsDict objectForKey:@"prettyPrintOptions->showUIDs"] boolValue];
+	if ([allArgKeys containsObject:@"showUIDs"])
+		prettyPrintOptions->showUIDs = [[constArgsDict objectForKey:@"showUIDs"] boolValue];
 	if ([allArgKeys containsObject:@"debug"])
 		debugPrintEnabled = [[constArgsDict objectForKey:@"debug"] boolValue];
 	if ([allArgKeys containsObject:@"showTodaysSection"])
@@ -182,7 +182,7 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
 			opts->noCalendarNames = YES;
 		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
 			prettyPrintOptions->displayRelativeDates = NO;
-		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--prettyPrintOptions->excludeEndDates") == 0))
+		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--excludeEndDates") == 0))
 			prettyPrintOptions->excludeEndDates = YES;
 		else if ((strcmp(argv[i], "-std") == 0) || (strcmp(argv[i], "--sortTasksByDate") == 0))
 			opts->sortTasksByDueDate = YES;
@@ -190,7 +190,7 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
 			opts->sortTasksByDueDateAscending = YES;
 		else if ((strcmp(argv[i], "-sed") == 0) || (strcmp(argv[i], "--showEmptyDates") == 0))
 			opts->sectionsForEachDayInSpan = YES;
-		else if ((strcmp(argv[i], "-uid") == 0) || (strcmp(argv[i], "--prettyPrintOptions->showUIDs") == 0))
+		else if ((strcmp(argv[i], "-uid") == 0) || (strcmp(argv[i], "--showUIDs") == 0))
 			prettyPrintOptions->showUIDs = YES;
 		else if ((strcmp(argv[i], "-npn") == 0) || (strcmp(argv[i], "--noPropNames") == 0))
 			opts->noPropNames = YES;
@@ -214,13 +214,13 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
 			prettyPrintOptions->includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-etp") == 0) || (strcmp(argv[i], "--excludeTaskProps") == 0)) && (i+1 < argc))
 			prettyPrintOptions->excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-nnr") == 0) || (strcmp(argv[i], "--prettyPrintOptions->notesNewlineReplacement") == 0)) && (i+1 < argc))
+		else if (((strcmp(argv[i], "-nnr") == 0) || (strcmp(argv[i], "--notesNewlineReplacement") == 0)) && (i+1 < argc))
 			prettyPrintOptions->notesNewlineReplacement = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ic") == 0) || (strcmp(argv[i], "--includeCals") == 0)) && (i+1 < argc))
 			opts->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
 		else if (((strcmp(argv[i], "-ec") == 0) || (strcmp(argv[i], "--excludeCals") == 0)) && (i+1 < argc))
 			opts->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-po") == 0) || (strcmp(argv[i], "--prettyPrintOptions->propertyOrder") == 0)) && (i+1 < argc))
+		else if (((strcmp(argv[i], "-po") == 0) || (strcmp(argv[i], "--propertyOrder") == 0)) && (i+1 < argc))
 			opts->propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
 			opts->strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
