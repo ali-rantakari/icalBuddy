@@ -130,6 +130,7 @@ typedef struct
 	BOOL sortTasksByDueDateAscending;
 	BOOL sectionsForEachDayInSpan;
 	BOOL noPropNames;
+	BOOL alwaysShowTodaysSection;
 	
 	BOOL output_is_uncompletedTasks;
 	BOOL output_is_eventsToday;

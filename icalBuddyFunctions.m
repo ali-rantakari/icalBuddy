@@ -432,6 +432,10 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 		
 		sections = [NSMutableArray arrayWithCapacity:[calItems count]];
 		
+		// add current date to list if needed
+		if (args->alwaysShowTodaysSection && [allDays objectForKey:today] == nil)
+			[allDays setObject:[NSMutableArray array] forKey:today];
+		
 		// remove NSNull ("no due date") if it exists and sort the dates
 		NSMutableArray *allDaysArr = [NSMutableArray arrayWithCapacity:[[allDays allKeys] count]];
 		[allDaysArr addObjectsFromArray:[allDays allKeys]];

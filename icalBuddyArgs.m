@@ -134,6 +134,8 @@ void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOpti
 		prettyPrintOptions->showUIDs = [[constArgsDict objectForKey:@"prettyPrintOptions->showUIDs"] boolValue];
 	if ([allArgKeys containsObject:@"debug"])
 		debugPrintEnabled = [[constArgsDict objectForKey:@"debug"] boolValue];
+	if ([allArgKeys containsObject:@"showTodaysSection"])
+		args->alwaysShowTodaysSection = [[constArgsDict objectForKey:@"showTodaysSection"] boolValue];
 }
 
 
@@ -192,6 +194,8 @@ void readProgramArgs(Arguments *args, PrettyPrintOptions *prettyPrintOptions, in
 			prettyPrintOptions->showUIDs = YES;
 		else if ((strcmp(argv[i], "-npn") == 0) || (strcmp(argv[i], "--noPropNames") == 0))
 			args->noPropNames = YES;
+		else if ((strcmp(argv[i], "-t") == 0) || (strcmp(argv[i], "--showTodaysSection") == 0))
+			args->alwaysShowTodaysSection = YES;
 		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
 			prettyPrintOptions->prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
 		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
