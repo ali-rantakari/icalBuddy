@@ -46,7 +46,7 @@ THE SOFTWARE.
 }
 
 
-- (Arguments) setUpWithNowDate:(NSDate *)date args:(NSArray *)argsArr
+- (AppOptions) setUpWithNowDate:(NSDate *)date opts:(NSArray *)argsArr
 {
 	int argc = [argsArr count];
 	char **argv = (char **) malloc(sizeof(char *) * (argc + 1));
@@ -74,7 +74,7 @@ THE SOFTWARE.
 	
 	initL10N(L10nFilePath);
 	
-	Arguments args = NEW_DEFAULT_ARGS;
+	AppOptions opts = NEW_DEFAULT_APP_OPTIONS;
 	PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
 	
 	// read and validate general configuration file
@@ -84,19 +84,19 @@ THE SOFTWARE.
 		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
 	if (configFilePath != nil && [configFilePath length] > 0)
 	{
-		readArgsFromConfigFile(&args, &prettyPrintOptions, configFilePath, &configDict);
+		readArgsFromConfigFile(&opts, &prettyPrintOptions, configFilePath, &configDict);
 		if (configDict != nil)
 			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
 	}
 	
-	readProgramArgs(&args, &prettyPrintOptions, argc, argv);
+	readProgramArgs(&opts, &prettyPrintOptions, argc, argv);
 	
 	NSArray *propertySeparators = nil;
-	processArgs(&args, &prettyPrintOptions, &propertySeparators);
+	processAppOptions(&opts, &prettyPrintOptions, &propertySeparators);
 	initFormatting(nil, propertySeparators);
 	initPrettyPrint(stdoutBuffer, prettyPrintOptions);
 	
-	return args;
+	return opts;
 }
 
 

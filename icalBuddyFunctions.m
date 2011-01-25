@@ -47,47 +47,47 @@ NSDate *today;
 
 
 
-BOOL areWePrintingEvents(Arguments *args)
+BOOL areWePrintingEvents(AppOptions *opts)
 {
-	return (args->output_is_eventsToday || args->output_is_eventsNow || args->output_is_eventsFromTo);
+	return (opts->output_is_eventsToday || opts->output_is_eventsNow || opts->output_is_eventsFromTo);
 }
 
-BOOL areWePrintingTasks(Arguments *args)
+BOOL areWePrintingTasks(AppOptions *opts)
 {
-	return (args->output_is_uncompletedTasks || args->output_is_tasksDueBefore);
+	return (opts->output_is_uncompletedTasks || opts->output_is_tasksDueBefore);
 }
 
-BOOL areWePrintingItems(Arguments *args)
+BOOL areWePrintingItems(AppOptions *opts)
 {
-	return (areWePrintingEvents(args) || areWePrintingTasks(args));
+	return (areWePrintingEvents(opts) || areWePrintingTasks(opts));
 }
 
-BOOL areWePrintingAlsoPastEvents(Arguments *args)
+BOOL areWePrintingAlsoPastEvents(AppOptions *opts)
 {
-	return (args->output_is_eventsFromTo);
+	return (opts->output_is_eventsFromTo);
 }
 
 
-NSArray *getEvents(Arguments *args, NSArray *calendars)
+NSArray *getEvents(AppOptions *opts, NSArray *calendars)
 {
 	NSDate *dateRangeStart = nil;
 	NSDate *dateRangeEnd = nil;
 	
 	// get start and end dates for predicate
-	if (args->output_is_eventsToday)
+	if (opts->output_is_eventsToday)
 	{
 		dateRangeStart = today;
 		dateRangeEnd = dateForEndOfDay(now);
 	}
-	else if (args->output_is_eventsNow)
+	else if (opts->output_is_eventsNow)
 	{
 		dateRangeStart = now;
 		dateRangeEnd = now;
 	}
-	else if (args->output_is_eventsFromTo)
+	else if (opts->output_is_eventsFromTo)
 	{
-		dateRangeStart = dateFromUserInput(args->eventsFrom, @"start date", NO);
-		dateRangeEnd = dateFromUserInput(args->eventsTo, @"end date", YES);
+		dateRangeStart = dateFromUserInput(opts->eventsFrom, @"start date", NO);
+		dateRangeEnd = dateFromUserInput(opts->eventsTo, @"end date", YES);
 		
 		if (dateRangeStart == nil || dateRangeEnd == nil)
 		{
@@ -107,40 +107,40 @@ NSArray *getEvents(Arguments *args, NSArray *calendars)
 	NSCAssert((dateRangeStart != nil && dateRangeEnd != nil), @"start or end date is nil");
 	
 	// expand end date if NUM in "eventsToday+NUM" is specified
-	if (args->output_is_eventsToday)
+	if (opts->output_is_eventsToday)
 	{
-		NSRange arg_output_plusSymbolRange = [args->output rangeOfString:@"+"];
+		NSRange arg_output_plusSymbolRange = [opts->output rangeOfString:@"+"];
 		if (arg_output_plusSymbolRange.location != NSNotFound)
 		{
-			NSInteger daysToAddToRange = [[args->output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
+			NSInteger daysToAddToRange = [[opts->output substringFromIndex:(arg_output_plusSymbolRange.location+arg_output_plusSymbolRange.length)] integerValue];
 			dateRangeEnd = dateByAddingDays(dateRangeEnd, daysToAddToRange);
 		}
 	}
 	
-	args->startDate = ((args->includeOnlyEventsFromNowOn) ? now : dateRangeStart);
-	args->endDate = dateRangeEnd;
-	DebugPrintf(@"effective query start date: %@\n", args->startDate);
-	DebugPrintf(@"effective query end date:   %@\n", args->endDate);
+	opts->startDate = ((opts->includeOnlyEventsFromNowOn) ? now : dateRangeStart);
+	opts->endDate = dateRangeEnd;
+	DebugPrintf(@"effective query start date: %@\n", opts->startDate);
+	DebugPrintf(@"effective query end date:   %@\n", opts->endDate);
 	
 	// make predicate for getting all events between start and end dates + use it to get the events
 	NSPredicate *eventsPredicate = [CALENDAR_STORE
-		eventPredicateWithStartDate:args->startDate
-		endDate:args->endDate
+		eventPredicateWithStartDate:opts->startDate
+		endDate:opts->endDate
 		calendars:calendars
 		];
 	return [[CALENDAR_STORE defaultCalendarStore] eventsWithPredicate:eventsPredicate];
 }
 
 
-NSArray *getTasks(Arguments *args, NSArray *calendars)
+NSArray *getTasks(AppOptions *opts, NSArray *calendars)
 {
 	NSPredicate *tasksPredicate = nil;
 	
-	if (args->output_is_tasksDueBefore)
+	if (opts->output_is_tasksDueBefore)
 	{
 		NSDate *dueBeforeDate = nil;
 		
-		NSString *dueBeforeDateStr = [args->output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
+		NSString *dueBeforeDateStr = [opts->output substringFromIndex:15]; // "tasksDueBefore:" has 15 chars
 		dueBeforeDate = dateFromUserInput(dueBeforeDateStr, @"due date", NO);
 		
 		if (dueBeforeDate == nil)
@@ -150,7 +150,7 @@ NSArray *getTasks(Arguments *args, NSArray *calendars)
 			return nil;
 		}
 		
-		args->dueBeforeDate = dueBeforeDate;
+		opts->dueBeforeDate = dueBeforeDate;
 		DebugPrintf(@"effective query 'due before' date: %@\n", dueBeforeDate);
 		tasksPredicate = [CALENDAR_STORE taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:calendars];
 	}
@@ -161,17 +161,17 @@ NSArray *getTasks(Arguments *args, NSArray *calendars)
 }
 
 
-NSArray *getCalItems(Arguments *args)
+NSArray *getCalItems(AppOptions *opts)
 {
-	NSArray *calendars = getCalendars(args);
+	NSArray *calendars = getCalendars(opts);
 	
-	BOOL printingEvents = areWePrintingEvents(args);
-	BOOL printingTasks = areWePrintingTasks(args);
+	BOOL printingEvents = areWePrintingEvents(opts);
+	BOOL printingTasks = areWePrintingTasks(opts);
 	
 	if (printingEvents)
-		return getEvents(args, calendars);
+		return getEvents(opts, calendars);
 	else if (printingTasks)
-		return getTasks(args, calendars);
+		return getTasks(opts, calendars);
 	
 	return nil;
 }
@@ -223,25 +223,25 @@ NSInteger prioritySort(id task1, id task2, void *context)
 
 
 
-NSArray *sortCalItems(Arguments *args, NSArray *calItems)
+NSArray *sortCalItems(AppOptions *opts, NSArray *calItems)
 {
 	NSArray *retCalItems = nil;
 	
-	BOOL printingTasks = areWePrintingTasks(args);
+	BOOL printingTasks = areWePrintingTasks(opts);
 	
 	if (printingTasks)
 	{
-		if (args->sortTasksByDueDate || args->sortTasksByDueDateAscending)
+		if (opts->sortTasksByDueDate || opts->sortTasksByDueDateAscending)
 		{
 			retCalItems = [calItems
 				sortedArrayUsingDescriptors:[NSArray
 					arrayWithObjects:
-						[[[NSSortDescriptor alloc] initWithKey:@"dueDate" ascending:args->sortTasksByDueDateAscending] autorelease],
+						[[[NSSortDescriptor alloc] initWithKey:@"dueDate" ascending:opts->sortTasksByDueDateAscending] autorelease],
 						nil
 					]
 				];
 			
-			if (args->sortTasksByDueDateAscending)
+			if (opts->sortTasksByDueDateAscending)
 			{
 				// put tasks with no due date last
 				NSArray *tasksWithNoDueDate = [retCalItems
@@ -265,10 +265,10 @@ NSArray *sortCalItems(Arguments *args, NSArray *calItems)
 }
 
 
-CalItemPrintOption getPrintOptions(Arguments *args)
+CalItemPrintOption getPrintOptions(AppOptions *opts)
 {
-	BOOL printingEvents = areWePrintingEvents(args);
-	BOOL printingTasks = areWePrintingTasks(args);
+	BOOL printingEvents = areWePrintingEvents(opts);
+	BOOL printingTasks = areWePrintingTasks(opts);
 	
 	CalItemPrintOption printOptions = {NO,NO,NO,NO};
 	
@@ -276,33 +276,33 @@ CalItemPrintOption getPrintOptions(Arguments *args)
 	if (printingEvents)
 	{
 		printOptions.singleDay = YES;
-		if (args->noCalendarNames)
+		if (opts->noCalendarNames)
 			printOptions.calendarAgnostic = YES;
 		
-		if (args->output_is_eventsFromTo)
+		if (opts->output_is_eventsFromTo)
 			printOptions.singleDay = NO;
-		else if (args->output_is_eventsToday)
+		else if (opts->output_is_eventsToday)
 		{
-			NSRange arg_output_plusSymbolRange = [args->output rangeOfString:@"+"];
+			NSRange arg_output_plusSymbolRange = [opts->output rangeOfString:@"+"];
 			if (arg_output_plusSymbolRange.location != NSNotFound)
 				printOptions.singleDay = NO;
 		}
 	}
 	else if (printingTasks)
 	{
-		if (args->noCalendarNames)
+		if (opts->noCalendarNames)
 			printOptions.calendarAgnostic = YES;
 	}
 	
-	if (args->noPropNames)
+	if (opts->noPropNames)
 		printOptions.withoutPropNames = YES;
 	
-	if (args->separateByCalendar)
+	if (opts->separateByCalendar)
 	{
 		printOptions.calendarColorsForSectionTitles = YES;
 		printOptions.calendarAgnostic = YES;
 	}
-	else if (args->separateByDate)
+	else if (opts->separateByDate)
 		printOptions.singleDay = YES;
 	
 	return printOptions;
@@ -310,17 +310,17 @@ CalItemPrintOption getPrintOptions(Arguments *args)
 
 
 
-NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
+NSArray *putItemsUnderSections(AppOptions *opts, NSArray *calItems)
 {
 	NSMutableArray *sections = nil;
 	
-	BOOL printingEvents = areWePrintingEvents(args);
-	BOOL printingTasks = areWePrintingTasks(args);
-	BOOL printingAlsoPastEvents = areWePrintingAlsoPastEvents(args);
+	BOOL printingEvents = areWePrintingEvents(opts);
+	BOOL printingTasks = areWePrintingTasks(opts);
+	BOOL printingAlsoPastEvents = areWePrintingAlsoPastEvents(opts);
 	
-	if (args->separateByCalendar)
+	if (opts->separateByCalendar)
 	{
-		NSArray *calendars = getCalendars(args);
+		NSArray *calendars = getCalendars(opts);
 		sections = [NSMutableArray arrayWithCapacity:[calendars count]];
 		
 		for (CalCalendar *cal in calendars)
@@ -341,7 +341,7 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 			}
 		}
 	}
-	else if (args->separateByDate)
+	else if (opts->separateByDate)
 	{
 		// keys: NSDates (representing *days* to use as sections),
 		// values: NSArrays of CalCalendarItems that match those days
@@ -363,16 +363,16 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 				if ([anEvent isAllDay] && anEventDaysSpan > 0)
 					anEventDaysSpan--;
 				
-				NSUInteger eventsDateRangeDaysSpan = getDayDiff(args->startDate, args->endDate);
-				NSUInteger rangeStartToAnEventStartDaysSpan = getDayDiff(args->startDate, [anEvent startDate]);
+				NSUInteger eventsDateRangeDaysSpan = getDayDiff(opts->startDate, opts->endDate);
+				NSUInteger rangeStartToAnEventStartDaysSpan = getDayDiff(opts->startDate, [anEvent startDate]);
 				
 				NSUInteger daySpanLeftInRange = eventsDateRangeDaysSpan - rangeStartToAnEventStartDaysSpan;
 				NSUInteger anEventDaysSpanToConsider = MIN(daySpanLeftInRange, anEventDaysSpan);
 				
 				NSDate *thisEventStartDate = [anEvent startDate];
 				
-				NSDate *fullDaysStartDate = dateForStartOfDay(args->startDate);
-				NSDate *fullDaysEndDate = dateForEndOfDay(args->endDate);
+				NSDate *fullDaysStartDate = dateForStartOfDay(opts->startDate);
+				NSDate *fullDaysEndDate = dateForEndOfDay(opts->endDate);
 				
 				for (NSUInteger i = 0; i <= anEventDaysSpanToConsider; i++)
 				{
@@ -433,7 +433,7 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 		sections = [NSMutableArray arrayWithCapacity:[calItems count]];
 		
 		// add current date to list if needed
-		if (args->alwaysShowTodaysSection && [allDays objectForKey:today] == nil)
+		if (opts->alwaysShowTodaysSection && [allDays objectForKey:today] == nil)
 			[allDays setObject:[NSMutableArray array] forKey:today];
 		
 		// remove NSNull ("no due date") if it exists and sort the dates
@@ -442,23 +442,23 @@ NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems)
 		[allDaysArr removeObjectIdenticalTo:[NSNull null]];
 		[allDaysArr sortUsingSelector:@selector(compare:)];
 		
-		if (args->sectionsForEachDayInSpan)
+		if (opts->sectionsForEachDayInSpan)
 		{
 			// fill the day span we have so that all days have an entry
 			NSDate *earliestDate = nil;
 			NSDate *latestDate = nil;
 			
-			if (args->output_is_eventsFromTo || args->output_is_eventsToday || args->output_is_eventsNow)
+			if (opts->output_is_eventsFromTo || opts->output_is_eventsToday || opts->output_is_eventsNow)
 			{
-				earliestDate = dateForStartOfDay(args->startDate);
-				latestDate = dateForStartOfDay(args->endDate);
+				earliestDate = dateForStartOfDay(opts->startDate);
+				latestDate = dateForStartOfDay(opts->endDate);
 			}
-			else if (args->output_is_tasksDueBefore)
+			else if (opts->output_is_tasksDueBefore)
 			{
 				earliestDate = [allDaysArr objectAtIndex:0];
-				latestDate = dateForStartOfDay(args->dueBeforeDate);
+				latestDate = dateForStartOfDay(opts->dueBeforeDate);
 			}
-			else if (args->output_is_uncompletedTasks)
+			else if (opts->output_is_uncompletedTasks)
 			{
 				earliestDate = [allDaysArr objectAtIndex:0];
 				latestDate = [allDaysArr lastObject];
@@ -522,16 +522,16 @@ NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSAr
 }
 
 
-NSArray *getCalendars(Arguments *args)
+NSArray *getCalendars(AppOptions *opts)
 {
 	NSMutableArray *calendars = [[[[CALENDAR_STORE defaultCalendarStore] calendars] mutableCopy] autorelease];
-	return filterCalendars(calendars, args->includeCals, args->excludeCals);
+	return filterCalendars(calendars, opts->includeCals, opts->excludeCals);
 }
 
 
-void printAllCalendars(Arguments *args)
+void printAllCalendars(AppOptions *opts)
 {
-	NSArray *calendars = getCalendars(args);
+	NSArray *calendars = getCalendars(opts);
 	
 	for (CalCalendar *cal in calendars)
 	{

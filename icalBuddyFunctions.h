@@ -36,16 +36,16 @@ extern NSDate *now;
 extern NSDate *today;
 
 
-BOOL areWePrintingItems(Arguments *args);
+BOOL areWePrintingItems(AppOptions *opts);
 
-NSArray *getCalItems(Arguments *args);
-NSArray *sortCalItems(Arguments *args, NSArray *calItems);
-NSArray *putItemsUnderSections(Arguments *args, NSArray *calItems);
+NSArray *getCalItems(AppOptions *opts);
+NSArray *sortCalItems(AppOptions *opts, NSArray *calItems);
+NSArray *putItemsUnderSections(AppOptions *opts, NSArray *calItems);
 
-CalItemPrintOption getPrintOptions(Arguments *args);
-NSArray *getCalendars(Arguments *args);
+CalItemPrintOption getPrintOptions(AppOptions *opts);
+NSArray *getCalendars(AppOptions *opts);
 
-void printAllCalendars(Arguments *args);
+void printAllCalendars(AppOptions *opts);
 void printAvailableStringEncodings();
 void openConfigFileInEditor(NSString *configFilePath, BOOL openInCLIEditor);
 

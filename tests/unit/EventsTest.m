@@ -50,12 +50,12 @@ THE SOFTWARE.
 
 - (HG_TEST_RETURN_TYPE) testEventsNow
 {
-	Arguments args = [self
+	AppOptions opts = [self
 		setUpWithNowDate:DATE(@"2010-10-22 16:30:00 +0200")
-		args:ARR(@"-sd", @"eventsNow")
+		opts:ARR(@"-sd", @"eventsNow")
 		];
 	
-	NSArray *items = getCalItems(&args);
+	NSArray *items = getCalItems(&opts);
 	
 	HG_ASSERT_EQUALS([items count], 2);
 	HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:0] title], @"Off from work");

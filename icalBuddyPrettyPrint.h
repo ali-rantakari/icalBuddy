@@ -100,5 +100,5 @@ void printCalEvent(CalEvent *event, CalItemPrintOption printOptions, NSDate *con
 void printCalTask(CalTask *task, CalItemPrintOption printOptions);
 void printItemSections(NSArray *sections, CalItemPrintOption printOptions);
 
-void flushOutputBuffer(NSMutableAttributedString *buffer, Arguments *args, NSDictionary *formattedKeywords);
+void flushOutputBuffer(NSMutableAttributedString *buffer, AppOptions *opts, NSDictionary *formattedKeywords);
 

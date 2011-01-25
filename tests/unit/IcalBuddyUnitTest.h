@@ -52,7 +52,7 @@ THE SOFTWARE.
 	
 }
 
-- (Arguments) setUpWithNowDate:(NSDate *)date args:(NSArray *)argsArr;
+- (AppOptions) setUpWithNowDate:(NSDate *)date opts:(NSArray *)argsArr;
 
 
 @end

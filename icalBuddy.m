@@ -53,7 +53,7 @@ struct
 	int major;
 	int minor;
 	int build;
-} version = {1,7,15};
+} version = {1,7,16};
 
 NSString* versionNumberStr()
 {
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	initL10N(L10nFilePath);
 	
 	
-	Arguments args = NEW_DEFAULT_ARGS;
+	AppOptions opts = NEW_DEFAULT_APP_OPTIONS;
 	PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
 	
 	// read and validate general configuration file
@@ -100,15 +100,15 @@ int main(int argc, char *argv[])
 		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
 	if (configFilePath != nil && [configFilePath length] > 0)
 	{
-		readArgsFromConfigFile(&args, &prettyPrintOptions, configFilePath, &configDict);
+		readArgsFromConfigFile(&opts, &prettyPrintOptions, configFilePath, &configDict);
 		if (configDict != nil)
 			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
 	}
 	
-	readProgramArgs(&args, &prettyPrintOptions, argc, argv);
+	readProgramArgs(&opts, &prettyPrintOptions, argc, argv);
 	
 	NSArray *propertySeparators = nil;
-	processArgs(&args, &prettyPrintOptions, &propertySeparators);
+	processAppOptions(&opts, &prettyPrintOptions, &propertySeparators);
 	
 	initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
 	
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print version and exit
 	// ------------------------------------------------------------------
-	if (args.printVersion)
+	if (opts.printVersion)
 	{
 		Printf(@"%@\n", versionNumberStr());
 	}
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// check for updates
 	// ------------------------------------------------------------------
-	else if (args.updatesCheck)
+	else if (opts.updatesCheck)
 	{
 		HGCLIAutoUpdater *autoUpdater = [[[HGCLIAutoUpdater alloc]
 			initWithAppName:@"icalBuddy"
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print possible values for the string encoding argument and exit
 	// ------------------------------------------------------------------
-	else if ([args.output isEqualToString:@"strEncodings"])
+	else if ([opts.output isEqualToString:@"strEncodings"])
 	{
 		printAvailableStringEncodings();
 	}
@@ -149,37 +149,37 @@ int main(int argc, char *argv[])
 	// ------------------------------------------------------------------
 	// print all calendars
 	// ------------------------------------------------------------------
-	else if ([args.output isEqualToString:@"calendars"])
+	else if ([opts.output isEqualToString:@"calendars"])
 	{
-		printAllCalendars(&args);
+		printAllCalendars(&opts);
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
 	// open config file for editing
 	// ------------------------------------------------------------------
-	else if ([args.output hasPrefix:@"editConfig"])
+	else if ([opts.output hasPrefix:@"editConfig"])
 	{
-		openConfigFileInEditor(configFilePath, [args.output hasSuffix:@"CLI"]);
+		openConfigFileInEditor(configFilePath, [opts.output hasSuffix:@"CLI"]);
 	}
 	// ------------------------------------------------------------------
 	// ------------------------------------------------------------------
 	// print events or tasks
 	// ------------------------------------------------------------------
-	else if (areWePrintingItems(&args))
+	else if (areWePrintingItems(&opts))
 	{
-		BOOL usingSubheadings = (args.separateByCalendar || args.separateByDate);
+		BOOL usingSubheadings = (opts.separateByCalendar || opts.separateByDate);
 		
-		NSArray *calItems = getCalItems(&args);
+		NSArray *calItems = getCalItems(&opts);
 		if (calItems == nil)
 			return 1;
 		
-		CalItemPrintOption printOptions = getPrintOptions(&args);
+		CalItemPrintOption printOptions = getPrintOptions(&opts);
 		
-		calItems = sortCalItems(&args, calItems);
+		calItems = sortCalItems(&opts, calItems);
 		
 		if (usingSubheadings)
 		{
-			NSArray *sections = putItemsUnderSections(&args, calItems);
+			NSArray *sections = putItemsUnderSections(&opts, calItems);
 			printItemSections(sections, printOptions);
 		}
 		else
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 	NSDictionary *formattedKeywords = nil;
 	if (configDict != nil)
 		formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
-	flushOutputBuffer(stdoutBuffer, &args, formattedKeywords);
+	flushOutputBuffer(stdoutBuffer, &opts, formattedKeywords);
 	
 	
 	[autoReleasePool release];

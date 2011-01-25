@@ -1029,12 +1029,12 @@ void printItemSections(NSArray *sections, CalItemPrintOption printOptions)
 }
 
 
-void flushOutputBuffer(NSMutableAttributedString *buffer, Arguments *args, NSDictionary *formattedKeywords)
+void flushOutputBuffer(NSMutableAttributedString *buffer, AppOptions *opts, NSDictionary *formattedKeywords)
 {
-	if (args->useFormatting
+	if (opts->useFormatting
 		&& formattedKeywords != nil
-		&& (args->output_is_eventsToday || args->output_is_eventsNow
-			|| args->output_is_eventsFromTo || args->output_is_uncompletedTasks)
+		&& (opts->output_is_eventsToday || opts->output_is_eventsNow
+			|| opts->output_is_eventsFromTo || opts->output_is_uncompletedTasks)
 		)
 	{
 		// it seems we need to do some search & replace for the output
@@ -1063,7 +1063,7 @@ void flushOutputBuffer(NSMutableAttributedString *buffer, Arguments *args, NSDic
 	
 	NSString *finalOutput = nil;
 	
-	if (args->useFormatting)
+	if (opts->useFormatting)
 	{
 		processCustomStringAttributes(&buffer);
 		finalOutput = ansiEscapedStringWithAttributedString(buffer);

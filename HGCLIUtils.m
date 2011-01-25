@@ -50,13 +50,13 @@ void Print(NSString *aStr)
 }
 
 // other Printf functions call this, and you call them
-void RealPrintf(NSString *aStr, NSString *aFile, va_list args)
+void RealPrintf(NSString *aStr, NSString *aFile, va_list opts)
 {
 	NSString *str = [
 		[[NSString alloc]
 			initWithFormat:aStr
 			locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]
-			arguments:args
+			arguments:opts
 			] autorelease
 		];
 	

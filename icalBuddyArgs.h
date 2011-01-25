@@ -32,11 +32,11 @@ THE SOFTWARE.
 #import "icalBuddyDefines.h"
 
 
-void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict);
+void readArgsFromConfigFile(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict);
 
-void readProgramArgs(Arguments *args, PrettyPrintOptions *prettyPrintOptions, int argc, char *argv[]);
+void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, int argc, char *argv[]);
 
 void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigFilePath, NSString **retL10NConfigFilePath);
 
-void processArgs(Arguments *args, PrettyPrintOptions *prettyPrintOptions, NSArray **retPropertySeparators);
+void processAppOptions(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, NSArray **retPropertySeparators);
 

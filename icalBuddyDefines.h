@@ -116,7 +116,6 @@ THE SOFTWARE.
 						 nil\
 						]
 
-// variables for arguments
 typedef struct
 {
 	BOOL separateByCalendar;
@@ -150,10 +149,10 @@ typedef struct
 	NSDate *startDate;
 	NSDate *endDate;
 	NSDate *dueBeforeDate;
-} Arguments;
+} AppOptions;
 
-#define NEW_DEFAULT_ARGS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
-					  		 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
+#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
+					  		 	 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
 
 
 
