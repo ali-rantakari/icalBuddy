@@ -74,8 +74,7 @@ THE SOFTWARE.
 	
 	initL10N(L10nFilePath);
 	
-	Arguments args = {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,
-					  nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil};
+	Arguments args = NEW_DEFAULT_ARGS;
 	PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
 	
 	// read and validate general configuration file

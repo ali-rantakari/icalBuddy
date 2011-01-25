@@ -151,4 +151,8 @@ typedef struct
 	NSDate *dueBeforeDate;
 } Arguments;
 
+#define NEW_DEFAULT_ARGS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
+					  		 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
+
+
 
