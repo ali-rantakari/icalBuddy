@@ -33,8 +33,105 @@ THE SOFTWARE.
 #import "icalBuddyPrettyPrint.h"
 
 
+void handleArgument(NSString *shortName, NSString *longName, id value,
+					AppOptions *opts, PrettyPrintOptions *prettyPrintOptions)
+{
+	// 'on/off' arguments
+	BOOL valueMayBeBool = [value respondsToSelector:@selector(boolValue)];
+	BOOL valueIsString = [value isKindOfClass:[NSString class]];
+	if (valueIsString || !valueMayBeBool || (valueMayBeBool && [value boolValue]))
+	{
+		if ([shortName isEqualToString:@"sc"] || [longName isEqualToString:@"separateByCalendar"])
+			opts->separateByCalendar = YES;
+		else if ([shortName isEqualToString:@"sd"] || [longName isEqualToString:@"separateByDate"])
+			opts->separateByDate = YES;
+		else if ([shortName isEqualToString:@"u"] || [longName isEqualToString:@"checkForUpdates"])
+			opts->updatesCheck = YES;
+		else if ([shortName isEqualToString:@"V"] || [longName isEqualToString:@"version"])
+			opts->printVersion = YES;
+		else if ([shortName isEqualToString:@"d"] || [longName isEqualToString:@"debug"])
+			debugPrintEnabled = YES;
+		else if ([shortName isEqualToString:@"n"] || [longName isEqualToString:@"includeOnlyEventsFromNowOn"])
+			opts->includeOnlyEventsFromNowOn = YES;
+		else if ([shortName isEqualToString:@"f"] || [longName isEqualToString:@"formatOutput"])
+			opts->useFormatting = YES;
+		else if ([shortName isEqualToString:@"nc"] || [longName isEqualToString:@"noCalendarNames"])
+			opts->noCalendarNames = YES;
+		else if ([shortName isEqualToString:@"nrd"] || [longName isEqualToString:@"noRelativeDates"])
+			prettyPrintOptions->displayRelativeDates = NO;
+		else if ([shortName isEqualToString:@"eed"] || [longName isEqualToString:@"excludeEndDates"])
+			prettyPrintOptions->excludeEndDates = YES;
+		else if ([shortName isEqualToString:@"std"] || [longName isEqualToString:@"sortTasksByDate"])
+			opts->sortTasksByDueDate = YES;
+		else if ([shortName isEqualToString:@"stda"] || [longName isEqualToString:@"sortTasksByDateAscending"])
+			opts->sortTasksByDueDateAscending = YES;
+		else if ([shortName isEqualToString:@"sed"] || [longName isEqualToString:@"showEmptyDates"])
+			opts->sectionsForEachDayInSpan = YES;
+		else if ([shortName isEqualToString:@"uid"] || [longName isEqualToString:@"showUIDs"])
+			prettyPrintOptions->showUIDs = YES;
+		else if ([shortName isEqualToString:@"npn"] || [longName isEqualToString:@"noPropNames"])
+			opts->noPropNames = YES;
+		else if ([shortName isEqualToString:@"t"] || [longName isEqualToString:@"showTodaysSection"])
+			opts->alwaysShowTodaysSection = YES;
+	}
+	
+	// value-requiring arguments
+	if (value != nil)
+	{
+		// string value
+		NSString *stringValue = nil;
+		if ([value isKindOfClass:[NSString class]])
+			stringValue = value;
+		else if ([value respondsToSelector:@selector(stringValue)])
+			stringValue = [value stringValue];
+		
+		if (stringValue != nil)
+		{
+			if ([shortName isEqualToString:@"b"] || [longName isEqualToString:@"bullet"])
+				prettyPrintOptions->prefixStrBullet = stringValue;
+			else if ([shortName isEqualToString:@"ab"] || [longName isEqualToString:@"alertBullet"])
+				prettyPrintOptions->prefixStrBulletAlert = stringValue;
+			else if ([shortName isEqualToString:@"ss"] || [longName isEqualToString:@"sectionSeparator"])
+				prettyPrintOptions->sectionSeparatorStr = stringValue;
+			else if ([shortName isEqualToString:@"tf"] || [longName isEqualToString:@"timeFormat"])
+				prettyPrintOptions->timeFormatStr = stringValue;
+			else if ([shortName isEqualToString:@"df"] || [longName isEqualToString:@"dateFormat"])
+				prettyPrintOptions->dateFormatStr = stringValue;
+			else if ([shortName isEqualToString:@"iep"] || [longName isEqualToString:@"includeEventProps"])
+				prettyPrintOptions->includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"eep"] || [longName isEqualToString:@"excludeEventProps"])
+				prettyPrintOptions->excludedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"itp"] || [longName isEqualToString:@"includeTaskProps"])
+				prettyPrintOptions->includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"etp"] || [longName isEqualToString:@"excludeTaskProps"])
+				prettyPrintOptions->excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"nnr"] || [longName isEqualToString:@"notesNewlineReplacement"])
+				prettyPrintOptions->notesNewlineReplacement = stringValue;
+			else if ([shortName isEqualToString:@"ic"] || [longName isEqualToString:@"includeCals"])
+				opts->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"ec"] || [longName isEqualToString:@"excludeCals"])
+				opts->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"po"] || [longName isEqualToString:@"propertyOrder"])
+				opts->propertyOrderStr = stringValue;
+			else if ([longName isEqualToString:@"strEncoding"])
+				opts->strEncoding = stringValue;
+			else if ([shortName isEqualToString:@"ps"] || [longName isEqualToString:@"propertySeparators"])
+				opts->propertySeparatorsStr = stringValue;
+		}
+		
+		// integer value
+		if ([value respondsToSelector:@selector(integerValue)])
+		{
+			if ([shortName isEqualToString:@"li"] || [longName isEqualToString:@"limitItems"])
+				prettyPrintOptions->maxNumPrintedItems = abs([value integerValue]);
+		}
+	}
+}
 
-void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict)
+
+
+
+void readArgsFromConfigFile(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict)
 {
 	NSMutableDictionary *configDict = nil;
 	
@@ -75,67 +172,10 @@ void readArgsFromConfigFile(Arguments *args, PrettyPrintOptions *prettyPrintOpti
 	if (constArgsDict == nil)
 		return;
 	
-	NSArray *allArgKeys = [constArgsDict allKeys];
-	if ([allArgKeys containsObject:@"bullet"])
-		prettyPrintOptions->prefixStrBullet = [constArgsDict objectForKey:@"bullet"];
-	if ([allArgKeys containsObject:@"alertBullet"])
-		prettyPrintOptions->prefixStrBulletAlert = [constArgsDict objectForKey:@"alertBullet"];
-	if ([allArgKeys containsObject:@"sectionSeparator"])
-		prettyPrintOptions->sectionSeparatorStr = [constArgsDict objectForKey:@"sectionSeparator"];
-	if ([allArgKeys containsObject:@"timeFormat"])
-		prettyPrintOptions->timeFormatStr = [constArgsDict objectForKey:@"timeFormat"];
-	if ([allArgKeys containsObject:@"dateFormat"])
-		prettyPrintOptions->dateFormatStr = [constArgsDict objectForKey:@"dateFormat"];
-	if ([allArgKeys containsObject:@"includeEventProps"])
-		prettyPrintOptions->includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeEventProps"]);
-	if ([allArgKeys containsObject:@"excludeEventProps"])
-		prettyPrintOptions->excludedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeEventProps"]);
-	if ([allArgKeys containsObject:@"includeTaskProps"])
-		prettyPrintOptions->includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeTaskProps"]);
-	if ([allArgKeys containsObject:@"excludeTaskProps"])
-		prettyPrintOptions->excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeTaskProps"]);
-	if ([allArgKeys containsObject:@"includeCals"])
-		opts->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"includeCals"]);
-	if ([allArgKeys containsObject:@"excludeCals"])
-		opts->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([constArgsDict objectForKey:@"excludeCals"]);
-	if ([allArgKeys containsObject:@"propertyOrder"])
-		opts->propertyOrderStr = [constArgsDict objectForKey:@"propertyOrder"];
-	if ([allArgKeys containsObject:@"strEncoding"])
-		opts->strEncoding = [constArgsDict objectForKey:@"strEncoding"];
-	if ([allArgKeys containsObject:@"separateByCalendar"])
-		opts->separateByCalendar = [[constArgsDict objectForKey:@"separateByCalendar"] boolValue];
-	if ([allArgKeys containsObject:@"separateByDate"])
-		opts->separateByDate = [[constArgsDict objectForKey:@"separateByDate"] boolValue];
-	if ([allArgKeys containsObject:@"includeOnlyEventsFromNowOn"])
-		opts->includeOnlyEventsFromNowOn = [[constArgsDict objectForKey:@"includeOnlyEventsFromNowOn"] boolValue];
-	if ([allArgKeys containsObject:@"formatOutput"])
-		opts->useFormatting = [[constArgsDict objectForKey:@"formatOutput"] boolValue];
-	if ([allArgKeys containsObject:@"noCalendarNames"])
-		opts->noCalendarNames = [[constArgsDict objectForKey:@"noCalendarNames"] boolValue];
-	if ([allArgKeys containsObject:@"noRelativeDates"])
-		prettyPrintOptions->displayRelativeDates = ![[constArgsDict objectForKey:@"noRelativeDates"] boolValue];
-	if ([allArgKeys containsObject:@"showEmptyDates"])
-		opts->sectionsForEachDayInSpan = [[constArgsDict objectForKey:@"showEmptyDates"] boolValue];
-	if ([allArgKeys containsObject:@"notesNewlineReplacement"])
-		prettyPrintOptions->notesNewlineReplacement = [constArgsDict objectForKey:@"notesNewlineReplacement"];
-	if ([allArgKeys containsObject:@"limitItems"])
-		prettyPrintOptions->maxNumPrintedItems = [[constArgsDict objectForKey:@"limitItems"] unsignedIntegerValue];
-	if ([allArgKeys containsObject:@"propertySeparators"])
-		opts->propertySeparatorsStr = [constArgsDict objectForKey:@"propertySeparators"];
-	if ([allArgKeys containsObject:@"excludeEndDates"])
-		prettyPrintOptions->excludeEndDates = [[constArgsDict objectForKey:@"excludeEndDates"] boolValue];
-	if ([allArgKeys containsObject:@"sortTasksByDate"])
-		opts->sortTasksByDueDate = [[constArgsDict objectForKey:@"sortTasksByDate"] boolValue];
-	if ([allArgKeys containsObject:@"sortTasksByDateAscending"])
-		opts->sortTasksByDueDateAscending = [[constArgsDict objectForKey:@"sortTasksByDateAscending"] boolValue];
-	if ([allArgKeys containsObject:@"noPropNames"])
-		opts->noPropNames = [[constArgsDict objectForKey:@"noPropNames"] boolValue];
-	if ([allArgKeys containsObject:@"showUIDs"])
-		prettyPrintOptions->showUIDs = [[constArgsDict objectForKey:@"showUIDs"] boolValue];
-	if ([allArgKeys containsObject:@"debug"])
-		debugPrintEnabled = [[constArgsDict objectForKey:@"debug"] boolValue];
-	if ([allArgKeys containsObject:@"showTodaysSection"])
-		opts->alwaysShowTodaysSection = [[constArgsDict objectForKey:@"showTodaysSection"] boolValue];
+	for (NSString *key in [constArgsDict allKeys])
+	{
+		handleArgument(nil, key, [constArgsDict objectForKey:key], opts, prettyPrintOptions);
+	}
 }
 
 
@@ -164,70 +204,22 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
 	
 	for (int i = 1; i < argc; i++)
 	{
-		if ((strcmp(argv[i], "-sc") == 0) || (strcmp(argv[i], "--separateByCalendar") == 0))
-			opts->separateByCalendar = YES;
-		else if ((strcmp(argv[i], "-sd") == 0) || (strcmp(argv[i], "--separateByDate") == 0))
-			opts->separateByDate = YES;
-		else if ((strcmp(argv[i], "-u") == 0) || (strcmp(argv[i], "--checkForUpdates") == 0))
-			opts->updatesCheck = YES;
-		else if ((strcmp(argv[i], "-V") == 0) || (strcmp(argv[i], "--version") == 0))
-			opts->printVersion = YES;
-		else if ((strcmp(argv[i], "-d") == 0) || (strcmp(argv[i], "--debug") == 0))
-			debugPrintEnabled = YES;
-		else if ((strcmp(argv[i], "-n") == 0) || (strcmp(argv[i], "--includeOnlyEventsFromNowOn") == 0))
-			opts->includeOnlyEventsFromNowOn = YES;
-		else if ((strcmp(argv[i], "-f") == 0) || (strcmp(argv[i], "--formatOutput") == 0))
-			opts->useFormatting = YES;
-		else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--noCalendarNames") == 0))
-			opts->noCalendarNames = YES;
-		else if ((strcmp(argv[i], "-nrd") == 0) || (strcmp(argv[i], "--noRelativeDates") == 0))
-			prettyPrintOptions->displayRelativeDates = NO;
-		else if ((strcmp(argv[i], "-eed") == 0) || (strcmp(argv[i], "--excludeEndDates") == 0))
-			prettyPrintOptions->excludeEndDates = YES;
-		else if ((strcmp(argv[i], "-std") == 0) || (strcmp(argv[i], "--sortTasksByDate") == 0))
-			opts->sortTasksByDueDate = YES;
-		else if ((strcmp(argv[i], "-stda") == 0) || (strcmp(argv[i], "--sortTasksByDateAscending") == 0))
-			opts->sortTasksByDueDateAscending = YES;
-		else if ((strcmp(argv[i], "-sed") == 0) || (strcmp(argv[i], "--showEmptyDates") == 0))
-			opts->sectionsForEachDayInSpan = YES;
-		else if ((strcmp(argv[i], "-uid") == 0) || (strcmp(argv[i], "--showUIDs") == 0))
-			prettyPrintOptions->showUIDs = YES;
-		else if ((strcmp(argv[i], "-npn") == 0) || (strcmp(argv[i], "--noPropNames") == 0))
-			opts->noPropNames = YES;
-		else if ((strcmp(argv[i], "-t") == 0) || (strcmp(argv[i], "--showTodaysSection") == 0))
-			opts->alwaysShowTodaysSection = YES;
-		else if (((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullet") == 0)) && (i+1 < argc))
-			prettyPrintOptions->prefixStrBullet = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-ab") == 0) || (strcmp(argv[i], "--alertBullet") == 0)) && (i+1 < argc))
-			prettyPrintOptions->prefixStrBulletAlert = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-ss") == 0) || (strcmp(argv[i], "--sectionSeparator") == 0)) && (i+1 < argc))
-			prettyPrintOptions->sectionSeparatorStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-tf") == 0) || (strcmp(argv[i], "--timeFormat") == 0)) && (i+1 < argc))
-			prettyPrintOptions->timeFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-df") == 0) || (strcmp(argv[i], "--dateFormat") == 0)) && (i+1 < argc))
-			prettyPrintOptions->dateFormatStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-iep") == 0) || (strcmp(argv[i], "--includeEventProps") == 0)) && (i+1 < argc))
-			prettyPrintOptions->includedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-eep") == 0) || (strcmp(argv[i], "--excludeEventProps") == 0)) && (i+1 < argc))
-			prettyPrintOptions->excludedEventProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-itp") == 0) || (strcmp(argv[i], "--includeTaskProps") == 0)) && (i+1 < argc))
-			prettyPrintOptions->includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-etp") == 0) || (strcmp(argv[i], "--excludeTaskProps") == 0)) && (i+1 < argc))
-			prettyPrintOptions->excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-nnr") == 0) || (strcmp(argv[i], "--notesNewlineReplacement") == 0)) && (i+1 < argc))
-			prettyPrintOptions->notesNewlineReplacement = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-ic") == 0) || (strcmp(argv[i], "--includeCals") == 0)) && (i+1 < argc))
-			opts->includeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-ec") == 0) || (strcmp(argv[i], "--excludeCals") == 0)) && (i+1 < argc))
-			opts->excludeCals = arrayFromCommaSeparatedStringTrimmingWhitespace([NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding]);
-		else if (((strcmp(argv[i], "-po") == 0) || (strcmp(argv[i], "--propertyOrder") == 0)) && (i+1 < argc))
-			opts->propertyOrderStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if ((strcmp(argv[i], "--strEncoding") == 0) && (i+1 < argc))
-			opts->strEncoding = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
-		else if (((strcmp(argv[i], "-li") == 0) || (strcmp(argv[i], "--limitItems") == 0)) && (i+1 < argc))
-			prettyPrintOptions->maxNumPrintedItems = abs([[NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding] integerValue]);
-		else if (((strcmp(argv[i], "-ps") == 0) || (strcmp(argv[i], "--propertySeparators") == 0)) && (i+1 < argc))
-			opts->propertySeparatorsStr = [NSString stringWithCString:argv[i+1] encoding:NSUTF8StringEncoding];
+		if (strncmp(argv[i], "-", 1) != 0)
+			continue;
+		
+		NSString *shortArgName = nil;
+		NSString *longArgName = nil;
+		NSString *argValue = nil;
+		
+		if (strncmp(argv[i], "--", 2) == 0)
+			longArgName = [[NSString stringWithUTF8String:argv[i]] substringFromIndex:2];
+		else
+			shortArgName = [[NSString stringWithUTF8String:argv[i]] substringFromIndex:1];
+		
+		if (i+1 < argc)
+			argValue = [NSString stringWithUTF8String:argv[i+1]];
+		
+		handleArgument(shortArgName, longArgName, argValue, opts, prettyPrintOptions);
 	}
 }
 
