@@ -4,8 +4,7 @@ TODO:
 important:
 -------------------------
 
-- use default date format from user's preferences if none is specified
-    - preference for specifying short/medium/long/full format?
+- preference for specifying short/medium/long/full date/time formats?
 
 - simplify handling of "relative dates" -- there's a special case (with the
   -nrd argument and all) and there's the %RD specifier. if we need both, their
@@ -14,6 +13,8 @@ important:
 
 user requests:
 -------------------------
+
+- ability to only get tasks with specific priorities
 
 - ability to use relative dates today and tomorrow but the rest as normal
   dates... I don't like the long "day after tomorrow" text it seems to defeat
