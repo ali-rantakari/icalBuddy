@@ -556,10 +556,10 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 		return nil;
 	
 	
-	if (elements.value == nil)
+	if (elements.value == nil || [elements.value length] == 0)
 		return nil;
 	
-	if (elements.name != nil)
+	if (elements.name != nil && [elements.name length] > 0)
 	{
 		[elements.name
 			setAttributes:getPropNameStringAttributes(propName)
@@ -829,10 +829,10 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, Cal
 	else
 		return nil;
 	
-	if (elements.value == nil)
+	if (elements.value == nil || [elements.value length] == 0)
 		return nil;
 	
-	if (elements.name != nil)
+	if (elements.name != nil && [elements.name length] > 0)
 	{
 		[elements.name
 			setAttributes:getPropNameStringAttributes(propName)
