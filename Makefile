@@ -48,7 +48,7 @@ all: icalBuddy
 #-------------------------------------------------------------------------
 # compile the binary itself
 #-------------------------------------------------------------------------
-icalBuddy: $(SOURCE_FILES)
+icalBuddy: $(SOURCE_FILES) icalBuddy.m
 	@echo
 	@echo ---- Compiling main app:
 	@echo ======================================
@@ -60,7 +60,7 @@ icalBuddy: $(SOURCE_FILES)
 #-------------------------------------------------------------------------
 # compile test binary
 #-------------------------------------------------------------------------
-testIcalBuddy: $(SOURCE_FILES)
+testIcalBuddy: $(SOURCE_FILES) icalBuddy.m calendarStoreMock/*.m
 	@echo
 	@echo ---- Compiling TEST version of main app:
 	@echo ======================================
