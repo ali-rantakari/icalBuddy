@@ -48,6 +48,22 @@ It's important to note that *GeekTool doesn't run these shell configuration file
     icalBuddy <arguments>
 
 
+## Q: How can I hide URLs (or any other fields/properties) for events or tasks?
+
+You can use any of the following arguments:
+
+	-eep (or --excludeEventProps): Exclude specified event properties
+	-etp (or --excludeTaskProps):  Exclude specified task properties
+	-iep (or --includeEventProps): Include only specified event properties
+	-itp (or --includeTaskProps):  Include only specified task properties
+
+See the [manual](man.html) for more information on these arguments.
+
+If you only want to **exclude one field/property, like URLs**, use `-eep` or `-etp`. So for example, to exclude URLs:
+
+	icalBuddy -eep url eventsToday+2
+
+
 ## Q: How can I get icalBuddy to display times according to a 12-hour clock?
 
 Since version 1.7.9, icalBuddy uses the system standard date and time formats (unless custom formats are specified like in the examples below). If you're using an older version and the date and time formats in your System Preferences are set to your liking, you can simply update icalBuddy.
