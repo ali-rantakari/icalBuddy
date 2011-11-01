@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 B<icalBuddy> -- query the OS X calendar database for items
@@ -148,11 +150,11 @@ Use the specified string encoding for the output. Run the app once with the 'str
 
 =item B<-tf>, B<--timeFormat> I<format>
 
-Format times included in the output based on the I<format> formatting string. See C<http://tinyurl.com/b9mgyp> [apple.com] for documentation on the syntax to use.
+Format times included in the output based on the I<format> formatting string. See the B<Date and Time Format Specifiers> section below for documentation on the syntax to use.
 
 =item B<-df>, B<--dateFormat> I<format>
 
-Format dates included in the output based on the I<format> formatting string. See C<http://tinyurl.com/b9mgyp> [apple.com] for documentation on the syntax to use. (note: in addition to the standard datetime element specifiers, you can also use the S<C<%RW>> specifier, which stands for "relative week" (e.g. "next week") and the S<C<%RD>> specifier which stands for "relative day" (e.g. "5 days from now").
+Format dates included in the output based on the I<format> formatting string. See the B<Date and Time Format Specifiers> section below for documentation on the syntax to use.
 
 =item B<-po>, B<--propertyOrder> I<value>
 
@@ -164,11 +166,11 @@ Use the strings specified in I<value> as the separators between item properties 
 
 =item B<-b>, B<--bullet> I<value>
 
-Sets I<value> as the string to be used as the bullet point in the output. The default is S<C<* >>.
+Sets I<value> as the string to be used as the bullet point in the output.
 
 =item B<-ab>, B<--alertBullet> I<value>
 
-Sets I<value> as the string to be used as the alert bullet point in the output. The default is S<C<! >>.
+Sets I<value> as the string to be used as the alert bullet point in the output.
 
 =item B<-ss>, B<--sectionSeparator> I<value>
 
@@ -212,6 +214,126 @@ Replaces newlines in values of the notes property with I<value>.
 
 
 =back
+
+
+=head1 DATE AND TIME FORMAT SPECIFIERS
+
+Date format specifiers (used with the B<-df> (or B<--dateFormat>) argument:
+
+=over 12
+
+=item B<%%>
+
+A S<C<%>> character
+
+=item B<%RW>
+
+Relative week (e.g. "next week", or "10 weeks from now")
+
+=item B<%RD>
+
+Relative day (e.g. "yesterday", "today", or "day after tomorrow")
+
+=item B<%a>
+
+Abbreviated weekday name
+
+=item B<%A>
+
+Full weekday name
+
+=item B<%b>
+
+Abbreviated month name
+
+=item B<%B>
+
+Full month name
+
+=item B<%d>
+
+Day of the month as a decimal number (01-31)
+
+=item B<%e>
+
+Same as B<%d> but does not print the leading 0 for days 1 through 9 (unlike strftime(3), does not print a leading space)
+
+=item B<%j>
+
+Day of the year as a decimal number (001-366)
+
+=item B<%m>
+
+Month as a decimal number (01-12)
+
+=item B<%w>
+
+Weekday as a decimal number (0-6), where Sunday is 0
+
+=item B<%y>
+
+Year without century (00-99)
+
+=item B<%Y>
+
+Year with century (such as 1990)
+
+=item B<%x>
+
+Date using the date representation for the locale, including the time zone (produces different results from strftime(3))
+
+=item B<%c>
+
+Shorthand for S<C<%X %x>>, the locale format for date and time
+
+=back
+
+Time format specifiers (used with the B<-tf> (or B<--timeFormat>) argument:
+
+=over 12
+
+=item B<%%>
+
+A S<C<%>> character
+
+=item B<%F>
+
+Milliseconds as a decimal number (000-999)
+
+=item B<%H>
+
+Hour based on a 24-hour clock as a decimal number (00-23)
+
+=item B<%I>
+
+Hour based on a 12-hour clock as a decimal number (01-12)
+
+=item B<%M>
+
+Minute as a decimal number (00-59)
+
+=item B<%p>
+
+AM/PM designation for the locale
+
+=item B<%S>
+
+Second as a decimal number (00-59)
+
+=item B<%Z>
+
+Time zone name (such as Pacific Daylight Time; produces different results from strftime(3))
+
+=item B<%z>
+
+Time zone offset in hours and minutes from GMT (HHMM)
+
+=item B<%X>
+
+Time using the time representation for the locale (produces different results from strftime(3))
+
+=back
+
 
 
 =head1 EXAMPLES
