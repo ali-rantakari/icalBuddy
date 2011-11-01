@@ -115,7 +115,7 @@ icalBuddy.1: icalBuddy.pod
 	@echo
 	@echo ---- Generating manpage from POD file:
 	@echo ======================================
-	pod2man --section=1 --release=1.0 --center="icalBuddy" --date="$(CURRDATE)" icalBuddy.pod > icalBuddy.1
+	pod2man --section=1 --release="$(APP_VERSION)" --center="icalBuddy" --date="$(CURRDATE)" icalBuddy.pod > icalBuddy.1
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -125,7 +125,7 @@ icalBuddyConfig.1: icalBuddyConfig.pod
 	@echo
 	@echo ---- Generating config manpage from POD file:
 	@echo ======================================
-	pod2man --section=1 --release=1.0 --center="icalBuddy configuration" --date="$(CURRDATE)" icalBuddyConfig.pod > icalBuddyConfig.1
+	pod2man --section=1 --release="$(APP_VERSION)" --center="icalBuddy configuration" --date="$(CURRDATE)" icalBuddyConfig.pod > icalBuddyConfig.1
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -135,7 +135,7 @@ icalBuddyLocalization.1: icalBuddyLocalization.pod
 	@echo
 	@echo ---- Generating localization manpage from POD file:
 	@echo ======================================
-	pod2man --section=1 --release=1.0 --center="icalBuddy localization" --date="$(CURRDATE)" icalBuddyLocalization.pod > icalBuddyLocalization.1
+	pod2man --section=1 --release="$(APP_VERSION)" --center="icalBuddy localization" --date="$(CURRDATE)" icalBuddyLocalization.pod > icalBuddyLocalization.1
 
 
 
