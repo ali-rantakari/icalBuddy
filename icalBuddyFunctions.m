@@ -528,6 +528,8 @@ NSArray *getCalendarStoreCalTypeValuesForUserProvidedValues(NSArray *userProvide
             [ret addObject:CalCalendarTypeBirthday];
         else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeCalDAV] == NSOrderedSame)
             [ret addObject:CalCalendarTypeCalDAV];
+        else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeiCloud] == NSOrderedSame)
+            [ret addObject:CalCalendarTypeCalDAV];
         else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeExchange] == NSOrderedSame)
             [ret addObject:CalCalendarTypeExchange];
         else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeIMAP] == NSOrderedSame)

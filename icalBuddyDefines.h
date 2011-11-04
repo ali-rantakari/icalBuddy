@@ -101,6 +101,7 @@ THE SOFTWARE.
 
 #define kCalendarTypeBirthday       @"birthday"
 #define kCalendarTypeCalDAV         @"caldav"
+#define kCalendarTypeiCloud         @"icloud"
 #define kCalendarTypeExchange       @"exchange"
 #define kCalendarTypeIMAP           @"imap"
 #define kCalendarTypeLocal          @"local"

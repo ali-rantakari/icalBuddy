@@ -186,7 +186,7 @@ Excludes items from specific calendars from the output. I<value> must be a comma
 
 =item B<-ict>, B<--includeCalTypes> I<value>
 
-Includes only items from specific types of calendars into the output. I<value> must be a comma-separated list consisting of one or more of the following: birthday, caldav, exchange, imap, local, subscription. The B<-ict> and B<-ect> parameters will be handled in the order of first include, then exclude, and are always applied before the B<-ic> and B<-ec> parameters.
+Includes only items from specific types of calendars into the output. I<value> must be a comma-separated list consisting of one or more of the following: birthday, caldav, exchange, imap, local, subscription, icloud ("icloud" is an alias for "caldav", and vice versa, because iCloud calendars on Lion are actually CalDAV calendars). The B<-ict> and B<-ect> parameters will be handled in the order of first include, then exclude, and are always applied before the B<-ic> and B<-ec> parameters.
 
 =item B<-ect>, B<--excludeCalTypes> I<value>
 
