@@ -551,7 +551,7 @@ void filterCalendarsByType(NSMutableArray *cals, AppOptions *opts)
     }
 	if (opts->excludeCalTypes != nil)
 	{
-        NSArray *excludeActualCalTypes = getCalendarStoreCalTypeValuesForUserProvidedValues(opts->includeCalTypes);
+        NSArray *excludeActualCalTypes = getCalendarStoreCalTypeValuesForUserProvidedValues(opts->excludeCalTypes);
 		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"NOT(type IN %@)", excludeActualCalTypes]];
 	}
 }
