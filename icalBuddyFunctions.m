@@ -524,17 +524,17 @@ NSArray *getCalendarStoreCalTypeValuesForUserProvidedValues(NSArray *userProvide
     NSMutableArray *ret = [NSMutableArray arrayWithCapacity:[userProvidedCalTypes count]];
     for (NSString *userProvidedType in userProvidedCalTypes)
     {
-        if ([userProvidedType isEqualToString:kCalendarTypeBirthday])
+        if ([userProvidedType caseInsensitiveCompare:kCalendarTypeBirthday] == NSOrderedSame)
             [ret addObject:CalCalendarTypeBirthday];
-        else if ([userProvidedType isEqualToString:kCalendarTypeCalDAV])
+        else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeCalDAV] == NSOrderedSame)
             [ret addObject:CalCalendarTypeCalDAV];
-        else if ([userProvidedType isEqualToString:kCalendarTypeExchange])
+        else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeExchange] == NSOrderedSame)
             [ret addObject:CalCalendarTypeExchange];
-        else if ([userProvidedType isEqualToString:kCalendarTypeIMAP])
+        else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeIMAP] == NSOrderedSame)
             [ret addObject:CalCalendarTypeIMAP];
-        else if ([userProvidedType isEqualToString:kCalendarTypeLocal])
+        else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeLocal] == NSOrderedSame)
             [ret addObject:CalCalendarTypeLocal];
-        else if ([userProvidedType isEqualToString:kCalendarTypeSubscription])
+        else if ([userProvidedType caseInsensitiveCompare:kCalendarTypeSubscription] == NSOrderedSame)
             [ret addObject:CalCalendarTypeSubscription];
     }
     return ret;
