@@ -105,6 +105,10 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
 				prettyPrintOptions->includedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace(stringValue);
 			else if ([shortName isEqualToString:@"etp"] || [longName isEqualToString:@"excludeTaskProps"])
 				prettyPrintOptions->excludedTaskProperties = setFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"ict"] || [longName isEqualToString:@"includeCalTypes"])
+				opts->includeCalTypes = arrayFromCommaSeparatedStringTrimmingWhitespace(stringValue);
+			else if ([shortName isEqualToString:@"ect"] || [longName isEqualToString:@"excludeCalTypes"])
+				opts->excludeCalTypes = arrayFromCommaSeparatedStringTrimmingWhitespace(stringValue);
 			else if ([shortName isEqualToString:@"nnr"] || [longName isEqualToString:@"notesNewlineReplacement"])
 				prettyPrintOptions->notesNewlineReplacement = stringValue;
 			else if ([shortName isEqualToString:@"ic"] || [longName isEqualToString:@"includeCals"])

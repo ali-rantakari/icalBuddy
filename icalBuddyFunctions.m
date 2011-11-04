@@ -511,21 +511,69 @@ NSArray *putItemsUnderSections(AppOptions *opts, NSArray *calItems)
 
 
 
-
-NSMutableArray *filterCalendars(NSMutableArray *cals, NSArray *includeCals, NSArray *excludeCals)
+void filterCalendarsByNameOrUID(NSMutableArray *cals, AppOptions *opts)
 {
-	if (includeCals != nil)
-		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", includeCals, includeCals]];
-	if (excludeCals != nil)
-		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", excludeCals, excludeCals]];
-	return cals;
+	if (opts->includeCals != nil)
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(uid IN %@) OR (title IN %@)", opts->includeCals, opts->includeCals]];
+	if (opts->excludeCals != nil)
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"(NOT(uid IN %@)) AND (NOT(title IN %@))", opts->excludeCals, opts->excludeCals]];
+}
+
+NSArray *getCalendarStoreCalTypeValuesForUserProvidedValues(NSArray *userProvidedCalTypes)
+{
+    NSMutableArray *ret = [NSMutableArray arrayWithCapacity:[userProvidedCalTypes count]];
+    for (NSString *userProvidedType in userProvidedCalTypes)
+    {
+        if ([userProvidedType isEqualToString:kCalendarTypeBirthday])
+            [ret addObject:CalCalendarTypeBirthday];
+        else if ([userProvidedType isEqualToString:kCalendarTypeCalDAV])
+            [ret addObject:CalCalendarTypeCalDAV];
+        else if ([userProvidedType isEqualToString:kCalendarTypeExchange])
+            [ret addObject:CalCalendarTypeExchange];
+        else if ([userProvidedType isEqualToString:kCalendarTypeIMAP])
+            [ret addObject:CalCalendarTypeIMAP];
+        else if ([userProvidedType isEqualToString:kCalendarTypeLocal])
+            [ret addObject:CalCalendarTypeLocal];
+        else if ([userProvidedType isEqualToString:kCalendarTypeSubscription])
+            [ret addObject:CalCalendarTypeSubscription];
+    }
+    return ret;
+}
+
+void filterCalendarsByType(NSMutableArray *cals, AppOptions *opts)
+{
+	if (opts->includeCalTypes != nil)
+    {
+        NSArray *includeActualCalTypes = getCalendarStoreCalTypeValuesForUserProvidedValues(opts->includeCalTypes);
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"type IN %@", includeActualCalTypes]];
+    }
+	if (opts->excludeCalTypes != nil)
+	{
+        NSArray *excludeActualCalTypes = getCalendarStoreCalTypeValuesForUserProvidedValues(opts->includeCalTypes);
+		[cals filterUsingPredicate:[NSPredicate predicateWithFormat:@"NOT(type IN %@)", excludeActualCalTypes]];
+	}
+}
+
+void filterCalendars(NSMutableArray *cals, AppOptions *opts)
+{
+    if (opts->specificCalFilterPrecedesCalTypeFilter)
+    {
+        filterCalendarsByNameOrUID(cals, opts);
+        filterCalendarsByType(cals, opts);
+    }
+    else
+    {
+        filterCalendarsByType(cals, opts);
+        filterCalendarsByNameOrUID(cals, opts);
+    }
 }
 
 
 NSArray *getCalendars(AppOptions *opts)
 {
 	NSMutableArray *calendars = [[[[CALENDAR_STORE defaultCalendarStore] calendars] mutableCopy] autorelease];
-	return filterCalendars(calendars, opts->includeCals, opts->excludeCals);
+	filterCalendars(calendars, opts);
+	return calendars;
 }
 
 

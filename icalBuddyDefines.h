@@ -99,6 +99,12 @@ THE SOFTWARE.
 #define kSGRCodeBlink				5
 #define kSGRCodeBlinkReset			25
 
+#define kCalendarTypeBirthday       @"birthday"
+#define kCalendarTypeCalDAV         @"caldav"
+#define kCalendarTypeExchange       @"exchange"
+#define kCalendarTypeIMAP           @"imap"
+#define kCalendarTypeLocal          @"local"
+#define kCalendarTypeSubscription   @"subscription"
 
 
 // default item property order + list of allowed property names (i.e. these must be in
@@ -130,6 +136,7 @@ typedef struct
 	BOOL sectionsForEachDayInSpan;
 	BOOL noPropNames;
 	BOOL alwaysShowTodaysSection;
+	BOOL specificCalFilterPrecedesCalTypeFilter;
 	
 	BOOL output_is_uncompletedTasks;
 	BOOL output_is_eventsToday;
@@ -140,6 +147,8 @@ typedef struct
 	NSString *output;
 	NSArray *includeCals;
 	NSArray *excludeCals;
+	NSArray *includeCalTypes;
+	NSArray *excludeCalTypes;
 	NSString *strEncoding;
 	NSString *propertyOrderStr;
 	NSString *propertySeparatorsStr;
@@ -151,8 +160,8 @@ typedef struct
 	NSDate *dueBeforeDate;
 } AppOptions;
 
-#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
-					  		 	 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
+#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
+					  		 	 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
 
 
 
