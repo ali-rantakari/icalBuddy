@@ -53,7 +53,7 @@ struct
 	int major;
 	int minor;
 	int build;
-} version = {1,7,20};
+} version = {1,7,21};
 
 NSString* versionNumberStr()
 {
