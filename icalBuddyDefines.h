@@ -119,6 +119,7 @@ THE SOFTWARE.
 
 // contents for a new configuration file "stub"
 #define kConfigFileStub [NSDictionary dictionaryWithObjectsAndKeys:\
+						 [NSDictionary dictionary], @"constantArguments",\
 						 [NSDictionary dictionary], @"formatting",\
 						 nil\
 						]
