@@ -150,6 +150,34 @@ Example: get events for tomorrow and the day after tomorrow:
 
     icalBuddy eventsFrom:tomorrow to:'day after tomorrow'
 
+If your requirements are more specific (for example, you want more accuracy than a single day), you can specify dates accurately by using the `YYYY-MM-DD HH:MM:SS ±HHMM` format (and icalBuddy shouldn't mess with them if they are specified that way). This means that you can write little scripts to determine relative datetimes yourself and then pass them to icalBuddy in the above format. Below is an example that should be a good starting point:
+
+    #!/bin/bash
+    # 
+    # Prints events from (now) to (12h from now) via icalBuddy
+    # 
+    
+    minute_in_seconds=60
+    hour_in_seconds=3600
+    
+    # Get current seconds since the epoch:
+    sec_now=`date +%s`
+    
+    # Calculate seconds since the epoch for our desired start and
+    # end datetimes:
+    sec_start="${sec_now}"
+    sec_end=$(echo "${sec_now} + (${hour_in_seconds} * 12)" | bc)
+    
+    # Convert our start and end datetimes into the format required
+    # by icalBuddy:
+    start_dt=$(date -r ${sec_start} +'%Y-%m-%d %H:%M:%S %z')
+    end_dt=$(date -r ${sec_end} +'%Y-%m-%d %H:%M:%S %z')
+    
+    # Use the -d argument to see how icalBuddy has interpreted the input.
+    # When you have verified that this script is working correctly, you
+    # can remove the argument.
+    /usr/local/bin/icalBuddy -d eventsFrom:"${start_dt}" to:"${end_dt}"
+
 
 ## Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
