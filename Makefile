@@ -52,7 +52,7 @@ icalBuddy: $(SOURCE_FILES) icalBuddy.m
 	@echo
 	@echo ---- Compiling main app:
 	@echo ======================================
-	$(COMPILER) $(ARG_DEBUG) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m $(SOURCE_FILES)
+	$(COMPILER) $(ARG_DEBUG) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m $(SOURCE_FILES)
 
 
 
@@ -64,7 +64,7 @@ testIcalBuddy: $(SOURCE_FILES) icalBuddy.m calendarStoreMock/*.m
 	@echo
 	@echo ---- Compiling TEST version of main app:
 	@echo ======================================
-	$(COMPILER) $(ARG_DEBUG) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 -arch ppc $(ARCH_64BIT) -DUSE_MOCKED_CALENDARSTORE -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m calendarStoreMock/*.m $(SOURCE_FILES)
+	$(COMPILER) $(ARG_DEBUG) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 $(ARCH_64BIT) -DUSE_MOCKED_CALENDARSTORE -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m calendarStoreMock/*.m $(SOURCE_FILES)
 
 
 
