@@ -116,7 +116,7 @@ Omit calendar names from the output. Does not apply if the B<-sc> argument is us
 
 Never use "natural language relative dates" (e.g. "today", "yesterday" or "day after tomorrow") instead of the default date format presentation (see the B<-df> argument).
 
-=item B<-npn>, B<--noPropertyNames>
+=item B<-npn>, B<--noPropNames>
 
 Omit property names from the output (i.e. only show property values -- e.g. "My house" instead of "location: My house").
 
