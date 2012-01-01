@@ -183,7 +183,7 @@ NSArray *getCalItems(AppOptions *opts)
 // - sort numerically by priority except treat CalPriorityNone (0) as a special case
 // - if priorities match, sort tasks that are late from their due date to be first and then
 //   order alphabetically by title
-NSInteger prioritySort(id task1, id task2, void *context)
+NSInteger prioritySort(CalTask *task1, CalTask *task2, void *context)
 {
     if ([task1 priority] < [task2 priority])
 	{
