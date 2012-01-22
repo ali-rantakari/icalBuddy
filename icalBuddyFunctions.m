@@ -54,7 +54,7 @@ BOOL areWePrintingEvents(AppOptions *opts)
 
 BOOL areWePrintingTasks(AppOptions *opts)
 {
-	return (opts->output_is_uncompletedTasks || opts->output_is_tasksDueBefore);
+	return (opts->output_is_uncompletedTasks || opts->output_is_undatedUncompletedTasks || opts->output_is_tasksDueBefore);
 }
 
 BOOL areWePrintingItems(AppOptions *opts)
@@ -154,8 +154,20 @@ NSArray *getTasks(AppOptions *opts, NSArray *calendars)
 		DebugPrintf(@"effective query 'due before' date: %@\n", dueBeforeDate);
 		tasksPredicate = [CALENDAR_STORE taskPredicateWithUncompletedTasksDueBefore:dueBeforeDate calendars:calendars];
 	}
-	else // all uncompleted tasks
+	else if (opts->output_is_uncompletedTasks)
+    {
 		tasksPredicate = [CALENDAR_STORE taskPredicateWithUncompletedTasks:calendars];
+    }
+	else if (opts->output_is_undatedUncompletedTasks)
+    {
+		tasksPredicate = [CALENDAR_STORE taskPredicateWithCalendars:calendars];
+		NSArray *allTasks = [[CALENDAR_STORE defaultCalendarStore] tasksWithPredicate:tasksPredicate];
+		return [allTasks filteredArrayUsingPredicate:
+		        [NSPredicate predicateWithFormat:
+		            @"isCompleted == NO && dueDate == nil"]];
+    }
+    else
+        return nil;
 	
 	return [[CALENDAR_STORE defaultCalendarStore] tasksWithPredicate:tasksPredicate];
 }
@@ -458,7 +470,7 @@ NSArray *putItemsUnderSections(AppOptions *opts, NSArray *calItems)
 				earliestDate = [allDaysArr objectAtIndex:0];
 				latestDate = dateForStartOfDay(opts->dueBeforeDate);
 			}
-			else if (opts->output_is_uncompletedTasks)
+			else if (opts->output_is_uncompletedTasks || opts->output_is_undatedUncompletedTasks)
 			{
 				earliestDate = [allDaysArr objectAtIndex:0];
 				latestDate = [allDaysArr lastObject];

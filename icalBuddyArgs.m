@@ -193,6 +193,7 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
 		opts->output_is_eventsToday = [opts->output hasPrefix:@"eventsToday"];
 		opts->output_is_eventsNow = [opts->output isEqualToString:@"eventsNow"];
 		opts->output_is_tasksDueBefore = [opts->output hasPrefix:@"tasksDueBefore:"];
+		opts->output_is_undatedUncompletedTasks = [opts->output isEqualToString:@"undatedUncompletedTasks"];
 		
 		if ([opts->output hasPrefix:@"to:"] && argc > 2)
 		{

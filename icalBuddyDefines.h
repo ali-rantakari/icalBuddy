@@ -145,6 +145,7 @@ typedef struct
 	BOOL output_is_eventsNow;
 	BOOL output_is_eventsFromTo;
 	BOOL output_is_tasksDueBefore;
+	BOOL output_is_undatedUncompletedTasks;
 	
 	NSString *output;
 	NSArray *includeCals;
@@ -162,7 +163,7 @@ typedef struct
 	NSDate *dueBeforeDate;
 } AppOptions;
 
-#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
+#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
 					  		 	 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
 
 

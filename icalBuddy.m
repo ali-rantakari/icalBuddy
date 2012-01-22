@@ -53,7 +53,7 @@ struct
 	int major;
 	int minor;
 	int build;
-} version = {1,7,22};
+} version = {1,8,0};
 
 NSString* versionNumberStr()
 {
@@ -199,53 +199,55 @@ int main(int argc, char *argv[])
 	{
 		Printf(@"\n");
 		Printf(@"USAGE: %@ [options] <command>\n", [[NSString stringWithCString:argv[0] encoding:NSUTF8StringEncoding] lastPathComponent]);
-		Printf(@"\n");
-		Printf(@"<command> specifies the general action icalBuddy should take:\n");
-		Printf(@"\n");
-		Printf(@"  'eventsToday'      Print events occurring today\n");
-		Printf(@"  'eventsToday+NUM'  Print events occurring between today and NUM days into\n");
-		Printf(@"                     the future\n");
-		Printf(@"  'eventsNow'        Print events occurring at present time\n");
-		Printf(@"  'eventsFrom:START to:END'\n");
-		Printf(@"                     Print events occurring between the two specified dates\n");
-		Printf(@"  'uncompletedTasks' Print uncompleted tasks\n");
-		Printf(@"  'tasksDueBefore:DATE'\n");
-		Printf(@"                     Print uncompleted tasks that are due before the given\n");
-		Printf(@"                     date, which can be 'today+NUM' or any regular date\n");
-		Printf(@"  'calendars'        Print all calendars\n");
-		Printf(@"  'strEncodings'     Print all the possible string encodings\n");
-		Printf(@"  'editConfig'       Open the configuration file for editing in a GUI editor\n");
-		Printf(@"  'editConfigCLI'    Open the configuration file for editing in a CLI editor\n");
-		Printf(@"\n");
-		Printf(@"Some of the [options] you can use are:\n");
-		Printf(@"\n");
-		Printf(@"-V         Print version number (no <command> needed)\n");
-		Printf(@"-u         Check for updates to self online (no <command> needed)\n");
-		Printf(@"-sc,-sd    Separate by calendar or date\n");
-		Printf(@"-f         Format output\n");
-		Printf(@"-nc        No calendar names\n");
-		Printf(@"-nrd       No relative dates\n");
-		Printf(@"-npn       No property names\n");
-		Printf(@"-n         Include only events from now on\n");
-		Printf(@"-sed       Show empty dates\n");
-		Printf(@"-uid       Show event/task UIDs\n");
-		Printf(@"-eed       Exclude end datetimes\n");
-		Printf(@"-li        Limit items (value required)\n");
-		Printf(@"-std,-stda Sort tasks by due date (stda = ascending)\n");
-		Printf(@"-tf,-df    Set time or date format (value required)\n");
-		Printf(@"-po        Set property order (value required)\n");
-		Printf(@"-ps        Set property separators (value required)\n");
-		Printf(@"-b         Set bullet point (value required)\n");
-		Printf(@"-ab        Set alert bullet point (value required)\n");
-		Printf(@"-ss        Set section separator (value required)\n");
-		Printf(@"-ic,-ec    Include or exclude calendars (value required)\n");
-		Printf(@"-iep,-eep  Include or exclude event properties (value required)\n");
-		Printf(@"-itp,-etp  Include or exclude task properties (value required)\n");
-		Printf(@"-cf,-lf    Set config or localization file path (value required)\n");
-		Printf(@"-nnr       Set replacement for newlines within notes (value required)\n");
-		Printf(@"\n");
-		Printf(@"See the icalBuddy man page for more info.\n");
-		Printf(@"\n");
+		Printf(@"\n"
+		       @"<command> specifies the general action icalBuddy should take:\n"
+		       @"\n"
+		       @"  'eventsToday'      Print events occurring today\n"
+		       @"  'eventsToday+NUM'  Print events occurring between today and NUM days into\n"
+		       @"                     the future\n"
+		       @"  'eventsNow'        Print events occurring at present time\n"
+		       @"  'eventsFrom:START to:END'\n"
+		       @"                     Print events occurring between the two specified dates\n"
+		       @"  'uncompletedTasks' Print uncompleted tasks\n"
+		       @"  'undatedUncompletedTasks'\n"
+		       @"                     Print uncompleted tasks that have no due date\n"
+		       @"  'tasksDueBefore:DATE'\n"
+		       @"                     Print uncompleted tasks that are due before the given\n"
+		       @"                     date, which can be 'today+NUM' or any regular date\n"
+		       @"  'calendars'        Print all calendars\n"
+		       @"  'strEncodings'     Print all the possible string encodings\n"
+		       @"  'editConfig'       Open the configuration file for editing in a GUI editor\n"
+		       @"  'editConfigCLI'    Open the configuration file for editing in a CLI editor\n"
+		       @"\n"
+		       @"Some of the [options] you can use are:\n"
+		       @"\n"
+		       @"-V         Print version number (no <command> needed)\n"
+		       @"-u         Check for updates to self online (no <command> needed)\n"
+		       @"-sc,-sd    Separate by calendar or date\n"
+		       @"-f         Format output\n"
+		       @"-nc        No calendar names\n"
+		       @"-nrd       No relative dates\n"
+		       @"-npn       No property names\n"
+		       @"-n         Include only events from now on\n"
+		       @"-sed       Show empty dates\n"
+		       @"-uid       Show event/task UIDs\n"
+		       @"-eed       Exclude end datetimes\n"
+		       @"-li        Limit items (value required)\n"
+		       @"-std,-stda Sort tasks by due date (stda = ascending)\n"
+		       @"-tf,-df    Set time or date format (value required)\n"
+		       @"-po        Set property order (value required)\n"
+		       @"-ps        Set property separators (value required)\n"
+		       @"-b         Set bullet point (value required)\n"
+		       @"-ab        Set alert bullet point (value required)\n"
+		       @"-ss        Set section separator (value required)\n"
+		       @"-ic,-ec    Include or exclude calendars (value required)\n"
+		       @"-iep,-eep  Include or exclude event properties (value required)\n"
+		       @"-itp,-etp  Include or exclude task properties (value required)\n"
+		       @"-cf,-lf    Set config or localization file path (value required)\n"
+		       @"-nnr       Set replacement for newlines within notes (value required)\n"
+		       @"\n"
+		       @"See the icalBuddy man page for more info.\n"
+		       @"\n");
 		Printf(@"Version %@\n", versionNumberStr());
 		Printf(@"Copyright 2008-2011 Ali Rantakari, http://hasseg.org/icalBuddy\n");
 		Printf(@"\n");

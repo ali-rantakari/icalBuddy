@@ -49,6 +49,10 @@ Print events occurring between the two specified dates. The dates (START and END
 
 Print uncompleted tasks
 
+=item B<C<undatedUncompletedTasks>>
+
+Print uncompleted tasks that have no due date
+
 =item B<C<tasksDueBefore:DATE>>
 
 Print uncompleted tasks that are due before the given date. DATE may be specified in a natural language form (such as C<tomorrow at noon> or C<june 10 at 6 pm>) or as a relative date (such as C<today+3> or C<yesterday-2>) but the safest format is C<YYYY-MM-DD HH:MM:SS +HHMM> (the C<+HHMM> part at the end specifies the timezone offset in hours and minutes from GMT, and it may have a plus or minus prefix)

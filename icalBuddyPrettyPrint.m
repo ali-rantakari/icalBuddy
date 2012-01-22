@@ -1033,9 +1033,7 @@ void flushOutputBuffer(NSMutableAttributedString *buffer, AppOptions *opts, NSDi
 {
 	if (opts->useFormatting
 		&& formattedKeywords != nil
-		&& (opts->output_is_eventsToday || opts->output_is_eventsNow
-			|| opts->output_is_eventsFromTo || opts->output_is_uncompletedTasks
-			|| opts->output_is_tasksDueBefore)
+	    && areWePrintingItems(opts)
 		)
 	{
 		// it seems we need to do some search & replace for the output
