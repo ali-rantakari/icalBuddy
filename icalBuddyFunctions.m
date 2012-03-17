@@ -597,7 +597,9 @@ void printAllCalendars(AppOptions *opts)
 	
 	for (CalCalendar *cal in calendars)
 	{
-		Printf(@"* %@\n  uid: %@\n", [cal title], [cal uid]);
+		Printf(@"* %@\n", [cal title]);
+		Printf(@"  type: %@\n", [cal type]);
+		Printf(@"  uid: %@\n", [cal uid]);
 	}
 }
 
