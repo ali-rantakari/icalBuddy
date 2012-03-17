@@ -179,6 +179,21 @@ If your requirements are more specific (for example, you want more accuracy than
     /usr/local/bin/icalBuddy -d eventsFrom:"${start_dt}" to:"${end_dt}"
 
 
+## Q: How do I filter events based on a calendar if I have multiple calendars with the same name?
+
+_(For example, Exchange names all default calendars `Calendar`.)_
+
+The `-ic` and `-ec` (or `--includeCals` and `--excludeCals`) arguments can be given calendar UID's (unique identifiers) instead of calendar names. You can get the calendar UIDs by running `icalBuddy calendars`. _(Since version 1.8.1, icalBuddy also uses the calendar color in this output to help you distinguish which is which.)_
+
+    $ icalBuddy calendars
+    • Calendar
+      type: Exchange
+      UID: 3F0B97F7-0B88-48E3-BDAB-977382767D28
+    • Calendar
+      type: Exchange
+      UID: 58C43DDA-384E-4866-8077-8C0BBF292C01
+
+
 ## Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
 The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. There are two workarounds I've come up with, depending on the application you're using to invoke icalBuddy:
