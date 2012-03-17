@@ -1044,6 +1044,25 @@ void printItemSections(NSArray *sections, CalItemPrintOption printOptions)
 }
 
 
+
+void printAllCalendars(AppOptions *opts)
+{
+	NSArray *calendars = getCalendars(opts);
+	
+	for (CalCalendar *cal in calendars)
+	{
+	    ADD_TO_OUTPUT_BUFFER(ATTR_STR(@"• "));
+	    NSMutableAttributedString *calendarName = M_ATTR_STR([cal title]);
+	    [calendarName addAttribute:NSForegroundColorAttributeName value:[cal color] range:NSMakeRange(0, [calendarName length])];
+	    ADD_TO_OUTPUT_BUFFER(calendarName);
+	    ADD_TO_OUTPUT_BUFFER(ATTR_STR(@"\n"));
+	    ADD_TO_OUTPUT_BUFFER(ATTR_STR(([NSString stringWithFormat:@"  type: %@\n", [cal type]])));
+	    ADD_TO_OUTPUT_BUFFER(ATTR_STR(([NSString stringWithFormat:@"  UID: %@\n", [cal uid]])));
+	}
+}
+
+
+
 void flushOutputBuffer(NSMutableAttributedString *buffer, AppOptions *opts, NSDictionary *formattedKeywords)
 {
 	if (opts->useFormatting

@@ -48,7 +48,6 @@ NSArray *putItemsUnderSections(AppOptions *opts, NSArray *calItems);
 CalItemPrintOption getPrintOptions(AppOptions *opts);
 NSArray *getCalendars(AppOptions *opts);
 
-void printAllCalendars(AppOptions *opts);
 void printAvailableStringEncodings();
 void openConfigFileInEditor(NSString *configFilePath, BOOL openInCLIEditor);
 

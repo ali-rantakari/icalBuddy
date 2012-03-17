@@ -616,19 +616,6 @@ NSArray *getCalendars(AppOptions *opts)
 }
 
 
-void printAllCalendars(AppOptions *opts)
-{
-	NSArray *calendars = getCalendars(opts);
-	
-	for (CalCalendar *cal in calendars)
-	{
-		Printf(@"* %@\n", [cal title]);
-		Printf(@"  type: %@\n", [cal type]);
-		Printf(@"  uid: %@\n", [cal uid]);
-	}
-}
-
-
 void printAvailableStringEncodings()
 {
 	Printf(@"\nAvailable String encodings (you can use one of these\nas an argument to the --strEncoding option):\n\n");
