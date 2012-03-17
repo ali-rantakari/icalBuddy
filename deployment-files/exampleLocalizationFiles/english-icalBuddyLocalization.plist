@@ -48,6 +48,12 @@
 	<string>medium</string>
 	<key>low</key>
 	<string>low</string>
+	<key>noPriority</key>
+	<string>none</string>
+	<key>priorityTitle</key>
+	<string>%@ priority</string>
+	<key>priorityTitleNone</key>
+	<string>No priority</string>
 	<key>dateTimeSeparator</key>
 	<string> at </string>
 	<key>noItems</key>
