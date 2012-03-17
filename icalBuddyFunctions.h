@@ -37,6 +37,9 @@ extern NSDate *today;
 
 
 BOOL areWePrintingItems(AppOptions *opts);
+BOOL areWePrintingEvents(AppOptions *opts);
+BOOL areWePrintingTasks(AppOptions *opts);
+BOOL areWePrintingAlsoPastEvents(AppOptions *opts);
 
 NSArray *getCalItems(AppOptions *opts);
 NSArray *sortCalItems(AppOptions *opts, NSArray *calItems);

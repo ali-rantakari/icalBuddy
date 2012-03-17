@@ -96,6 +96,10 @@ Separate events/tasks in the output by calendar.
 
 Separate events/tasks in the output by date.
 
+=item B<-sp>, B<--separateByPriority>
+
+Separate tasks in the output by priority.
+
 =over 8
 
 =item B<-sed>, B<--showEmptyDates>

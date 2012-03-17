@@ -128,6 +128,8 @@ typedef struct
 {
 	BOOL separateByCalendar;
 	BOOL separateByDate;
+	BOOL separateByPriority;
+
 	BOOL updatesCheck;
 	BOOL printVersion;
 	BOOL includeOnlyEventsFromNowOn;
@@ -163,7 +165,7 @@ typedef struct
 	NSDate *dueBeforeDate;
 } AppOptions;
 
-#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
+#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
 					  		 	 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
 
 

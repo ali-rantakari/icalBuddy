@@ -45,6 +45,8 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
 			opts->separateByCalendar = YES;
 		else if ([shortName isEqualToString:@"sd"] || [longName isEqualToString:@"separateByDate"])
 			opts->separateByDate = YES;
+		else if ([shortName isEqualToString:@"sp"] || [longName isEqualToString:@"separateByPriority"])
+			opts->separateByPriority = YES;
 		else if ([shortName isEqualToString:@"u"] || [longName isEqualToString:@"checkForUpdates"])
 			opts->updatesCheck = YES;
 		else if ([shortName isEqualToString:@"V"] || [longName isEqualToString:@"version"])
