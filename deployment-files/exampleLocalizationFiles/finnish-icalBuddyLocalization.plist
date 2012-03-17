@@ -48,6 +48,12 @@
 	<string>normaali</string>
 	<key>low</key>
 	<string>alhainen</string>
+	<key>noPriority</key>
+	<string>ei prioriteettia</string>
+	<key>priorityTitle</key>
+	<string>%@ prioriteetti</string>
+	<key>priorityTitleNone</key>
+	<string>Ei prioriteettia</string>
 	<key>dateTimeSeparator</key>
 	<string> klo </string>
 	<key>noItems</key>
