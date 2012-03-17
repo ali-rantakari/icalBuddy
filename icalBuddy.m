@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 		       @"See the icalBuddy man page for more info.\n"
 		       @"\n");
 		Printf(@"Version %@\n", versionNumberStr());
-		Printf(@"Copyright 2008-2011 Ali Rantakari, http://hasseg.org/icalBuddy\n");
+		Printf(@"Copyright 2008-2012 Ali Rantakari, http://hasseg.org/icalBuddy\n");
 		Printf(@"\n");
 	}
 	
