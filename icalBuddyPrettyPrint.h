@@ -76,6 +76,7 @@ typedef struct
 	BOOL calendarAgnostic;	// calendar-agnostic (i.e. don't print out the calendar name)
 	BOOL withoutPropNames;	// without property names (i.e. print only the values)
 	BOOL calendarColorsForSectionTitles;
+	BOOL priorityAgnostic;
 } CalItemPrintOption;
 
 
@@ -91,7 +92,9 @@ typedef enum datePrintOption
 void initPrettyPrint(NSMutableAttributedString *aOutputBuffer, PrettyPrintOptions opts);
 PrettyPrintOptions getDefaultPrettyPrintOptions();
 
-NSString* dateStr(NSDate *date, DatePrintOption printOption);
+NSString *dateStr(NSDate *date, DatePrintOption printOption);
+NSString *localizedPriority(CalPriority priority);
+NSString *localizedPriorityTitle(CalPriority priority);
 
 NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay);
 NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, CalItemPrintOption printOptions);

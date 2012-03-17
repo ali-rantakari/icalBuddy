@@ -763,6 +763,35 @@ PropertyPresentationElements *getTaskDatetimePresentation(CalTask *task, CalItem
 	return elements;
 }
 
+NSString *localizedPriority(CalPriority priority)
+{
+	switch(priority)
+	{
+		case CalPriorityHigh:
+			return localizedStr(kL10nKeyPriorityHigh);
+			break;
+		case CalPriorityMedium:
+			return localizedStr(kL10nKeyPriorityMedium);
+			break;
+		case CalPriorityLow:
+			return localizedStr(kL10nKeyPriorityLow);
+			break;
+		case CalPriorityNone:
+			return localizedStr(kL10nKeyPriorityNone);
+			break;
+	}
+	return [NSString stringWithFormat:@"%d", priority];
+}
+
+NSString *localizedPriorityTitle(CalPriority priority)
+{
+	if (priority == CalPriorityNone)
+		return localizedStr(kL10nKeyPriorityTitleNone);
+	return [[NSString stringWithFormat:
+		     localizedStr(kL10nKeyPriorityTitle),
+		     localizedPriority(priority)] capitalizedString];
+}
+
 PropertyPresentationElements *getTaskPriorityPresentation(CalTask *task, CalItemPrintOption printOptions)
 {
 	PropertyPresentationElements *elements = [PropertyPresentationElements new];
@@ -772,22 +801,7 @@ PropertyPresentationElements *getTaskPriorityPresentation(CalTask *task, CalItem
 	if ([task priority] == CalPriorityNone)
 		return elements;
 	
-	switch([task priority])
-	{
-		case CalPriorityHigh:
-			elements.value = M_ATTR_STR(localizedStr(kL10nKeyPriorityHigh));
-			break;
-		case CalPriorityMedium:
-			elements.value = M_ATTR_STR(localizedStr(kL10nKeyPriorityMedium));
-			break;
-		case CalPriorityLow:
-			elements.value = M_ATTR_STR(localizedStr(kL10nKeyPriorityLow));
-			break;
-		default:
-			elements.value = M_ATTR_STR(([NSString stringWithFormat:@"%d", [task priority]]));
-			break;
-	}
-	
+	elements.value = M_ATTR_STR(localizedPriority([task priority]));
 	return elements;
 }
 
@@ -824,7 +838,8 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, Cal
 	}
 	else if ([propName isEqualToString:kPropName_priority])
 	{
-		elements = getTaskPriorityPresentation(task, printOptions);
+		if (!printOptions.priorityAgnostic)
+			elements = getTaskPriorityPresentation(task, printOptions);
 	}
 	else
 		return nil;

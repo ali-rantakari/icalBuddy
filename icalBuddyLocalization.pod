@@ -62,6 +62,18 @@ The translation of the value "medium" for the "priority" property of a task.
 
 The translation of the value "low" for the "priority" property of a task.
 
+=item B<C<noPriority>>
+
+The translation of the value "none" for the "priority" property of a task.
+
+=item B<C<priorityTitle>>
+
+The formatting of a task priority as a title (e.g. C<%@ priority>). Must include substring %@ to specify the location of the priority value.
+
+=item B<C<priorityTitleNone>>
+
+The lack of a task priority as a title (e.g. C<No priority>).
+
 =item B<C<someonesBirthday>>
 
 The title for an event in the Birthdays calendar (e.g. C<%@'s Birthday>.) Must include substring %@ to specify the location of the person's name.
@@ -180,6 +192,12 @@ What to print under empty sections (i.e. dates, if separating by date and showin
 		<string>medium</string>
 		<key>low</key>
 		<string>low</string>
+		<key>noPriority</key>
+		<string>none</string>
+		<key>priorityTitle</key>
+		<string>%@ priority</string>
+		<key>priorityTitleNone</key>
+		<string>No priority</string>
 		<key>dateTimeSeparator</key>
 		<string> at </string>
 	</dict>

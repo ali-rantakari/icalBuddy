@@ -282,7 +282,7 @@ CalItemPrintOption getPrintOptions(AppOptions *opts)
 	BOOL printingEvents = areWePrintingEvents(opts);
 	BOOL printingTasks = areWePrintingTasks(opts);
 	
-	CalItemPrintOption printOptions = {NO,NO,NO,NO};
+	CalItemPrintOption printOptions = {NO,NO,NO,NO,NO};
 	
 	// set default print options
 	if (printingEvents)
@@ -304,6 +304,8 @@ CalItemPrintOption getPrintOptions(AppOptions *opts)
 	{
 		if (opts->noCalendarNames)
 			printOptions.calendarAgnostic = YES;
+		if (opts->separateByPriority)
+			printOptions.priorityAgnostic = YES;
 	}
 	
 	if (opts->noPropNames)
@@ -515,6 +517,29 @@ NSArray *putItemsUnderSections(AppOptions *opts, NSArray *calItems)
 			
 			PrintSection section = {thisSectionTitle, thisSectionItems, thisSectionContextDay};
 			[sections addObject:SECTION_TO_NSVALUE(section)];
+		}
+	}
+	else if (opts->separateByPriority && printingTasks)
+	{
+		sections = [NSMutableArray arrayWithCapacity:4];
+
+		// None = 0, High = 1, Medium = 5, Low = 9
+		CalPriority priorities[] = {CalPriorityHigh, CalPriorityMedium, CalPriorityLow, CalPriorityNone};
+		int len_priorities = 4;
+		for (int i = 0; i < len_priorities; i++)
+		{
+			CalPriority priority = priorities[i];
+			NSMutableArray *thisCalendarItems = [NSMutableArray arrayWithCapacity:[calItems count]];
+			for (CalTask *aTask in calItems)
+			{
+				if ([aTask priority] == priority)
+					[thisCalendarItems addObject:aTask];
+			}
+			if (0 < [thisCalendarItems count])
+			{
+				PrintSection section = {localizedPriorityTitle(priority), thisCalendarItems, nil};
+				[sections addObject:SECTION_TO_NSVALUE(section)];
+			}
 		}
 	}
 	

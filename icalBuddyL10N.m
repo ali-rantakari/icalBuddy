@@ -85,11 +85,14 @@ void initL10N(NSString *configFilePath)
 		@"next week",				kL10nKeyNextWeek,
 		@"%d weeks ago",			kL10nKeyXWeeksAgo,
 		@"%d weeks from now",		kL10nKeyXWeeksFromNow,
-		@"high",		kL10nKeyPriorityHigh,
-		@"medium",		kL10nKeyPriorityMedium,
-		@"low",			kL10nKeyPriorityLow,
-		@" at ",		kL10nKeyDateTimeSeparator,
-		@"Nothing.",	kL10nKeyNoItemsInSection,
+		@"high",		 kL10nKeyPriorityHigh,
+		@"medium",		 kL10nKeyPriorityMedium,
+		@"low",			 kL10nKeyPriorityLow,
+		@"none",		 kL10nKeyPriorityNone,
+		@"%@ priority",  kL10nKeyPriorityTitle,
+		@"No priority",  kL10nKeyPriorityTitleNone,
+		@" at ",		 kL10nKeyDateTimeSeparator,
+		@"Nothing.",	 kL10nKeyNoItemsInSection,
 		nil
 		];
 	readAndValidateL10NConfigFile(configFilePath);
