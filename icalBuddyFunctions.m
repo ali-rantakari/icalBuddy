@@ -128,7 +128,13 @@ NSArray *getEvents(AppOptions *opts, NSArray *calendars)
 		endDate:opts->endDate
 		calendars:calendars
 		];
-	return [[CALENDAR_STORE defaultCalendarStore] eventsWithPredicate:eventsPredicate];
+	NSArray *ret = [[CALENDAR_STORE defaultCalendarStore] eventsWithPredicate:eventsPredicate];
+	
+	// filter results
+	if (opts->excludeAllDayEvents)
+	    ret = [ret filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"isAllDay == NO"]];
+	
+	return ret;
 }
 
 

@@ -141,6 +141,7 @@ typedef struct
 	BOOL noPropNames;
 	BOOL alwaysShowTodaysSection;
 	BOOL specificCalFilterPrecedesCalTypeFilter;
+	BOOL excludeAllDayEvents;
 	
 	BOOL output_is_uncompletedTasks;
 	BOOL output_is_eventsToday;
@@ -165,7 +166,7 @@ typedef struct
 	NSDate *dueBeforeDate;
 } AppOptions;
 
-#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
+#define NEW_DEFAULT_APP_OPTIONS	{NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
 					  		 	 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
 
 
