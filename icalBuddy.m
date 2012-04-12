@@ -233,6 +233,7 @@ int main(int argc, char *argv[])
 		       @"-sed        Show empty dates\n"
 		       @"-uid        Show event/task UIDs\n"
 		       @"-eed        Exclude end datetimes\n"
+		       @"-ea         Exclude all-day events\n"
 		       @"-li         Limit items (value required)\n"
 		       @"-std,-stda  Sort tasks by due date (stda = ascending)\n"
 		       @"-tf,-df     Set time or date format (value required)\n"
