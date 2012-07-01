@@ -48,6 +48,18 @@
 	<string>Mittel</string>
 	<key>low</key>
 	<string>Gering</string>
+	<!-- TODO: these need to be translated:
+    <key>noPriority</key>
+    <string></string>
+    <key>priorityTitleHigh</key>
+    <string></string>
+    <key>priorityTitleMedium</key>
+    <string></string>
+    <key>priorityTitleLow</key>
+    <string></string>
+    <key>priorityTitleNone</key>
+    <string></string>
+    -->
 	<key>dateTimeSeparator</key>
 	<string> um </string>
 	<key>noItems</key>
