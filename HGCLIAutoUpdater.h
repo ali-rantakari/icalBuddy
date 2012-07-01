@@ -35,12 +35,12 @@ THE SOFTWARE.
 #define kServerConnectTimeout 10.0
 
 
-#define NS_ERROR(c,d)	[NSError\
-						errorWithDomain:kHGCLIAutoUpdateErrorDomain\
-						code:(c)\
-						userInfo:[NSDictionary\
-							dictionaryWithObject:(d)\
-							forKey:NSLocalizedDescriptionKey]]
+#define NS_ERROR(c,d)   [NSError\
+                        errorWithDomain:kHGCLIAutoUpdateErrorDomain\
+                        code:(c)\
+                        userInfo:[NSDictionary\
+                            dictionaryWithObject:(d)\
+                            forKey:NSLocalizedDescriptionKey]]
 
 
 // helper method: compare three-part version number strings (e.g. "1.12.3")
@@ -49,14 +49,14 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second);
 
 @interface HGCLIAutoUpdater : NSObject
 {
-	ANSIEscapeHelper *ansiEscapeHelper;
-	NSString *versionCheckHeaderName;
-	
-	NSString *appName;
-	NSString *currentVersionStr;
-	NSString *latestVersionStr;
-	
-	id delegate;
+    ANSIEscapeHelper *ansiEscapeHelper;
+    NSString *versionCheckHeaderName;
+    
+    NSString *appName;
+    NSString *currentVersionStr;
+    NSString *latestVersionStr;
+    
+    id delegate;
 }
 
 @property(retain) id delegate;

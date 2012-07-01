@@ -28,11 +28,11 @@ THE SOFTWARE.
 */
 
 #ifdef USE_MOCKED_CALENDARSTORE
-	#import "calendarStoreMock/MockCalCalendarStore.h"
-	#define CALENDAR_STORE	MockCalCalendarStore
+    #import "calendarStoreMock/MockCalCalendarStore.h"
+    #define CALENDAR_STORE  MockCalCalendarStore
 #else
-	#import <CalendarStore/CalendarStore.h>
-	#define CALENDAR_STORE	CalCalendarStore
+    #import <CalendarStore/CalendarStore.h>
+    #define CALENDAR_STORE  CalCalendarStore
 #endif
 
 

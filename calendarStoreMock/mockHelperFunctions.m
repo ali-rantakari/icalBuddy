@@ -32,62 +32,62 @@ THE SOFTWARE.
 
 NSDate *dateFromStr(NSString *str)
 {
-	NSString *dateStr = nil;
-	if ([str length] == 25)
-		dateStr = str;
-	else if ([str length] == 19)
-		dateStr = strConcat(str, @" +0200", nil);
-	else if ([str length] == 16)
-		dateStr = strConcat(str, @":00 +0200", nil);
-	else if ([str length] == 13)
-		dateStr = strConcat(str, @":00:00 +0200", nil);
-	else if ([str length] == 10)
-		dateStr = strConcat(str, @" 12:00:00 +0200", nil);
-	return [NSDate dateWithString:dateStr];
+    NSString *dateStr = nil;
+    if ([str length] == 25)
+        dateStr = str;
+    else if ([str length] == 19)
+        dateStr = strConcat(str, @" +0200", nil);
+    else if ([str length] == 16)
+        dateStr = strConcat(str, @":00 +0200", nil);
+    else if ([str length] == 13)
+        dateStr = strConcat(str, @":00:00 +0200", nil);
+    else if ([str length] == 10)
+        dateStr = strConcat(str, @" 12:00:00 +0200", nil);
+    return [NSDate dateWithString:dateStr];
 }
 
 CalCalendar *newCalendar(NSString *title, NSColor *color)
 {
-	CalCalendar *cal = [CalCalendar calendar];
-	cal.title = title;
-	cal.color = color;
-	return cal;
+    CalCalendar *cal = [CalCalendar calendar];
+    cal.title = title;
+    cal.color = color;
+    return cal;
 }
 
 CalEvent *newEvent(CalCalendar *calendar,
-	NSString *title, NSString *location,
-	NSString *start, NSString *end,
-	NSString *notes, NSURL *url
-	)
+    NSString *title, NSString *location,
+    NSString *start, NSString *end,
+    NSString *notes, NSURL *url
+    )
 {
-	CalEvent *event = [CalEvent event];
-	event.calendar = calendar;
-	event.title = title;
-	event.location = location;
-	event.isAllDay = NO;
-	event.startDate = dateFromStr(start);
-	event.endDate = dateFromStr(end);
-	event.notes = notes;
-	event.url = url;
-	return event;
+    CalEvent *event = [CalEvent event];
+    event.calendar = calendar;
+    event.title = title;
+    event.location = location;
+    event.isAllDay = NO;
+    event.startDate = dateFromStr(start);
+    event.endDate = dateFromStr(end);
+    event.notes = notes;
+    event.url = url;
+    return event;
 }
 
 CalEvent *newAllDayEvent(CalCalendar *calendar,
-	NSString *title, NSString *location,
-	NSString *start, NSString *end,
-	NSString *notes, NSURL *url
-	)
+    NSString *title, NSString *location,
+    NSString *start, NSString *end,
+    NSString *notes, NSURL *url
+    )
 {
-	CalEvent *event = [CalEvent event];
-	event.calendar = calendar;
-	event.title = title;
-	event.location = location;
-	event.isAllDay = YES;
-	event.startDate = dateFromStr(start);
-	event.endDate = dateByAddingDays(dateFromStr(end), 1);
-	event.notes = notes;
-	event.url = url;
-	return event;
+    CalEvent *event = [CalEvent event];
+    event.calendar = calendar;
+    event.title = title;
+    event.location = location;
+    event.isAllDay = YES;
+    event.startDate = dateFromStr(start);
+    event.endDate = dateByAddingDays(dateFromStr(end), 1);
+    event.notes = notes;
+    event.url = url;
+    return event;
 }
 
 

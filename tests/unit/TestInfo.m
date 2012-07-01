@@ -39,18 +39,18 @@ THE SOFTWARE.
 
 - (id) init
 {
-	if (!(self = [super init]))
-		return nil;
-	
-	self.output = [NSMutableString string];
-	
-	return self;
+    if (!(self = [super init]))
+        return nil;
+    
+    self.output = [NSMutableString string];
+    
+    return self;
 }
 
 - (void) dealloc
 {
-	self.output = nil;
-	[super dealloc];
+    self.output = nil;
+    [super dealloc];
 }
 
 @end

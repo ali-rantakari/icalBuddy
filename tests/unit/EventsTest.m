@@ -33,41 +33,41 @@ THE SOFTWARE.
 
 - (void) setUp
 {
-	CalCalendar *homeCal = newCalendar(@"Home", [NSColor greenColor]);
-	CalCalendar *workCal = newCalendar(@"Work", [NSColor blueColor]);
-	[CALENDAR_STORE defaultCalendarStore].calendarsArr = [NSMutableArray arrayWithObjects:
-		homeCal, workCal,
-		nil
-		];
-	
-	[CALENDAR_STORE defaultCalendarStore].itemsArr = [NSMutableArray arrayWithObjects:
-		newAllDayEvent(homeCal, @"Off from work", nil, @"2010-10-22", @"2010-10-23", nil, nil),
-		newEvent(homeCal, @"Feed the cat", @"apartment", @"2010-10-21 15", @"2010-10-21 15", nil, nil),
-		newEvent(homeCal, @"Watch the game", @"apartment", @"2010-10-22 16", @"2010-10-22 17", nil, nil),
-		nil
-		];
+    CalCalendar *homeCal = newCalendar(@"Home", [NSColor greenColor]);
+    CalCalendar *workCal = newCalendar(@"Work", [NSColor blueColor]);
+    [CALENDAR_STORE defaultCalendarStore].calendarsArr = [NSMutableArray arrayWithObjects:
+        homeCal, workCal,
+        nil
+        ];
+    
+    [CALENDAR_STORE defaultCalendarStore].itemsArr = [NSMutableArray arrayWithObjects:
+        newAllDayEvent(homeCal, @"Off from work", nil, @"2010-10-22", @"2010-10-23", nil, nil),
+        newEvent(homeCal, @"Feed the cat", @"apartment", @"2010-10-21 15", @"2010-10-21 15", nil, nil),
+        newEvent(homeCal, @"Watch the game", @"apartment", @"2010-10-22 16", @"2010-10-22 17", nil, nil),
+        nil
+        ];
 }
 
 - (HG_TEST_RETURN_TYPE) testEventsNow
 {
-	AppOptions opts = [self
-		setUpWithNowDate:DATE(@"2010-10-22 16:30:00 +0200")
-		opts:ARR(@"-sd", @"eventsNow")
-		];
-	
-	NSArray *items = getCalItems(&opts);
-	
-	HG_ASSERT_EQUALS([items count], 2);
-	HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:0] title], @"Off from work");
-	HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:1] title], @"Watch the game");
-	
-	HG_TEST_DONE;
+    AppOptions opts = [self
+        setUpWithNowDate:DATE(@"2010-10-22 16:30:00 +0200")
+        opts:ARR(@"-sd", @"eventsNow")
+        ];
+    
+    NSArray *items = getCalItems(&opts);
+    
+    HG_ASSERT_EQUALS([items count], 2);
+    HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:0] title], @"Off from work");
+    HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:1] title], @"Watch the game");
+    
+    HG_TEST_DONE;
 }
 
 - (void) tearDown
 {
-	[CALENDAR_STORE defaultCalendarStore].calendarsArr = nil;
-	[CALENDAR_STORE defaultCalendarStore].itemsArr = nil;
+    [CALENDAR_STORE defaultCalendarStore].calendarsArr = nil;
+    [CALENDAR_STORE defaultCalendarStore].itemsArr = nil;
 }
 
 @end

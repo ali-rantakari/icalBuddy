@@ -29,13 +29,13 @@ THE SOFTWARE.
 
 #import <Cocoa/Cocoa.h>
 
-#define kHGInternalErrorDomain			@"org.hasseg"
+#define kHGInternalErrorDomain          @"org.hasseg"
 
 // helper function macros
-#define kEmptyMutableAttributedString 	[[[NSMutableAttributedString alloc] init] autorelease]
-#define ATTR_STR(x)						[[[NSAttributedString alloc] initWithString:(x)] autorelease]
-#define M_ATTR_STR(x)					[[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
-#define WHITESPACE(x)					[@"" stringByPaddingToLength:(x) withString:@" " startingAtIndex:0]
+#define kEmptyMutableAttributedString   [[[NSMutableAttributedString alloc] init] autorelease]
+#define ATTR_STR(x)                     [[[NSAttributedString alloc] initWithString:(x)] autorelease]
+#define M_ATTR_STR(x)                   [[[NSMutableAttributedString alloc] initWithString:(x)] autorelease]
+#define WHITESPACE(x)                   [@"" stringByPaddingToLength:(x) withString:@" " startingAtIndex:0]
 
 NSError *hgInternalError(NSInteger code, NSString *description);
 

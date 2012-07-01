@@ -36,15 +36,15 @@ THE SOFTWARE.
 
 - (id) init
 {
-	if (!(self = [super initWithAppName:@"icalBuddy"]))
-		return nil;
-	
-	return self;
+    if (!(self = [super initWithAppName:@"icalBuddy"]))
+        return nil;
+    
+    return self;
 }
 
 - (void) autoUpdater:(HGCLIAutoUpdater *)autoUpdater didInstallVersion:(NSString *)latestVersionStr
 {
-	Printf(@"You can run \"icalBuddy -V\" to confirm the update.\n\n");
+    Printf(@"You can run \"icalBuddy -V\" to confirm the update.\n\n");
 }
 
 @end

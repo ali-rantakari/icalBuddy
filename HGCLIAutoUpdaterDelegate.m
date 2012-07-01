@@ -39,56 +39,56 @@ THE SOFTWARE.
 
 - (id) initWithAppName:(NSString *)aAppName
 {
-	if (!(self = [super init]))
-		return nil;
-	
-	appName = [aAppName copy];
-	
-	return self;
+    if (!(self = [super init]))
+        return nil;
+    
+    appName = [aAppName copy];
+    
+    return self;
 }
 
 - (void) dealloc
 {
-	[appName release], appName = nil;
-	[super dealloc];
+    [appName release], appName = nil;
+    [super dealloc];
 }
 
 
 
 - (NSString *) appSiteURLPrefix
 {
-	return [NSString stringWithFormat:kAppSiteURLPrefixFormat, appName];
+    return [NSString stringWithFormat:kAppSiteURLPrefixFormat, appName];
 }
 
 
 - (NSURL *) latestVersionCheckURLWithCurrentVersion:(NSString *)currentVersionStr
 {
-	return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?versioncheck=y", nil)];
+    return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?versioncheck=y", nil)];
 }
 
 - (NSURL *) latestVersionInfoWebURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr
 {
-	return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?currentversion=", currentVersionStr, nil)];
+    return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?currentversion=", currentVersionStr, nil)];
 }
 
 - (NSURL *) releaseNotesHTMLURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr
 {
-	return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?whatschanged=y&currentversion=", currentVersionStr, nil)];
+    return [NSURL URLWithString:strConcat([self appSiteURLPrefix], @"?whatschanged=y&currentversion=", currentVersionStr, nil)];
 }
 
 - (NSURL *) latestVersionZIPURLWithCurrentVersion:(NSString *)currentVersionStr latestVersion:(NSString *)latestVersionStr
 {
-	NSString *urlStr = strConcat(
-		[self appSiteURLPrefix],
-		[NSString stringWithFormat:@"%@/%@-v%@.zip", latestVersionStr, appName, latestVersionStr],
-		nil
-		);
-	return [NSURL URLWithString:urlStr];
+    NSString *urlStr = strConcat(
+        [self appSiteURLPrefix],
+        [NSString stringWithFormat:@"%@/%@-v%@.zip", latestVersionStr, appName, latestVersionStr],
+        nil
+        );
+    return [NSURL URLWithString:urlStr];
 }
 
 - (NSString *) commandToRunInstaller
 {
-	return @"./install.command -y";
+    return @"./install.command -y";
 }
 
 

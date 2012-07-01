@@ -35,89 +35,89 @@ THE SOFTWARE.
 
 - (id) init
 {
-	if (!(self = [super init]))
-		return nil;
-	
-	return self;
+    if (!(self = [super init]))
+        return nil;
+    
+    return self;
 }
 
 - (void) dealloc
 {
-	[super dealloc];
+    [super dealloc];
 }
 
 - (NSString *) getClassName
 {
-	return [NSString stringWithUTF8String:class_getName([self class])];
+    return [NSString stringWithUTF8String:class_getName([self class])];
 }
 
 - (NSArray *) getMethodNames
 {
-	NSMutableArray *methodsArr = [NSMutableArray array];
-	
-	unsigned int numMethods;
-	Method *methods = class_copyMethodList([self class], &numMethods);
-	for (unsigned i = 0; i < numMethods; i++)
-		[methodsArr addObject:[NSString stringWithUTF8String:sel_getName(method_getName(methods[i]))]];
-	free(methods);
-	
-	return methodsArr;
+    NSMutableArray *methodsArr = [NSMutableArray array];
+    
+    unsigned int numMethods;
+    Method *methods = class_copyMethodList([self class], &numMethods);
+    for (unsigned i = 0; i < numMethods; i++)
+        [methodsArr addObject:[NSString stringWithUTF8String:sel_getName(method_getName(methods[i]))]];
+    free(methods);
+    
+    return methodsArr;
 }
 
 - (NSArray *) getTestMethodNames
 {
-	NSMutableArray *testMethods = [NSMutableArray array];
-	
-	NSArray *methodNames = [self getMethodNames];
-	for (NSString *name in methodNames)
-	{
-		if ([name hasPrefix:@"test"])
-			[testMethods addObject:name];
-	}
-	
-	return testMethods;
+    NSMutableArray *testMethods = [NSMutableArray array];
+    
+    NSArray *methodNames = [self getMethodNames];
+    for (NSString *name in methodNames)
+    {
+        if ([name hasPrefix:@"test"])
+            [testMethods addObject:name];
+    }
+    
+    return testMethods;
 }
 
 
 - (TestInfo *) runTests
 {
-	TestInfo *testInfo = [[[TestInfo alloc] init] autorelease];
-	
-	SEL setUpSel = @selector(setUp);
-	SEL tearDownSel = @selector(tearDown);
-	
-	PRINTLN_BOLD(@"------------------------------------------------");
-	PRINTLN_BOLD(@"TEST CLASS: %@", [self getClassName]);
-	
-	if ([self respondsToSelector:setUpSel])
-	{
-		PRINTLN_B(@"• setUp");
-		[self performSelector:setUpSel];
-	}
-	
-	NSArray *testMethods = [self getTestMethodNames];
-	for (NSString *name in testMethods)
-	{
-		PRINTLN_B(@"• Running test: %@", name);
-		BOOL success = [[self performSelector:NSSelectorFromString(name)] boolValue];
-		
-		testInfo.numTests++;
-		if (success)
-		{
-			testInfo.numSuccesses++;
-			PRINTLN_G(@"+ TEST %@ OK.", name);
-		}
-		else
-			PRINTLN_R(@"- TEST %@ FAILED.", name);
-	}
-	
-	if ([self respondsToSelector:tearDownSel])
-	{
-		PRINTLN_B(@"• tearDown");
-		[self performSelector:tearDownSel];
-	}
-	
-	return testInfo;
+    TestInfo *testInfo = [[[TestInfo alloc] init] autorelease];
+    
+    SEL setUpSel = @selector(setUp);
+    SEL tearDownSel = @selector(tearDown);
+    
+    PRINTLN_BOLD(@"------------------------------------------------");
+    PRINTLN_BOLD(@"TEST CLASS: %@", [self getClassName]);
+    
+    if ([self respondsToSelector:setUpSel])
+    {
+        PRINTLN_B(@"• setUp");
+        [self performSelector:setUpSel];
+    }
+    
+    NSArray *testMethods = [self getTestMethodNames];
+    for (NSString *name in testMethods)
+    {
+        PRINTLN_B(@"• Running test: %@", name);
+        BOOL success = [[self performSelector:NSSelectorFromString(name)] boolValue];
+        
+        testInfo.numTests++;
+        if (success)
+        {
+            testInfo.numSuccesses++;
+            PRINTLN_G(@"+ TEST %@ OK.", name);
+        }
+        else
+            PRINTLN_R(@"- TEST %@ FAILED.", name);
+    }
+    
+    if ([self respondsToSelector:tearDownSel])
+    {
+        PRINTLN_B(@"• tearDown");
+        [self performSelector:tearDownSel];
+    }
+    
+    return testInfo;
 }
 
 

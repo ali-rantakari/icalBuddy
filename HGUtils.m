@@ -33,14 +33,14 @@ THE SOFTWARE.
 
 NSError *hgInternalError(NSInteger code, NSString *description)
 {
-	return [NSError
-		errorWithDomain:kHGInternalErrorDomain
-		code:code
-		userInfo:[NSDictionary
-			dictionaryWithObject:description
-			forKey:NSLocalizedDescriptionKey
-			]
-		];
+    return [NSError
+        errorWithDomain:kHGInternalErrorDomain
+        code:code
+        userInfo:[NSDictionary
+            dictionaryWithObject:description
+            forKey:NSLocalizedDescriptionKey
+            ]
+        ];
 }
 
 
@@ -49,65 +49,65 @@ NSError *hgInternalError(NSInteger code, NSString *description)
 // NOTE: MUST SEND nil AS THE LAST ARGUMENT
 NSString *strConcat(NSString *firstStr, ...)
 {
-	if (!firstStr)
-		return nil;
-	
-	va_list argList;
-	NSMutableString *retVal = [firstStr mutableCopy];
-	NSString *str;
-	va_start(argList, firstStr);
-	while((str = va_arg(argList, NSString*)))
-		[retVal appendString:str];
-	va_end(argList);
-	return retVal;
+    if (!firstStr)
+        return nil;
+    
+    va_list argList;
+    NSMutableString *retVal = [firstStr mutableCopy];
+    NSString *str;
+    va_start(argList, firstStr);
+    while((str = va_arg(argList, NSString*)))
+        [retVal appendString:str];
+    va_end(argList);
+    return retVal;
 }
 
 NSString *escapeDoubleQuotes(NSString *str)
 {
-	return [str stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
+    return [str stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
 }
 
 NSString *translateEscapeSequences(NSString *str)
 {
-	if (str == nil)
-		return nil;
-	
-	NSMutableString *ms = [NSMutableString stringWithString:str];
-	[ms replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\\t" withString:@"\t" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\\e" withString:@"\e" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
-	return ms;
+    if (str == nil)
+        return nil;
+    
+    NSMutableString *ms = [NSMutableString stringWithString:str];
+    [ms replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+    [ms replaceOccurrencesOfString:@"\\t" withString:@"\t" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+    [ms replaceOccurrencesOfString:@"\\e" withString:@"\e" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
+    return ms;
 }
 
 
 NSMutableAttributedString *mutableAttrStrWithAttrs(NSString *string, NSDictionary *attrs)
 {
-	return [[[NSMutableAttributedString alloc] initWithString:string attributes:attrs] autorelease];
+    return [[[NSMutableAttributedString alloc] initWithString:string attributes:attrs] autorelease];
 }
 
 // replaces all occurrences of searchStr in str with replaceStr
 void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr, NSAttributedString *replaceStr)
 {
-	if (str == nil || searchStr == nil || replaceStr == nil)
-		return;
-	
-	NSUInteger replaceStrLength = [replaceStr length];
-	NSString *strRegularString = [str string];
-	NSRange searchRange = NSMakeRange(0, [strRegularString length]);
-	NSRange foundRange;
-	do
-	{
-		foundRange = [strRegularString rangeOfString:searchStr options:NSLiteralSearch range:searchRange];
-		if (foundRange.location != NSNotFound)
-		{
-			[str replaceCharactersInRange:foundRange withAttributedString:replaceStr];
-			
-			strRegularString = [str string];
-			searchRange.location = foundRange.location + replaceStrLength;
-			searchRange.length = [strRegularString length] - searchRange.location;
-		}
-	}
-	while (foundRange.location != NSNotFound);
+    if (str == nil || searchStr == nil || replaceStr == nil)
+        return;
+    
+    NSUInteger replaceStrLength = [replaceStr length];
+    NSString *strRegularString = [str string];
+    NSRange searchRange = NSMakeRange(0, [strRegularString length]);
+    NSRange foundRange;
+    do
+    {
+        foundRange = [strRegularString rangeOfString:searchStr options:NSLiteralSearch range:searchRange];
+        if (foundRange.location != NSNotFound)
+        {
+            [str replaceCharactersInRange:foundRange withAttributedString:replaceStr];
+            
+            strRegularString = [str string];
+            searchRange.location = foundRange.location + replaceStrLength;
+            searchRange.length = [strRegularString length] - searchRange.location;
+        }
+    }
+    while (foundRange.location != NSNotFound);
 }
 
 
@@ -117,16 +117,16 @@ void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr
 // trimming whitespace from around each string component
 NSSet *setFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 {
-	if (str != nil)
-	{
-		NSMutableSet *set = [NSMutableSet setWithCapacity:10];
-		NSArray *arr = [str componentsSeparatedByString:@","];
-		NSString *component;
-		for (component in arr)
-			[set addObject:[component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-		return set;
-	}
-	return [NSSet set];
+    if (str != nil)
+    {
+        NSMutableSet *set = [NSMutableSet setWithCapacity:10];
+        NSArray *arr = [str componentsSeparatedByString:@","];
+        NSString *component;
+        for (component in arr)
+            [set addObject:[component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        return set;
+    }
+    return [NSSet set];
 }
 
 
@@ -134,16 +134,16 @@ NSSet *setFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 // trimming whitespace from around each string component
 NSArray *arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 {
-	if (str != nil)
-	{
-		NSMutableArray *retArr = [NSMutableArray arrayWithCapacity:10];
-		NSArray *arr = [str componentsSeparatedByString:@","];
-		NSString *component;
-		for (component in arr)
-			[retArr addObject:[component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-		return retArr;
-	}
-	return [NSArray array];
+    if (str != nil)
+    {
+        NSMutableArray *retArr = [NSMutableArray arrayWithCapacity:10];
+        NSArray *arr = [str componentsSeparatedByString:@","];
+        NSString *component;
+        for (component in arr)
+            [retArr addObject:[component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        return retArr;
+    }
+    return [NSArray array];
 }
 
 
@@ -153,64 +153,64 @@ NSArray *arrayFromCommaSeparatedStringTrimmingWhitespace(NSString *str)
 // in the given string (e.g.: @"/first/second/third/")
 NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscapeSequences, NSError **error)
 {
-	if (str == nil)
-	{
-		if (error != NULL)
-			*error = hgInternalError(0, @"Given string is null");
-		return nil;
-	}
-	if ([str length] < 2)
-	{
-		if (error != NULL)
-			*error = hgInternalError(0, @"Given string has less than two characters");
-		return nil;
-	}
-	
-	NSString *separatorChar = nil;
-	
-	NSString *firstChar = [str substringToIndex:1];
-	NSString *lastChar = [str substringFromIndex:[str length]-1];
-	if ([firstChar isEqualToString:lastChar])
-		separatorChar = firstChar;
-	else
-	{
-		if (error != NULL)
-			*error = hgInternalError(0, @"Given string must start and end with the separator character");
-		return nil;
-	}
-	
-	if (separatorChar != nil)
-	{
-		NSString *trimmedStr = [str substringWithRange:NSMakeRange(1,([str length]-2))];
-		if (aTranslateEscapeSequences)
-			trimmedStr = translateEscapeSequences(trimmedStr);
-		return [trimmedStr componentsSeparatedByString:separatorChar];
-	}
-	
-	return [NSArray array];
+    if (str == nil)
+    {
+        if (error != NULL)
+            *error = hgInternalError(0, @"Given string is null");
+        return nil;
+    }
+    if ([str length] < 2)
+    {
+        if (error != NULL)
+            *error = hgInternalError(0, @"Given string has less than two characters");
+        return nil;
+    }
+    
+    NSString *separatorChar = nil;
+    
+    NSString *firstChar = [str substringToIndex:1];
+    NSString *lastChar = [str substringFromIndex:[str length]-1];
+    if ([firstChar isEqualToString:lastChar])
+        separatorChar = firstChar;
+    else
+    {
+        if (error != NULL)
+            *error = hgInternalError(0, @"Given string must start and end with the separator character");
+        return nil;
+    }
+    
+    if (separatorChar != nil)
+    {
+        NSString *trimmedStr = [str substringWithRange:NSMakeRange(1,([str length]-2))];
+        if (aTranslateEscapeSequences)
+            trimmedStr = translateEscapeSequences(trimmedStr);
+        return [trimmedStr componentsSeparatedByString:separatorChar];
+    }
+    
+    return [NSArray array];
 }
 
 
 
 NSUInteger countOccurrences(NSString *haystack, NSString *needle, NSStringCompareOptions options)
 {
-	NSInteger count = -1;
-	
-	NSRange searchRange = NSMakeRange(0, [haystack length]);
-	NSRange result;
-	do
-	{
-		count++;
-		result = [haystack rangeOfString:needle options:options range:searchRange];
-		if (result.location != NSNotFound)
-		{
-			searchRange.location = NSMaxRange(result);
-			searchRange.length = [haystack length] - searchRange.location;
-		}
-	}
-	while (result.location != NSNotFound);
-	
-	return count;
+    NSInteger count = -1;
+    
+    NSRange searchRange = NSMakeRange(0, [haystack length]);
+    NSRange result;
+    do
+    {
+        count++;
+        result = [haystack rangeOfString:needle options:options range:searchRange];
+        if (result.location != NSNotFound)
+        {
+            searchRange.location = NSMaxRange(result);
+            searchRange.length = [haystack length] - searchRange.location;
+        }
+    }
+    while (result.location != NSNotFound);
+    
+    return count;
 }
 
 
@@ -218,19 +218,19 @@ NSUInteger countOccurrences(NSString *haystack, NSString *needle, NSStringCompar
 // returns YES if success, NO if failure
 BOOL moveFileToTrash(NSString *filePath)
 {
-	if (filePath == nil)
-		return NO;
-	
-	NSString *fileDir = [filePath stringByDeletingLastPathComponent];
-	NSString *fileName = [filePath lastPathComponent];
-	
-	return [[NSWorkspace sharedWorkspace]
-		performFileOperation:NSWorkspaceRecycleOperation
-		source:fileDir
-		destination:@""
-		files:[NSArray arrayWithObject:fileName]
-		tag:nil
-		];
+    if (filePath == nil)
+        return NO;
+    
+    NSString *fileDir = [filePath stringByDeletingLastPathComponent];
+    NSString *fileName = [filePath lastPathComponent];
+    
+    return [[NSWorkspace sharedWorkspace]
+        performFileOperation:NSWorkspaceRecycleOperation
+        source:fileDir
+        destination:@""
+        files:[NSArray arrayWithObject:fileName]
+        tag:nil
+        ];
 }
 
 

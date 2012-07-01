@@ -40,20 +40,20 @@ THE SOFTWARE.
 
 - (id) init
 {
-	if (!(self = [super init]))
-		return nil;
-	
-	self.calendarsArr = [NSMutableArray array];
-	self.itemsArr = [NSMutableArray array];
-	
-	return self;
+    if (!(self = [super init]))
+        return nil;
+    
+    self.calendarsArr = [NSMutableArray array];
+    self.itemsArr = [NSMutableArray array];
+    
+    return self;
 }
 
 - (void) dealloc
 {
-	self.calendarsArr = nil;
-	self.itemsArr = nil;
-	[super dealloc];
+    self.calendarsArr = nil;
+    self.itemsArr = nil;
+    [super dealloc];
 }
 
 
@@ -68,27 +68,27 @@ THE SOFTWARE.
 //  calendars, named Home and Work.
 - (NSArray *)calendars
 {
-	return self.calendarsArr;
+    return self.calendarsArr;
 }
 
 
 //  The calendar associated with the specific UID. If no record with this UID exists, nil is returned.
 - (CalCalendar *)calendarWithUID:(NSString *)UID
 {
-	// not implemented
-	return nil;
+    // not implemented
+    return nil;
 }
 
 
 - (BOOL)saveCalendar:(CalCalendar *)calendar error:(NSError **)error
 {
-	// not implemented
-	return NO;
+    // not implemented
+    return NO;
 }
 - (BOOL)removeCalendar:(CalCalendar *)calendar error:(NSError **)error
 {
-	// not implemented
-	return NO;
+    // not implemented
+    return NO;
 }
 
 
@@ -106,24 +106,24 @@ THE SOFTWARE.
 //  timespan containing recurrences is always the first four years of date range.
 - (NSArray *)eventsWithPredicate:(NSPredicate *)predicate
 {
-	NSMutableArray *arr = [NSMutableArray array];
-	
-	for (CalCalendarItem *item in self.itemsArr)
-	{
-		if (![item isKindOfClass:[CalEvent class]])
-			continue;
-		CalEvent *event = (CalEvent *)item;
-		if ([predicate evaluateWithObject:event])
-			[arr addObject:event];
-	}
-	
-	return arr;
+    NSMutableArray *arr = [NSMutableArray array];
+    
+    for (CalCalendarItem *item in self.itemsArr)
+    {
+        if (![item isKindOfClass:[CalEvent class]])
+            continue;
+        CalEvent *event = (CalEvent *)item;
+        if ([predicate evaluateWithObject:event])
+            [arr addObject:event];
+    }
+    
+    return arr;
 }
 
 - (CalEvent *)eventWithUID:(NSString *)uid occurrence:(NSDate *)date
 {
-	// not implemented
-	return nil;
+    // not implemented
+    return nil;
 }
 
 
@@ -137,48 +137,48 @@ THE SOFTWARE.
 //  nil is returned. If nil is passed as the predicate, an exception will be raised.
 - (NSArray *)tasksWithPredicate:(NSPredicate *)predicate
 {
-	NSMutableArray *arr = [NSMutableArray array];
-	
-	for (CalCalendarItem *item in self.itemsArr)
-	{
-		if (![item isKindOfClass:[CalTask class]])
-			continue;
-		CalTask *task = (CalTask *)item;
-		if ([predicate evaluateWithObject:task])
-			[arr addObject:task];
-	}
-	
-	return arr;
+    NSMutableArray *arr = [NSMutableArray array];
+    
+    for (CalCalendarItem *item in self.itemsArr)
+    {
+        if (![item isKindOfClass:[CalTask class]])
+            continue;
+        CalTask *task = (CalTask *)item;
+        if ([predicate evaluateWithObject:task])
+            [arr addObject:task];
+    }
+    
+    return arr;
 }
 
 - (CalTask *)taskWithUID:(NSString *)uid
 {
-	// not implemented
-	return nil;
+    // not implemented
+    return nil;
 }
 
 
 - (BOOL)saveEvent:(CalEvent *)event span:(CalSpan)span error:(NSError **)error
 {
-	// not implemented
-	return NO;
+    // not implemented
+    return NO;
 }
 - (BOOL)removeEvent:(CalEvent *)event span:(CalSpan)span error:(NSError **)error
 {
-	// not implemented
-	return NO;
+    // not implemented
+    return NO;
 }
 
 
 - (BOOL)saveTask:(CalTask *)task error:(NSError **)error
 {
-	// not implemented
-	return NO;
+    // not implemented
+    return NO;
 }
 - (BOOL)removeTask:(CalTask *)task error:(NSError **)error
 {
-	// not implemented
-	return NO;
+    // not implemented
+    return NO;
 }
 
 
@@ -186,42 +186,42 @@ THE SOFTWARE.
 
 + (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate calendars:(NSArray *)calendars
 {
-	NSPredicate *pred = [NSPredicate
-		predicateWithFormat:
-			@"calendar IN %@ AND (endDate >= %@ AND startDate <= %@)",
-			calendars, startDate, endDate
-		];
-	return pred;
+    NSPredicate *pred = [NSPredicate
+        predicateWithFormat:
+            @"calendar IN %@ AND (endDate >= %@ AND startDate <= %@)",
+            calendars, startDate, endDate
+        ];
+    return pred;
 }
 
 + (NSPredicate *)taskPredicateWithUncompletedTasks:(NSArray *)calendars
 {
-	// TODO
-	return nil;
+    // TODO
+    return nil;
 }
 
 + (NSPredicate *)taskPredicateWithUncompletedTasksDueBefore:(NSDate *)dueDate calendars:(NSArray *)calendars
 {
-	// TODO
-	return nil;
+    // TODO
+    return nil;
 }
 
 + (NSPredicate *)eventPredicateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate UID:(NSString *)UID calendars:(NSArray *)calendars
 {
-	// not implemented
-	return nil;
+    // not implemented
+    return nil;
 }
 
 + (NSPredicate *)taskPredicateWithCalendars:(NSArray *)calendars //  This will return all tasks, completed and uncompleted, for a set of calendars
 {
-	// not implemented
-	return nil;
+    // not implemented
+    return nil;
 }
 
 + (NSPredicate *)taskPredicateWithTasksCompletedSince:(NSDate *)completedSince calendars:(NSArray *)calendars
 {
-	// not implemented
-	return nil;
+    // not implemented
+    return nil;
 }
 
 
@@ -238,7 +238,7 @@ static MockCalCalendarStore *sharedInstance = NULL;
     @synchronized(self)
     {
         if (sharedInstance == nil)
-			sharedInstance = [[MockCalCalendarStore alloc] init];
+            sharedInstance = [[MockCalCalendarStore alloc] init];
     }
     return sharedInstance;
 }
@@ -246,9 +246,9 @@ static MockCalCalendarStore *sharedInstance = NULL;
 + (id) allocWithZone:(NSZone *)zone
 {
     @synchronized(self)
-	{
+    {
         if (sharedInstance == nil)
-		{
+        {
             sharedInstance = [super allocWithZone:zone];
             return sharedInstance;  // assignment and return on first allocation
         }

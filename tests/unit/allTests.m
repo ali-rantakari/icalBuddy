@@ -35,10 +35,10 @@ THE SOFTWARE.
 
 NSArray *getAllTests()
 {
-	NSMutableArray *allTests = [NSMutableArray array];
-	
-	[allTests addObject:[EventsTest new]];
-	
-	return allTests;
+    NSMutableArray *allTests = [NSMutableArray array];
+    
+    [allTests addObject:[EventsTest new]];
+    
+    return allTests;
 }
 

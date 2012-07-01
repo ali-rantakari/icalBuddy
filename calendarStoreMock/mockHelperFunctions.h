@@ -39,14 +39,14 @@ NSDate *dateFromStr(NSString *str);
 
 CalCalendar *newCalendar(NSString *title, NSColor *color);
 CalEvent *newEvent(CalCalendar *calendar,
-	NSString *title, NSString *location,
-	NSString *start, NSString *end,
-	NSString *notes, NSURL *url
-	);
+    NSString *title, NSString *location,
+    NSString *start, NSString *end,
+    NSString *notes, NSURL *url
+    );
 CalEvent *newAllDayEvent(CalCalendar *calendar,
-	NSString *title, NSString *location,
-	NSString *start, NSString *end,
-	NSString *notes, NSURL *url
-	);
+    NSString *title, NSString *location,
+    NSString *start, NSString *end,
+    NSString *notes, NSURL *url
+    );
 
 

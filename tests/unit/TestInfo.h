@@ -32,10 +32,10 @@ THE SOFTWARE.
 
 @interface TestInfo : NSObject
 {
-	NSUInteger numTests;
-	NSUInteger numSuccesses;
-	BOOL success;
-	NSMutableString *output;
+    NSUInteger numTests;
+    NSUInteger numSuccesses;
+    BOOL success;
+    NSMutableString *output;
 }
 
 @property() NSUInteger numTests;

@@ -33,9 +33,9 @@ THE SOFTWARE.
 
 - (NSInteger) hg_ageOnDate:(NSDate *)referenceDate
 {
-	NSDate *birthday = [self valueForProperty:kABBirthdayProperty];
-	if (birthday == nil)
-		return NSNotFound;
+    NSDate *birthday = [self valueForProperty:kABBirthdayProperty];
+    if (birthday == nil)
+        return NSNotFound;
 
     NSCalendar *calendar = [NSCalendar currentCalendar];
     unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit;
@@ -45,8 +45,8 @@ THE SOFTWARE.
     NSLog(@"Ref year: %i Birth year: %i", [dateComponentsRefDate year], [dateComponentsBirth year]);
 
     if (([dateComponentsRefDate month] < [dateComponentsBirth month])
-    	|| (([dateComponentsRefDate month] == [dateComponentsBirth month])
-    		&& ([dateComponentsRefDate day] < [dateComponentsBirth day])))
+        || (([dateComponentsRefDate month] == [dateComponentsBirth month])
+            && ([dateComponentsRefDate day] < [dateComponentsBirth day])))
         return [dateComponentsRefDate year] - [dateComponentsBirth year] - 1;
     else
         return [dateComponentsRefDate year] - [dateComponentsBirth year];
@@ -54,35 +54,35 @@ THE SOFTWARE.
 
 - (NSInteger) hg_age
 {
-	return [self hg_ageOnDate:[NSDate date]];
+    return [self hg_ageOnDate:[NSDate date]];
 }
 
 - (NSString *) hg_fullName
 {
-	NSString *firstName = [self valueForProperty:kABFirstNameProperty];
-	NSString *lastName = [self valueForProperty:kABLastNameProperty];
-	NSString *orgName = [self valueForProperty:kABOrganizationProperty];
+    NSString *firstName = [self valueForProperty:kABFirstNameProperty];
+    NSString *lastName = [self valueForProperty:kABLastNameProperty];
+    NSString *orgName = [self valueForProperty:kABOrganizationProperty];
 
-	NSInteger personFlags = [[self valueForProperty:kABPersonFlags] integerValue];
-	//BOOL isPerson = (personFlags & kABShowAsMask) == kABShowAsPerson;
-	BOOL isCompany = (personFlags & kABShowAsMask) == kABShowAsCompany;
+    NSInteger personFlags = [[self valueForProperty:kABPersonFlags] integerValue];
+    //BOOL isPerson = (personFlags & kABShowAsMask) == kABShowAsPerson;
+    BOOL isCompany = (personFlags & kABShowAsMask) == kABShowAsCompany;
 
-	if (isCompany)
-		return orgName;
+    if (isCompany)
+        return orgName;
 
-	if (0 < firstName.length && 0 < lastName.length)
-	{
-		if ([[ABAddressBook sharedAddressBook] defaultNameOrdering] == kABFirstNameFirst)
-			return [NSString stringWithFormat:@"%@ %@", firstName, lastName];
-		else
-			return [NSString stringWithFormat:@"%@ %@", lastName, firstName];
-	}
-	else if (0 < firstName.length)
-		return firstName;
-	else if (0 < lastName.length)
-		return lastName;
+    if (0 < firstName.length && 0 < lastName.length)
+    {
+        if ([[ABAddressBook sharedAddressBook] defaultNameOrdering] == kABFirstNameFirst)
+            return [NSString stringWithFormat:@"%@ %@", firstName, lastName];
+        else
+            return [NSString stringWithFormat:@"%@ %@", lastName, firstName];
+    }
+    else if (0 < firstName.length)
+        return firstName;
+    else if (0 < lastName.length)
+        return lastName;
 
-	return nil;
+    return nil;
 }
 
 @end

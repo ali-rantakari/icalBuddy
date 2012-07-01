@@ -31,7 +31,7 @@ THE SOFTWARE.
 
 @interface HGCLIAutoUpdaterDelegate : NSObject
 {
-	NSString *appName;
+    NSString *appName;
 }
 
 - (id) initWithAppName:(NSString *)aAppName;

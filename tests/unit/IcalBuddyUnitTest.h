@@ -49,7 +49,7 @@ THE SOFTWARE.
 
 @interface IcalBuddyUnitTest : UnitTest
 {
-	
+    
 }
 
 - (AppOptions) setUpWithNowDate:(NSDate *)date opts:(NSArray *)argsArr;

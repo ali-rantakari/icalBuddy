@@ -28,7 +28,7 @@ THE SOFTWARE.
 */
 
 #ifndef USE_MOCKED_CALENDARSTORE
-	#define USE_MOCKED_CALENDARSTORE
+    #define USE_MOCKED_CALENDARSTORE
 #endif
 
 #import <Foundation/Foundation.h>
@@ -40,22 +40,22 @@ THE SOFTWARE.
 
 int main(int argc, char *argv[])
 {
-	NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
-	
-	NSUInteger totalNumTests = 0;
-	NSUInteger totalNumSuccesses = 0;
-	
-	NSArray *allTests = getAllTests();
-	for (UnitTest *test in allTests)
-	{
-		TestInfo *info = [test runTests];
-		totalNumTests += info.numTests;
-		totalNumSuccesses += info.numSuccesses;
-	}
-	
-	Printf(@"\n");
-	PRINTLN_Y(@"%i/%i tests succeeded.", totalNumSuccesses, totalNumTests);
-	
-	[autoReleasePool release];
-	return(0);
+    NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
+    
+    NSUInteger totalNumTests = 0;
+    NSUInteger totalNumSuccesses = 0;
+    
+    NSArray *allTests = getAllTests();
+    for (UnitTest *test in allTests)
+    {
+        TestInfo *info = [test runTests];
+        totalNumTests += info.numTests;
+        totalNumSuccesses += info.numSuccesses;
+    }
+    
+    Printf(@"\n");
+    PRINTLN_Y(@"%i/%i tests succeeded.", totalNumSuccesses, totalNumTests);
+    
+    [autoReleasePool release];
+    return(0);
 }

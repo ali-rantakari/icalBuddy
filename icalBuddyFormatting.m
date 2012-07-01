@@ -52,48 +52,48 @@ NSArray *propertySeparators;
 
 void initFormatting(NSDictionary *aFormattingConfigDict, NSArray *aPropertySeparators)
 {
-	ansiEscapeHelper = [[ANSIEscapeHelper alloc] init];
-	
-	formattingConfigDict = aFormattingConfigDict;
-	
-	// default formatting for different output elements
-	defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
-		kFormatColorCyan,		@"datetimeName",
-		kFormatColorYellow,		@"datetimeValue",
-		@"",		 	 		@"titleValue",
-		kFormatColorCyan, 	 	@"notesName",
-		@"", 		 			@"notesValue",
-		kFormatColorCyan, 		@"urlName",
-		@"", 			 		@"urlValue",
-		kFormatColorCyan, 		@"locationName",
-		@"", 		 			@"locationValue",
-		kFormatColorCyan, 		@"dueDateName",
-		@"", 			 		@"dueDateValue",
-		kFormatColorCyan, 	 	@"priorityName",
-		@"", 		 			@"priorityValue",
-		kFormatColorCyan, 	 	@"uidName",
-		@"", 		 			@"uidValue",
-		kFormatColorRed,		kFormatKeyPriorityValueHigh,
-		kFormatColorYellow,	 	kFormatKeyPriorityValueMedium,
-		kFormatColorGreen,		kFormatKeyPriorityValueLow,
-		@"", 					kFormatKeySectionTitle,
-		kFormatBold,			kFormatKeyFirstItemLine,
-		@"", 					kFormatKeyBullet,
-		strConcat(kFormatColorRed, @",", kFormatBold, nil),	kFormatKeyAlertBullet,
-		kFormatColorBrightBlack,kFormatKeyNoItems,
-		nil
-		];
-	
-	propertySeparators = aPropertySeparators;
-	if (propertySeparators == nil || [propertySeparators count] == 0)
-		propertySeparators = kDefaultPropertySeparators;
+    ansiEscapeHelper = [[ANSIEscapeHelper alloc] init];
+    
+    formattingConfigDict = aFormattingConfigDict;
+    
+    // default formatting for different output elements
+    defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
+        kFormatColorCyan,       @"datetimeName",
+        kFormatColorYellow,     @"datetimeValue",
+        @"",                    @"titleValue",
+        kFormatColorCyan,       @"notesName",
+        @"",                    @"notesValue",
+        kFormatColorCyan,       @"urlName",
+        @"",                    @"urlValue",
+        kFormatColorCyan,       @"locationName",
+        @"",                    @"locationValue",
+        kFormatColorCyan,       @"dueDateName",
+        @"",                    @"dueDateValue",
+        kFormatColorCyan,       @"priorityName",
+        @"",                    @"priorityValue",
+        kFormatColorCyan,       @"uidName",
+        @"",                    @"uidValue",
+        kFormatColorRed,        kFormatKeyPriorityValueHigh,
+        kFormatColorYellow,     kFormatKeyPriorityValueMedium,
+        kFormatColorGreen,      kFormatKeyPriorityValueLow,
+        @"",                    kFormatKeySectionTitle,
+        kFormatBold,            kFormatKeyFirstItemLine,
+        @"",                    kFormatKeyBullet,
+        strConcat(kFormatColorRed, @",", kFormatBold, nil), kFormatKeyAlertBullet,
+        kFormatColorBrightBlack,kFormatKeyNoItems,
+        nil
+        ];
+    
+    propertySeparators = aPropertySeparators;
+    if (propertySeparators == nil || [propertySeparators count] == 0)
+        propertySeparators = kDefaultPropertySeparators;
 }
 
 
 
 NSString *ansiEscapedStringWithAttributedString(NSAttributedString *str)
 {
-	return [ansiEscapeHelper ansiEscapedStringWithAttributedString:str];
+    return [ansiEscapeHelper ansiEscapedStringWithAttributedString:str];
 }
 
 
@@ -103,14 +103,14 @@ NSString *ansiEscapedStringWithAttributedString(NSAttributedString *str)
 // color is nil.
 NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 {
-	if (color == nil)
-		return nil;
-	
-	enum sgrCode closestSGRCode = [ansiEscapeHelper closestSGRCodeForColor:color isForegroundColor:foreground];
-	if (closestSGRCode == SGRCodeNoneOrInvalid)
-		return nil;
-	
-	return [ansiEscapeHelper colorForSGRCode:closestSGRCode];
+    if (color == nil)
+        return nil;
+    
+    enum sgrCode closestSGRCode = [ansiEscapeHelper closestSGRCodeForColor:color isForegroundColor:foreground];
+    if (closestSGRCode == SGRCodeNoneOrInvalid)
+        return nil;
+    
+    return [ansiEscapeHelper colorForSGRCode:closestSGRCode];
 }
 
 
@@ -122,120 +122,120 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 // (from the config file, like: "red,bg:blue,bold")
 NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig, CalCalendarItem *calItem)
 {
-	NSMutableDictionary *returnAttributes = [NSMutableDictionary dictionary];
-	
-	NSArray *parts = [formattingConfig componentsSeparatedByString:@","];
-	NSString *part;
-	for (part in parts)
-	{
-		part = [[part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
-		
-		NSString *thisAttrName = nil;
-		NSObject *thisAttrValue = nil;
-		
-		BOOL isColorAttribute = NO;
-		BOOL isBackgroundColor = NO;
-		if ([part hasPrefix:kFormatFgColorPrefix] ||
-			[part isEqualToString:kFormatColorBlack] ||
-			[part isEqualToString:kFormatColorRed] ||
-			[part isEqualToString:kFormatColorGreen] ||
-			[part isEqualToString:kFormatColorYellow] ||
-			[part isEqualToString:kFormatColorBlue] ||
-			[part isEqualToString:kFormatColorMagenta] ||
-			[part isEqualToString:kFormatColorWhite] ||
-			[part isEqualToString:kFormatColorCyan] ||
-			[part isEqualToString:kFormatColorBrightBlack] ||
-			[part isEqualToString:kFormatColorBrightRed] ||
-			[part isEqualToString:kFormatColorBrightGreen] ||
-			[part isEqualToString:kFormatColorBrightYellow] ||
-			[part isEqualToString:kFormatColorBrightBlue] ||
-			[part isEqualToString:kFormatColorBrightMagenta] ||
-			[part isEqualToString:kFormatColorBrightWhite] ||
-			[part isEqualToString:kFormatColorBrightCyan] ||
-			[part isEqualToString:kFormatColorCalendarColor]
-			)
-		{
-			thisAttrName = NSForegroundColorAttributeName;
-			isColorAttribute = YES;
-		}
-		else if ([part hasPrefix:kFormatBgColorPrefix])
-		{
-			thisAttrName = NSBackgroundColorAttributeName;
-			isColorAttribute = YES;
-			isBackgroundColor = YES;
-		}
-		else if ([part isEqualToString:kFormatBold])
-		{
-			thisAttrName = NSFontAttributeName;
-			thisAttrValue = [[NSFontManager sharedFontManager] convertFont:[ansiEscapeHelper font] toHaveTrait:NSBoldFontMask];
-		}
-		else if ([part isEqualToString:kFormatUnderlined])
-		{
-			thisAttrName = NSUnderlineStyleAttributeName;
-			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleSingle];
-		}
-		else if ([part isEqualToString:kFormatDoubleUnderlined])
-		{
-			thisAttrName = NSUnderlineStyleAttributeName;
-			thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleDouble];
-		}
-		else if ([part isEqualToString:kFormatBlink])
-		{
-			thisAttrName = kBlinkAttributeName;
-			thisAttrValue = [NSNumber numberWithBool:YES];
-		}
-		
-		if (isColorAttribute)
-		{
-			enum sgrCode thisColorSGRCode = SGRCodeNoneOrInvalid;
-			if ([part hasSuffix:kFormatColorBrightBlack])
-				thisColorSGRCode = SGRCodeFgBrightBlack;
-			else if ([part hasSuffix:kFormatColorBrightRed])
-				thisColorSGRCode = SGRCodeFgBrightRed;
-			else if ([part hasSuffix:kFormatColorBrightGreen])
-				thisColorSGRCode = SGRCodeFgBrightGreen;
-			else if ([part hasSuffix:kFormatColorBrightYellow])
-				thisColorSGRCode = SGRCodeFgBrightYellow;
-			else if ([part hasSuffix:kFormatColorBrightBlue])
-				thisColorSGRCode = SGRCodeFgBrightBlue;
-			else if ([part hasSuffix:kFormatColorBrightMagenta])
-				thisColorSGRCode = SGRCodeFgBrightMagenta;
-			else if ([part hasSuffix:kFormatColorBrightWhite])
-				thisColorSGRCode = SGRCodeFgBrightWhite;
-			else if ([part hasSuffix:kFormatColorBrightCyan])
-				thisColorSGRCode = SGRCodeFgBrightCyan;
-			else if ([part hasSuffix:kFormatColorBlack])
-				thisColorSGRCode = SGRCodeFgBlack;
-			else if ([part hasSuffix:kFormatColorRed])
-				thisColorSGRCode = SGRCodeFgRed;
-			else if ([part hasSuffix:kFormatColorGreen])
-				thisColorSGRCode = SGRCodeFgGreen;
-			else if ([part hasSuffix:kFormatColorYellow])
-				thisColorSGRCode = SGRCodeFgYellow;
-			else if ([part hasSuffix:kFormatColorBlue])
-				thisColorSGRCode = SGRCodeFgBlue;
-			else if ([part hasSuffix:kFormatColorMagenta])
-				thisColorSGRCode = SGRCodeFgMagenta;
-			else if ([part hasSuffix:kFormatColorWhite])
-				thisColorSGRCode = SGRCodeFgWhite;
-			else if ([part hasSuffix:kFormatColorCyan])
-				thisColorSGRCode = SGRCodeFgCyan;
-			else if ([part hasSuffix:kFormatColorCalendarColor] && calItem != nil)
-				thisColorSGRCode = [ansiEscapeHelper closestSGRCodeForColor:[[calItem calendar] color] isForegroundColor:YES];
-			
-			if (thisColorSGRCode != SGRCodeNoneOrInvalid)
-			{
-				if (isBackgroundColor)
-					thisColorSGRCode += 10;
-				thisAttrValue = [ansiEscapeHelper colorForSGRCode:thisColorSGRCode];
-			}
-		}
-		
-		if (thisAttrName != nil && thisAttrValue != nil)
-			[returnAttributes setValue:thisAttrValue forKey:thisAttrName];
-	}
-	
-	return returnAttributes;
+    NSMutableDictionary *returnAttributes = [NSMutableDictionary dictionary];
+    
+    NSArray *parts = [formattingConfig componentsSeparatedByString:@","];
+    NSString *part;
+    for (part in parts)
+    {
+        part = [[part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
+        
+        NSString *thisAttrName = nil;
+        NSObject *thisAttrValue = nil;
+        
+        BOOL isColorAttribute = NO;
+        BOOL isBackgroundColor = NO;
+        if ([part hasPrefix:kFormatFgColorPrefix] ||
+            [part isEqualToString:kFormatColorBlack] ||
+            [part isEqualToString:kFormatColorRed] ||
+            [part isEqualToString:kFormatColorGreen] ||
+            [part isEqualToString:kFormatColorYellow] ||
+            [part isEqualToString:kFormatColorBlue] ||
+            [part isEqualToString:kFormatColorMagenta] ||
+            [part isEqualToString:kFormatColorWhite] ||
+            [part isEqualToString:kFormatColorCyan] ||
+            [part isEqualToString:kFormatColorBrightBlack] ||
+            [part isEqualToString:kFormatColorBrightRed] ||
+            [part isEqualToString:kFormatColorBrightGreen] ||
+            [part isEqualToString:kFormatColorBrightYellow] ||
+            [part isEqualToString:kFormatColorBrightBlue] ||
+            [part isEqualToString:kFormatColorBrightMagenta] ||
+            [part isEqualToString:kFormatColorBrightWhite] ||
+            [part isEqualToString:kFormatColorBrightCyan] ||
+            [part isEqualToString:kFormatColorCalendarColor]
+            )
+        {
+            thisAttrName = NSForegroundColorAttributeName;
+            isColorAttribute = YES;
+        }
+        else if ([part hasPrefix:kFormatBgColorPrefix])
+        {
+            thisAttrName = NSBackgroundColorAttributeName;
+            isColorAttribute = YES;
+            isBackgroundColor = YES;
+        }
+        else if ([part isEqualToString:kFormatBold])
+        {
+            thisAttrName = NSFontAttributeName;
+            thisAttrValue = [[NSFontManager sharedFontManager] convertFont:[ansiEscapeHelper font] toHaveTrait:NSBoldFontMask];
+        }
+        else if ([part isEqualToString:kFormatUnderlined])
+        {
+            thisAttrName = NSUnderlineStyleAttributeName;
+            thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleSingle];
+        }
+        else if ([part isEqualToString:kFormatDoubleUnderlined])
+        {
+            thisAttrName = NSUnderlineStyleAttributeName;
+            thisAttrValue = [NSNumber numberWithInteger:NSUnderlineStyleDouble];
+        }
+        else if ([part isEqualToString:kFormatBlink])
+        {
+            thisAttrName = kBlinkAttributeName;
+            thisAttrValue = [NSNumber numberWithBool:YES];
+        }
+        
+        if (isColorAttribute)
+        {
+            enum sgrCode thisColorSGRCode = SGRCodeNoneOrInvalid;
+            if ([part hasSuffix:kFormatColorBrightBlack])
+                thisColorSGRCode = SGRCodeFgBrightBlack;
+            else if ([part hasSuffix:kFormatColorBrightRed])
+                thisColorSGRCode = SGRCodeFgBrightRed;
+            else if ([part hasSuffix:kFormatColorBrightGreen])
+                thisColorSGRCode = SGRCodeFgBrightGreen;
+            else if ([part hasSuffix:kFormatColorBrightYellow])
+                thisColorSGRCode = SGRCodeFgBrightYellow;
+            else if ([part hasSuffix:kFormatColorBrightBlue])
+                thisColorSGRCode = SGRCodeFgBrightBlue;
+            else if ([part hasSuffix:kFormatColorBrightMagenta])
+                thisColorSGRCode = SGRCodeFgBrightMagenta;
+            else if ([part hasSuffix:kFormatColorBrightWhite])
+                thisColorSGRCode = SGRCodeFgBrightWhite;
+            else if ([part hasSuffix:kFormatColorBrightCyan])
+                thisColorSGRCode = SGRCodeFgBrightCyan;
+            else if ([part hasSuffix:kFormatColorBlack])
+                thisColorSGRCode = SGRCodeFgBlack;
+            else if ([part hasSuffix:kFormatColorRed])
+                thisColorSGRCode = SGRCodeFgRed;
+            else if ([part hasSuffix:kFormatColorGreen])
+                thisColorSGRCode = SGRCodeFgGreen;
+            else if ([part hasSuffix:kFormatColorYellow])
+                thisColorSGRCode = SGRCodeFgYellow;
+            else if ([part hasSuffix:kFormatColorBlue])
+                thisColorSGRCode = SGRCodeFgBlue;
+            else if ([part hasSuffix:kFormatColorMagenta])
+                thisColorSGRCode = SGRCodeFgMagenta;
+            else if ([part hasSuffix:kFormatColorWhite])
+                thisColorSGRCode = SGRCodeFgWhite;
+            else if ([part hasSuffix:kFormatColorCyan])
+                thisColorSGRCode = SGRCodeFgCyan;
+            else if ([part hasSuffix:kFormatColorCalendarColor] && calItem != nil)
+                thisColorSGRCode = [ansiEscapeHelper closestSGRCodeForColor:[[calItem calendar] color] isForegroundColor:YES];
+            
+            if (thisColorSGRCode != SGRCodeNoneOrInvalid)
+            {
+                if (isBackgroundColor)
+                    thisColorSGRCode += 10;
+                thisAttrValue = [ansiEscapeHelper colorForSGRCode:thisColorSGRCode];
+            }
+        }
+        
+        if (thisAttrName != nil && thisAttrValue != nil)
+            [returnAttributes setValue:thisAttrValue forKey:thisAttrName];
+    }
+    
+    return returnAttributes;
 }
 
 
@@ -245,74 +245,74 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 // attributed string
 void processCustomStringAttributes(NSMutableAttributedString **aAttributedString)
 {
-	NSMutableAttributedString *str = *aAttributedString;
-	
-	if (str == nil)
-		return;
-	
-	
-	NSArray *attrNames = [NSArray arrayWithObjects:
-						  kBlinkAttributeName,
-						  nil
-						  ];
-	
-	NSRange limitRange;
-	NSRange effectiveRange;
-	id attributeValue;
-	
-	NSMutableArray *codesAndLocations = [NSMutableArray array];
-	
-	for (NSString *thisAttrName in attrNames)
-	{
-		limitRange = NSMakeRange(0, [str length]);
-		while (limitRange.length > 0)
-		{
-			attributeValue = [str
-							  attribute:thisAttrName
-							  atIndex:limitRange.location
-							  longestEffectiveRange:&effectiveRange
-							  inRange:limitRange
-							  ];
-			int thisSGRCode = SGRCodeNoneOrInvalid;
-			
-			if ([thisAttrName isEqualToString:kBlinkAttributeName])
-			{
-				thisSGRCode = (attributeValue != nil) ? kSGRCodeBlink : kSGRCodeBlinkReset;
-			}
-			
-			if (thisSGRCode != SGRCodeNoneOrInvalid)
-			{
-				[codesAndLocations addObject:
-					[NSDictionary
-					dictionaryWithObjectsAndKeys:
-						[NSNumber numberWithInt:thisSGRCode], @"code",
-						[NSNumber numberWithUnsignedInteger:effectiveRange.location], @"location",
-						nil
-						]
-					];
-			}
-			
-			limitRange = NSMakeRange(NSMaxRange(effectiveRange),
-									 NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
-		}
-	}
-	
-	NSUInteger locationOffset = 0;
-	for (NSDictionary *dict in codesAndLocations)
-	{
-		int sgrCode = [[dict objectForKey:@"code"] intValue];
-		NSUInteger location = [[dict objectForKey:@"location"] unsignedIntegerValue];
-		
-		NSAttributedString *ansiStr = ATTR_STR(strConcat(
-			kANSIEscapeCSI,
-			[NSString stringWithFormat:@"%i", sgrCode],
-			kANSIEscapeSGREnd,
-			nil));
-		
-		[str insertAttributedString:ansiStr atIndex:(location+locationOffset)];
-		
-		locationOffset += [ansiStr length];
-	}
+    NSMutableAttributedString *str = *aAttributedString;
+    
+    if (str == nil)
+        return;
+    
+    
+    NSArray *attrNames = [NSArray arrayWithObjects:
+                          kBlinkAttributeName,
+                          nil
+                          ];
+    
+    NSRange limitRange;
+    NSRange effectiveRange;
+    id attributeValue;
+    
+    NSMutableArray *codesAndLocations = [NSMutableArray array];
+    
+    for (NSString *thisAttrName in attrNames)
+    {
+        limitRange = NSMakeRange(0, [str length]);
+        while (limitRange.length > 0)
+        {
+            attributeValue = [str
+                              attribute:thisAttrName
+                              atIndex:limitRange.location
+                              longestEffectiveRange:&effectiveRange
+                              inRange:limitRange
+                              ];
+            int thisSGRCode = SGRCodeNoneOrInvalid;
+            
+            if ([thisAttrName isEqualToString:kBlinkAttributeName])
+            {
+                thisSGRCode = (attributeValue != nil) ? kSGRCodeBlink : kSGRCodeBlinkReset;
+            }
+            
+            if (thisSGRCode != SGRCodeNoneOrInvalid)
+            {
+                [codesAndLocations addObject:
+                    [NSDictionary
+                    dictionaryWithObjectsAndKeys:
+                        [NSNumber numberWithInt:thisSGRCode], @"code",
+                        [NSNumber numberWithUnsignedInteger:effectiveRange.location], @"location",
+                        nil
+                        ]
+                    ];
+            }
+            
+            limitRange = NSMakeRange(NSMaxRange(effectiveRange),
+                                     NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
+        }
+    }
+    
+    NSUInteger locationOffset = 0;
+    for (NSDictionary *dict in codesAndLocations)
+    {
+        int sgrCode = [[dict objectForKey:@"code"] intValue];
+        NSUInteger location = [[dict objectForKey:@"location"] unsignedIntegerValue];
+        
+        NSAttributedString *ansiStr = ATTR_STR(strConcat(
+            kANSIEscapeCSI,
+            [NSString stringWithFormat:@"%i", sgrCode],
+            kANSIEscapeSGREnd,
+            nil));
+        
+        [str insertAttributedString:ansiStr atIndex:(location+locationOffset)];
+        
+        locationOffset += [ansiStr length];
+    }
 }
 
 
@@ -320,28 +320,28 @@ void processCustomStringAttributes(NSMutableAttributedString **aAttributedString
 // return formatting string attributes for specified key
 NSDictionary* getStringAttributesForKey(NSString *key, CalCalendarItem *calItem)
 {
-	if (key == nil)
-		return [NSDictionary dictionary];
-	
-	NSString *formattingConfig = nil;
-	
-	if (formattingConfigDict != nil)
-		formattingConfig = [formattingConfigDict objectForKey:key];
-	
-	if (formattingConfig == nil)
-		formattingConfig = [defaultFormattingConfigDict objectForKey:key];
-	
-	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig, calItem);
-	
-	return [NSDictionary dictionary];
+    if (key == nil)
+        return [NSDictionary dictionary];
+    
+    NSString *formattingConfig = nil;
+    
+    if (formattingConfigDict != nil)
+        formattingConfig = [formattingConfigDict objectForKey:key];
+    
+    if (formattingConfig == nil)
+        formattingConfig = [defaultFormattingConfigDict objectForKey:key];
+    
+    if (formattingConfig != nil)
+        return formattingConfigToStringAttributes(formattingConfig, calItem);
+    
+    return [NSDictionary dictionary];
 }
 
 
 // return string attributes for formatting a section title
 NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
 {
-	return getStringAttributesForKey(kFormatKeySectionTitle, nil);
+    return getStringAttributesForKey(kFormatKeySectionTitle, nil);
 }
 
 
@@ -349,7 +349,7 @@ NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
 // line for a calendar item
 NSDictionary* getFirstLineStringAttributes(CalCalendarItem *calItem)
 {
-	return getStringAttributesForKey(kFormatKeyFirstItemLine, calItem);
+    return getStringAttributesForKey(kFormatKeyFirstItemLine, calItem);
 }
 
 
@@ -357,7 +357,7 @@ NSDictionary* getFirstLineStringAttributes(CalCalendarItem *calItem)
 // return string attributes for formatting a bullet point
 NSDictionary* getBulletStringAttributes(BOOL isAlertBullet, CalCalendarItem *calItem)
 {
-	return getStringAttributesForKey((isAlertBullet) ? kFormatKeyAlertBullet : kFormatKeyBullet, calItem);
+    return getStringAttributesForKey((isAlertBullet) ? kFormatKeyAlertBullet : kFormatKeyBullet, calItem);
 }
 
 
@@ -365,43 +365,43 @@ NSDictionary* getBulletStringAttributes(BOOL isAlertBullet, CalCalendarItem *cal
 // with title properties
 NSDictionary* getCalNameInTitleStringAttributes(CalCalendarItem *calItem)
 {
-	return getStringAttributesForKey(kFormatKeyCalendarNameInTitle, calItem);
+    return getStringAttributesForKey(kFormatKeyCalendarNameInTitle, calItem);
 }
 
 
 // return string attributes for formatting a property name
 NSDictionary* getPropNameStringAttributes(NSString *propName, CalCalendarItem *calItem)
 {
-	if (propName == nil)
-		return [NSDictionary dictionary];
-	
-	NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropNameSuffix];
-	return getStringAttributesForKey(formattingConfigKey, calItem);
+    if (propName == nil)
+        return [NSDictionary dictionary];
+    
+    NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropNameSuffix];
+    return getStringAttributesForKey(formattingConfigKey, calItem);
 }
 
 
 // return string attributes for formatting a property value
 NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propValue, CalCalendarItem *calItem)
 {
-	if (propName == nil)
-		return [NSDictionary dictionary];
-	
-	NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropValueSuffix];
-	
-	if (propName == kPropName_priority)
-	{
-		if (propValue != nil)
-		{
-			if ([propValue isEqual:localizedStr(kL10nKeyPriorityHigh)])
-				formattingConfigKey = kFormatKeyPriorityValueHigh;
-			else if ([propValue isEqual:localizedStr(kL10nKeyPriorityMedium)])
-				formattingConfigKey = kFormatKeyPriorityValueMedium;
-			else if ([propValue isEqual:localizedStr(kL10nKeyPriorityLow)])
-				formattingConfigKey = kFormatKeyPriorityValueLow;
-		}
-	}
-	
-	return getStringAttributesForKey(formattingConfigKey, calItem);
+    if (propName == nil)
+        return [NSDictionary dictionary];
+    
+    NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropValueSuffix];
+    
+    if (propName == kPropName_priority)
+    {
+        if (propValue != nil)
+        {
+            if ([propValue isEqual:localizedStr(kL10nKeyPriorityHigh)])
+                formattingConfigKey = kFormatKeyPriorityValueHigh;
+            else if ([propValue isEqual:localizedStr(kL10nKeyPriorityMedium)])
+                formattingConfigKey = kFormatKeyPriorityValueMedium;
+            else if ([propValue isEqual:localizedStr(kL10nKeyPriorityLow)])
+                formattingConfigKey = kFormatKeyPriorityValueLow;
+        }
+    }
+    
+    return getStringAttributesForKey(formattingConfigKey, calItem);
 }
 
 
@@ -410,19 +410,19 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 // (2) and so on.)
 NSString* getPropSeparatorStr(NSUInteger propertyNumber)
 {
-	NSCAssert((propertySeparators != nil), @"propertySeparators is nil");
-	NSCAssert(([propertySeparators count] > 0), @"propertySeparators is empty");
-	
-	// we subtract two here because the first printed property is always
-	// prefixed with a bullet (so we only have propertySeparator prefix
-	// strings for properties thereafter -- thus -1) and we want a zero-based
-	// index to use for the array access (thus the other -1)
-	NSUInteger indexToGet = (propertyNumber >= 2) ? (propertyNumber-2) : 0;
-	NSUInteger lastIndex = [propertySeparators count]-1;
-	if (indexToGet > lastIndex)
-		indexToGet = lastIndex;
-	
-	return [propertySeparators objectAtIndex:indexToGet];
+    NSCAssert((propertySeparators != nil), @"propertySeparators is nil");
+    NSCAssert(([propertySeparators count] > 0), @"propertySeparators is empty");
+    
+    // we subtract two here because the first printed property is always
+    // prefixed with a bullet (so we only have propertySeparator prefix
+    // strings for properties thereafter -- thus -1) and we want a zero-based
+    // index to use for the array access (thus the other -1)
+    NSUInteger indexToGet = (propertyNumber >= 2) ? (propertyNumber-2) : 0;
+    NSUInteger lastIndex = [propertySeparators count]-1;
+    if (indexToGet > lastIndex)
+        indexToGet = lastIndex;
+    
+    return [propertySeparators objectAtIndex:indexToGet];
 }
 
 

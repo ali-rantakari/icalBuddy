@@ -34,69 +34,69 @@ THE SOFTWARE.
 
 - (id) init
 {
-	if (!(self = [super init]))
-		return nil;
-	
-	return self;
+    if (!(self = [super init]))
+        return nil;
+    
+    return self;
 }
 
 - (void) dealloc
 {
-	[super dealloc];
+    [super dealloc];
 }
 
 
 - (AppOptions) setUpWithNowDate:(NSDate *)date opts:(NSArray *)argsArr
 {
-	int argc = [argsArr count];
-	char **argv = (char **) malloc(sizeof(char *) * (argc + 1));
-	for (int i = 0; i < argc; i++)
-	{
-		NSString *s = [argsArr objectAtIndex:i];
-		const char *cstr = [s UTF8String];
-		int len = strlen(cstr);
-		char *cstr_copy = (char *) malloc(sizeof(char) * (len + 1));
-		strcpy(cstr_copy, cstr);
-		argv[i] = cstr_copy;
-	}
-	
-	
-	
-	NSMutableAttributedString *stdoutBuffer = kEmptyMutableAttributedString;
-	
-	now = date;
-	today = dateForStartOfDay(now);
-	
-	// don't read any config or L10N files
-	NSString *configFilePath = @"";
-	NSString *L10nFilePath = @"";
-	readConfigAndL10NFilePathArgs(argc, argv, &configFilePath, &L10nFilePath);
-	
-	initL10N(L10nFilePath);
-	
-	AppOptions opts = NEW_DEFAULT_APP_OPTIONS;
-	PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
-	
-	// read and validate general configuration file
-	NSMutableDictionary *configDict = nil;
-	NSDictionary *userSuppliedFormattingConfigDict = nil;
-	if (configFilePath == nil)
-		configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
-	if (configFilePath != nil && [configFilePath length] > 0)
-	{
-		readArgsFromConfigFile(&opts, &prettyPrintOptions, configFilePath, &configDict);
-		if (configDict != nil)
-			userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
-	}
-	
-	readProgramArgs(&opts, &prettyPrintOptions, argc, argv);
-	
-	NSArray *propertySeparators = nil;
-	processAppOptions(&opts, &prettyPrintOptions, &propertySeparators);
-	initFormatting(nil, propertySeparators);
-	initPrettyPrint(stdoutBuffer, prettyPrintOptions);
-	
-	return opts;
+    int argc = [argsArr count];
+    char **argv = (char **) malloc(sizeof(char *) * (argc + 1));
+    for (int i = 0; i < argc; i++)
+    {
+        NSString *s = [argsArr objectAtIndex:i];
+        const char *cstr = [s UTF8String];
+        int len = strlen(cstr);
+        char *cstr_copy = (char *) malloc(sizeof(char) * (len + 1));
+        strcpy(cstr_copy, cstr);
+        argv[i] = cstr_copy;
+    }
+    
+    
+    
+    NSMutableAttributedString *stdoutBuffer = kEmptyMutableAttributedString;
+    
+    now = date;
+    today = dateForStartOfDay(now);
+    
+    // don't read any config or L10N files
+    NSString *configFilePath = @"";
+    NSString *L10nFilePath = @"";
+    readConfigAndL10NFilePathArgs(argc, argv, &configFilePath, &L10nFilePath);
+    
+    initL10N(L10nFilePath);
+    
+    AppOptions opts = NEW_DEFAULT_APP_OPTIONS;
+    PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
+    
+    // read and validate general configuration file
+    NSMutableDictionary *configDict = nil;
+    NSDictionary *userSuppliedFormattingConfigDict = nil;
+    if (configFilePath == nil)
+        configFilePath = [kConfigFilePath stringByExpandingTildeInPath];
+    if (configFilePath != nil && [configFilePath length] > 0)
+    {
+        readArgsFromConfigFile(&opts, &prettyPrintOptions, configFilePath, &configDict);
+        if (configDict != nil)
+            userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
+    }
+    
+    readProgramArgs(&opts, &prettyPrintOptions, argc, argv);
+    
+    NSArray *propertySeparators = nil;
+    processAppOptions(&opts, &prettyPrintOptions, &propertySeparators);
+    initFormatting(nil, propertySeparators);
+    initPrettyPrint(stdoutBuffer, prettyPrintOptions);
+    
+    return opts;
 }
 
 

@@ -34,58 +34,58 @@ THE SOFTWARE.
 
 typedef struct
 {
-	// the order of properties in the output
-	NSArray *propertyOrder;
-	
-	// the prefix strings
-	NSString *prefixStrBullet;
-	NSString *prefixStrBulletAlert;
-	NSString *sectionSeparatorStr;
-	
-	NSString *timeFormatStr;
-	NSString *dateFormatStr;
-	NSSet *includedEventProperties;
-	NSSet *excludedEventProperties;
-	NSSet *includedTaskProperties;
-	NSSet *excludedTaskProperties;
-	NSString *notesNewlineReplacement;
-	
-	BOOL displayRelativeDates;
-	BOOL excludeEndDates;
-	BOOL useCalendarColorsForTitles;
-	BOOL showUIDs;
-	NSUInteger maxNumPrintedItems; // 0 = no limit
-	NSUInteger numPrintedItems;
+    // the order of properties in the output
+    NSArray *propertyOrder;
+    
+    // the prefix strings
+    NSString *prefixStrBullet;
+    NSString *prefixStrBulletAlert;
+    NSString *sectionSeparatorStr;
+    
+    NSString *timeFormatStr;
+    NSString *dateFormatStr;
+    NSSet *includedEventProperties;
+    NSSet *excludedEventProperties;
+    NSSet *includedTaskProperties;
+    NSSet *excludedTaskProperties;
+    NSString *notesNewlineReplacement;
+    
+    BOOL displayRelativeDates;
+    BOOL excludeEndDates;
+    BOOL useCalendarColorsForTitles;
+    BOOL showUIDs;
+    NSUInteger maxNumPrintedItems; // 0 = no limit
+    NSUInteger numPrintedItems;
 } PrettyPrintOptions;
 
 
-#define SECTION_TO_NSVALUE(x)		[NSValue valueWithBytes:&(x) objCType:@encode(PrintSection)]
-#define NSVALUE_TO_SECTION(x, y)	[(x) getValue:&(y)]
+#define SECTION_TO_NSVALUE(x)       [NSValue valueWithBytes:&(x) objCType:@encode(PrintSection)]
+#define NSVALUE_TO_SECTION(x, y)    [(x) getValue:&(y)]
 
 typedef struct
 {
-	NSString *title;
-	NSArray *items;
-	NSDate *eventsContextDay;
+    NSString *title;
+    NSArray *items;
+    NSDate *eventsContextDay;
 } PrintSection;
 
 
 typedef struct
 {
-	BOOL singleDay;			// in the contex of a single day (for events) (i.e. don't print out full dates)
-	BOOL calendarAgnostic;	// calendar-agnostic (i.e. don't print out the calendar name)
-	BOOL withoutPropNames;	// without property names (i.e. print only the values)
-	BOOL calendarColorsForSectionTitles;
-	BOOL priorityAgnostic;
+    BOOL singleDay;         // in the contex of a single day (for events) (i.e. don't print out full dates)
+    BOOL calendarAgnostic;  // calendar-agnostic (i.e. don't print out the calendar name)
+    BOOL withoutPropNames;  // without property names (i.e. print only the values)
+    BOOL calendarColorsForSectionTitles;
+    BOOL priorityAgnostic;
 } CalItemPrintOption;
 
 
 typedef enum datePrintOption
 {
-	DATE_PRINT_OPTION_NONE = 	0,
-	ONLY_DATE =					(1 << 0),
-	ONLY_TIME = 				(1 << 1),
-	DATE_AND_TIME =				(1 << 2)
+    DATE_PRINT_OPTION_NONE =    0,
+    ONLY_DATE =                 (1 << 0),
+    ONLY_TIME =                 (1 << 1),
+    DATE_AND_TIME =             (1 << 2)
 } DatePrintOption;
 
 
