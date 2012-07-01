@@ -5,7 +5,6 @@ before next release:
 -------------------------
 - update translations for new priority L10N strings
   - Need people to help me with this.
-- tabs to spaces (right now it seems to be a mix of both :( )
 
 
 own ideas:
@@ -21,8 +20,8 @@ own ideas:
 
 user requests:
 -------------------------
-- Output both events and tasks into the same list (user ref: Richard B.
-  +a few other people)
+- Output both events and tasks into the same list
+  - Problem: how to handle args that assume we're printing only events or tasks?
 
 - ability to specify color for specific calendars not just specific words (user
   ref: Edward)
