@@ -210,6 +210,10 @@ Bright cyan foreground color
 
 Bright magenta foreground color
 
+=item B<C<calendar-color>>
+
+Same foreground color as the calendar color
+
 =item B<C<bg:black>>
 
 Black background color
@@ -273,6 +277,10 @@ Bright cyan background color
 =item B<C<bg:bright-magenta>>
 
 Bright magenta background color
+
+=item B<C<bg:calendar-color>>
+
+Same background color as the calendar color
 
 =item B<C<bold>>
 

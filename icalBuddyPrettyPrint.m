@@ -333,7 +333,7 @@ PropertyPresentationElements *getEventTitlePresentation(CalEvent *event, CalItem
 		[elements.valueSuffix
 			appendAttributedString: mutableAttrStrWithAttrs(
 				strConcat(@"(", [[event calendar] title], @")", nil),
-				getCalNameInTitleStringAttributes()
+				getCalNameInTitleStringAttributes(event)
 				)
 			];
 	}
@@ -563,13 +563,13 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
 	if (elements.name != nil && [elements.name length] > 0)
 	{
 		[elements.name
-			setAttributes:getPropNameStringAttributes(propName)
+			setAttributes:getPropNameStringAttributes(propName, event)
 			range:NSMakeRange(0, [elements.name length])
 			];
 	}
 	
 	[elements.value
-		setAttributes:getPropValueStringAttributes(propName, [elements.value string])
+		setAttributes:getPropValueStringAttributes(propName, [elements.value string], event)
 		range:NSMakeRange(0, [elements.value length])
 		];
 	
@@ -625,7 +625,7 @@ void printCalEvent(CalEvent *event, CalItemPrintOption printOptions, NSDate *con
 		
 		NSMutableAttributedString *prefixStr;
 		if (numPrintedProps == 0)
-			prefixStr = mutableAttrStrWithAttrs(prettyPrintOptions.prefixStrBullet, getBulletStringAttributes(NO));
+			prefixStr = mutableAttrStrWithAttrs(prettyPrintOptions.prefixStrBullet, getBulletStringAttributes(NO, event));
 		else
 			prefixStr = M_ATTR_STR(getPropSeparatorStr(numPrintedProps+1));
 		
@@ -658,7 +658,7 @@ void printCalEvent(CalEvent *event, CalItemPrintOption printOptions, NSDate *con
 		
 		if (numPrintedProps == 0)
 			[thisOutput
-				addAttributes:getFirstLineStringAttributes()
+				addAttributes:getFirstLineStringAttributes(event)
 				range:NSMakeRange(0,[thisOutput length])
 				];
 		
@@ -689,7 +689,7 @@ PropertyPresentationElements *getTaskTitlePresentation(CalTask *task, CalItemPri
 		[elements.valueSuffix
 			appendAttributedString: mutableAttrStrWithAttrs(
 				strConcat(@"(", [[task calendar] title], @")", nil),
-				getCalNameInTitleStringAttributes()
+				getCalNameInTitleStringAttributes(task)
 				)
 			];
 	}
@@ -860,13 +860,13 @@ NSMutableAttributedString* getTaskPropStr(NSString *propName, CalTask *task, Cal
 	if (elements.name != nil && [elements.name length] > 0)
 	{
 		[elements.name
-			setAttributes:getPropNameStringAttributes(propName)
+			setAttributes:getPropNameStringAttributes(propName, task)
 			range:NSMakeRange(0, [elements.name length])
 			];
 	}
 	
 	[elements.value
-		setAttributes:getPropValueStringAttributes(propName, [elements.value string])
+		setAttributes:getPropValueStringAttributes(propName, [elements.value string], task)
 		range:NSMakeRange(0, [elements.value length])
 		];
 	
@@ -927,7 +927,7 @@ void printCalTask(CalTask *task, CalItemPrintOption printOptions)
 									 [now compare:[task dueDate]] == NSOrderedDescending);
 			prefixStr = mutableAttrStrWithAttrs(
 				((useAlertBullet)?prettyPrintOptions.prefixStrBulletAlert:prettyPrintOptions.prefixStrBullet),
-				getBulletStringAttributes(useAlertBullet)
+				getBulletStringAttributes(useAlertBullet, task)
 				);
 		}
 		else
@@ -962,7 +962,7 @@ void printCalTask(CalTask *task, CalItemPrintOption printOptions)
 		
 		if (numPrintedProps == 0)
 			[thisOutput
-				addAttributes:getFirstLineStringAttributes()
+				addAttributes:getFirstLineStringAttributes(task)
 				range:NSMakeRange(0,[thisOutput length])
 				];
 		
@@ -1030,7 +1030,7 @@ void printItemSections(NSArray *sections, CalItemPrintOption printOptions)
 				strConcat(localizedStr(kL10nKeyNoItemsInSection), @"\n", nil)
 				);
 			[noItemsTextOutput
-				addAttributes:getStringAttributesForKey(kFormatKeyNoItems)
+				addAttributes:getStringAttributesForKey(kFormatKeyNoItems, nil)
 				range:NSMakeRange(0,[noItemsTextOutput length])
 				];
 			ADD_TO_OUTPUT_BUFFER(noItemsTextOutput);
@@ -1085,7 +1085,7 @@ void flushOutputBuffer(NSMutableAttributedString *buffer, AppOptions *opts, NSDi
 		
 		for (NSString *keyword in [formattedKeywords allKeys])
 		{
-			NSDictionary* thisKeywordFormattingAttrs = formattingConfigToStringAttributes([formattedKeywords objectForKey:keyword]);
+			NSDictionary* thisKeywordFormattingAttrs = formattingConfigToStringAttributes([formattedKeywords objectForKey:keyword], nil);
 			
 			NSString *cleanStdoutBuffer = [buffer string];
 			NSRange searchRange = NSMakeRange(0,[buffer length]);

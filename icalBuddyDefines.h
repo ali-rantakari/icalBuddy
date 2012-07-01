@@ -93,6 +93,7 @@ THE SOFTWARE.
 #define kFormatColorBrightMagenta	@"bright-magenta"
 #define kFormatColorBrightWhite		@"bright-white"
 #define kFormatColorBrightCyan		@"bright-cyan"
+#define kFormatColorCalendarColor	@"calendar-color"
 
 // custom string formatting attribute(s)
 #define kBlinkAttributeName			@"blinkAttributeName"

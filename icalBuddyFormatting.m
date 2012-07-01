@@ -120,7 +120,7 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 // pairs (suitable for using directly with NSMutableAttributedString's
 // attribute setter methods) based on a user-defined formatting specification
 // (from the config file, like: "red,bg:blue,bold")
-NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig)
+NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig, CalCalendarItem *calItem)
 {
 	NSMutableDictionary *returnAttributes = [NSMutableDictionary dictionary];
 	
@@ -151,7 +151,8 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 			[part isEqualToString:kFormatColorBrightBlue] ||
 			[part isEqualToString:kFormatColorBrightMagenta] ||
 			[part isEqualToString:kFormatColorBrightWhite] ||
-			[part isEqualToString:kFormatColorBrightCyan]
+			[part isEqualToString:kFormatColorBrightCyan] ||
+			[part isEqualToString:kFormatColorCalendarColor]
 			)
 		{
 			thisAttrName = NSForegroundColorAttributeName;
@@ -219,6 +220,8 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 				thisColorSGRCode = SGRCodeFgWhite;
 			else if ([part hasSuffix:kFormatColorCyan])
 				thisColorSGRCode = SGRCodeFgCyan;
+			else if ([part hasSuffix:kFormatColorCalendarColor] && calItem != nil)
+				thisColorSGRCode = [ansiEscapeHelper closestSGRCodeForColor:[[calItem calendar] color] isForegroundColor:YES];
 			
 			if (thisColorSGRCode != SGRCodeNoneOrInvalid)
 			{
@@ -315,7 +318,7 @@ void processCustomStringAttributes(NSMutableAttributedString **aAttributedString
 
 
 // return formatting string attributes for specified key
-NSDictionary* getStringAttributesForKey(NSString *key)
+NSDictionary* getStringAttributesForKey(NSString *key, CalCalendarItem *calItem)
 {
 	if (key == nil)
 		return [NSDictionary dictionary];
@@ -329,57 +332,56 @@ NSDictionary* getStringAttributesForKey(NSString *key)
 		formattingConfig = [defaultFormattingConfigDict objectForKey:key];
 	
 	if (formattingConfig != nil)
-		return formattingConfigToStringAttributes(formattingConfig);
+		return formattingConfigToStringAttributes(formattingConfig, calItem);
 	
 	return [NSDictionary dictionary];
 }
 
 
-
 // return string attributes for formatting a section title
 NSDictionary* getSectionTitleStringAttributes(NSString *sectionTitle)
 {
-	return getStringAttributesForKey(kFormatKeySectionTitle);
+	return getStringAttributesForKey(kFormatKeySectionTitle, nil);
 }
 
 
 // return string attributes for formatting the first printed
 // line for a calendar item
-NSDictionary* getFirstLineStringAttributes()
+NSDictionary* getFirstLineStringAttributes(CalCalendarItem *calItem)
 {
-	return getStringAttributesForKey(kFormatKeyFirstItemLine);
+	return getStringAttributesForKey(kFormatKeyFirstItemLine, calItem);
 }
 
 
 
 // return string attributes for formatting a bullet point
-NSDictionary* getBulletStringAttributes(BOOL isAlertBullet)
+NSDictionary* getBulletStringAttributes(BOOL isAlertBullet, CalCalendarItem *calItem)
 {
-	return getStringAttributesForKey((isAlertBullet) ? kFormatKeyAlertBullet : kFormatKeyBullet);
+	return getStringAttributesForKey((isAlertBullet) ? kFormatKeyAlertBullet : kFormatKeyBullet, calItem);
 }
 
 
 // return string attributes for calendar names printed along
 // with title properties
-NSDictionary* getCalNameInTitleStringAttributes()
+NSDictionary* getCalNameInTitleStringAttributes(CalCalendarItem *calItem)
 {
-	return getStringAttributesForKey(kFormatKeyCalendarNameInTitle);
+	return getStringAttributesForKey(kFormatKeyCalendarNameInTitle, calItem);
 }
 
 
 // return string attributes for formatting a property name
-NSDictionary* getPropNameStringAttributes(NSString *propName)
+NSDictionary* getPropNameStringAttributes(NSString *propName, CalCalendarItem *calItem)
 {
 	if (propName == nil)
 		return [NSDictionary dictionary];
 	
 	NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropNameSuffix];
-	return getStringAttributesForKey(formattingConfigKey);
+	return getStringAttributesForKey(formattingConfigKey, calItem);
 }
 
 
 // return string attributes for formatting a property value
-NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propValue)
+NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propValue, CalCalendarItem *calItem)
 {
 	if (propName == nil)
 		return [NSDictionary dictionary];
@@ -399,7 +401,7 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 		}
 	}
 	
-	return getStringAttributesForKey(formattingConfigKey);
+	return getStringAttributesForKey(formattingConfigKey, calItem);
 }
 
 
