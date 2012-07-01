@@ -31,7 +31,7 @@ THE SOFTWARE.
 
 @implementation ABRecord (HGAdditions)
 
-- (NSInteger) hg_age
+- (NSInteger) hg_ageOnDate:(NSDate *)referenceDate
 {
 	NSDate *birthday = [self valueForProperty:kABBirthdayProperty];
 	if (birthday == nil)
@@ -39,15 +39,22 @@ THE SOFTWARE.
 
     NSCalendar *calendar = [NSCalendar currentCalendar];
     unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit;
-    NSDateComponents *dateComponentsNow = [calendar components:unitFlags fromDate:[NSDate date]];
+    NSDateComponents *dateComponentsRefDate = [calendar components:unitFlags fromDate:referenceDate];
     NSDateComponents *dateComponentsBirth = [calendar components:unitFlags fromDate:birthday];
     
-    if (([dateComponentsNow month] < [dateComponentsBirth month])
-    	|| (([dateComponentsNow month] == [dateComponentsBirth month])
-    		&& ([dateComponentsNow day] < [dateComponentsBirth day])))
-        return [dateComponentsNow year] - [dateComponentsBirth year] - 1;
+    NSLog(@"Ref year: %i Birth year: %i", [dateComponentsRefDate year], [dateComponentsBirth year]);
+
+    if (([dateComponentsRefDate month] < [dateComponentsBirth month])
+    	|| (([dateComponentsRefDate month] == [dateComponentsBirth month])
+    		&& ([dateComponentsRefDate day] < [dateComponentsBirth day])))
+        return [dateComponentsRefDate year] - [dateComponentsBirth year] - 1;
     else
-        return [dateComponentsNow year] - [dateComponentsBirth year];
+        return [dateComponentsRefDate year] - [dateComponentsBirth year];
+}
+
+- (NSInteger) hg_age
+{
+	return [self hg_ageOnDate:[NSDate date]];
 }
 
 - (NSString *) hg_fullName

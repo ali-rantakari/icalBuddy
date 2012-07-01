@@ -312,7 +312,7 @@ PropertyPresentationElements *getEventTitlePresentation(CalEvent *event, CalItem
 			else
 			{
 				NSString *contactFullName = [person hg_fullName];
-				NSInteger contactAge = [person hg_age];
+				NSInteger contactAge = [person hg_ageOnDate:[event startDate]];
 				NSString *birthdayFormat = localizedStr(kL10nKeySomeonesBirthday);
 				if ([birthdayFormat rangeOfString:@"%i"].location != NSNotFound)
 					thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName, contactAge];

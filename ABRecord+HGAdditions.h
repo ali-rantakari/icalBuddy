@@ -31,6 +31,7 @@ THE SOFTWARE.
 
 @interface ABRecord (HGAdditions)
 
+- (NSInteger) hg_ageOnDate:(NSDate *)referenceDate;
 - (NSInteger) hg_age;
 - (NSString *) hg_fullName;
 
