@@ -38,6 +38,7 @@ THE SOFTWARE.
 #import "HGCLIUtils.h"
 #import "HGDateFunctions.h"
 #import "icalBuddyFunctions.h" // today, now
+#import "ABRecord+HGAdditions.h"
 
 
 PrettyPrintOptions prettyPrintOptions;
@@ -310,13 +311,13 @@ PropertyPresentationElements *getEventTitlePresentation(CalEvent *event, CalItem
 				thisTitle = localizedStr(kL10nKeyMyBirthday);
 			else
 			{
-				NSString *contactFullName = strConcat(
-					[person valueForProperty:kABFirstNameProperty],
-					@" ",
-					[person valueForProperty:kABLastNameProperty],
-					nil
-					);
-				thisTitle = [NSString stringWithFormat:localizedStr(kL10nKeySomeonesBirthday), contactFullName];
+				NSString *contactFullName = [person hg_fullName];
+				NSInteger contactAge = [person hg_age];
+				NSString *birthdayFormat = localizedStr(kL10nKeySomeonesBirthday);
+				if ([birthdayFormat rangeOfString:@"%i"].location != NSNotFound)
+					thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName, contactAge];
+				else
+					thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName];
 			}
 			thisPropTempValue = thisTitle;
 		}

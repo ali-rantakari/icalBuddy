@@ -17,7 +17,7 @@
 	<key>priority</key>
 	<string>priority</string>
 	<key>someonesBirthday</key>
-	<string>%@'s Birthday</string>
+	<string>%@'s Birthday (age %i)</string>
 	<key>today</key>
 	<string>today</string>
 	<key>tomorrow</key>

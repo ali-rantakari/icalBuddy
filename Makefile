@@ -36,7 +36,7 @@ else
 	ARG_DEBUG=
 endif
 
-SOURCE_FILES=icalBuddy[ABCDEFGHIJKLMNOPQRSTUVWXYZ]*.m ANSIEscapeHelper.m HG*.m IcalBuddy*.m
+SOURCE_FILES=icalBuddy[ABCDEFGHIJKLMNOPQRSTUVWXYZ]*.m ANSIEscapeHelper.m HG*.m IcalBuddy*.m *+HGAdditions.m
 
 
 
