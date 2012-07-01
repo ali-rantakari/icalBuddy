@@ -48,6 +48,16 @@
     <string>media</string>
     <key>low</key>
     <string>baja</string>
+    <key>noPriority</key>
+    <string>no es una prioridad</string>
+    <key>priorityTitleHigh</key>
+    <string>Alta prioridad</string>
+    <key>priorityTitleMedium</key>
+    <string>Prioridad media</string>
+    <key>priorityTitleLow</key>
+    <string>De baja prioridad</string>
+    <key>priorityTitleNone</key>
+    <string>No es una prioridad</string>
     <key>dateTimeSeparator</key>
     <string> a las </string>
 	<key>noItems</key>

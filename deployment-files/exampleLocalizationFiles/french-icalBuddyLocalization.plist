@@ -48,6 +48,16 @@
 	<string>moyenne</string>
 	<key>low</key>
 	<string>basse</string>
+	<key>noPriority</key>
+	<string>aucune priorité</string>
+	<key>priorityTitleHigh</key>
+	<string>Rang de priorité élevé</string>
+	<key>priorityTitleMedium</key>
+	<string>Priorité moyenne</string>
+	<key>priorityTitleLow</key>
+	<string>Basse priorité</string>
+	<key>priorityTitleNone</key>
+	<string>Aucune priorité</string>
 	<key>dateTimeSeparator</key>
 	<string> à </string>
 	<key>noItems</key>
