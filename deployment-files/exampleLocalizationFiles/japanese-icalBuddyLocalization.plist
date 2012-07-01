@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>タイトル</string>
+	<key>location</key>
+	<string>場所</string>
+	<key>notes</key>
+	<string>メモ</string>
+	<key>url</key>
+	<string>URL</string>
+	<key>dueDate</key>
+	<string>期日</string>
+	<key>noDueDate</key>
+	<string>期日なし</string>
+	<key>priority</key>
+	<string>順位</string>
+	<key>someonesBirthday</key>
+	<string>%@の誕生日</string>
+	<key>today</key>
+	<string>今日</string>
+	<key>tomorrow</key>
+	<string>明日</string>
+	<key>yesterday</key>
+	<string>昨日</string>
+	<key>dayBeforeYesterday</key>
+	<string>一昨日</string>
+	<key>dayAfterTomorrow</key>
+	<string>明後日</string>
+	<key>xDaysAgo</key>
+	<string>%d日前</string>
+	<key>xDaysFromNow</key>
+	<string>今日から%d日</string>
+	<key>thisWeek</key>
+	<string>今週</string>
+	<key>lastWeek</key>
+	<string>先週</string>
+	<key>nextWeek</key>
+	<string>来週</string>
+	<key>xWeeksAgo</key>
+	<string>%d週間前</string>
+	<key>xWeeksFromNow</key>
+	<string>今日から%d週間</string>
+	<key>high</key>
+	<string>高い優先度</string>
+	<key>medium</key>
+	<string>中程度の優先度</string>
+	<key>low</key>
+	<string>低い優先度</string>
+	<!-- TODO: these need to be translated:
+	<key>noPriority</key>
+	<string></string>
+	<key>priorityTitleHigh</key>
+	<string></string>
+	<key>priorityTitleMedium</key>
+	<string></string>
+	<key>priorityTitleLow</key>
+	<string></string>
+	<key>priorityTitleNone</key>
+	<string></string>
+	-->
+	<key>dateTimeSeparator</key>
+	<string></string>
+	<key>noItems</key>
+	<string>なし</string>
+</dict>
+</plist>
+
