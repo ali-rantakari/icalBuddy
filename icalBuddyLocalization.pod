@@ -68,11 +68,23 @@ The translation of the value "none" for the "priority" property of a task.
 
 =item B<C<priorityTitle>>
 
-The formatting of a task priority as a title (e.g. C<%@ priority>). Must include substring %@ to specify the location of the priority value.
+The formatting of a task priority as a title (e.g. C<%@ priority>). Must include substring %@ to specify the location of the priority value. If this cannot be used (like it cannot for e.g. french), B<C<priorityTitleLow>>, B<C<priorityTitleMedium>> and B<C<priorityTitleHigh>> should be defined instead.
 
 =item B<C<priorityTitleNone>>
 
 The lack of a task priority as a title (e.g. C<No priority>).
+
+=item B<C<priorityTitleLow>>
+
+"Low priority" as a title. If defined, will be used instead of B<C<priorityTitle>>. Note that if using B<C<priorityTitle>> is sufficient for the language (like it is for e.g. english), this one does not need to be defined.
+
+=item B<C<priorityTitleMedium>>
+
+"Medium priority" as a title. If defined, will be used instead of B<C<priorityTitle>>. Note that if using B<C<priorityTitle>> is sufficient for the language (like it is for e.g. english), this one does not need to be defined.
+
+=item B<C<priorityTitleHigh>>
+
+"High priority" as a title. If defined, will be used instead of B<C<priorityTitle>>. Note that if using B<C<priorityTitle>> is sufficient for the language (like it is for e.g. english), this one does not need to be defined.
 
 =item B<C<someonesBirthday>>
 

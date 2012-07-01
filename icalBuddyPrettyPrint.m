@@ -787,8 +787,17 @@ NSString *localizedPriorityTitle(CalPriority priority)
 {
 	if (priority == CalPriorityNone)
 		return localizedStr(kL10nKeyPriorityTitleNone);
-	return [[NSString stringWithFormat:
-		     localizedStr(kL10nKeyPriorityTitle),
+
+	// If we have a specific translation for this priority title:
+	if (priority == CalPriorityLow && localizedStr(kL10nKeyPriorityTitleLow) != nil)
+		return localizedStr(kL10nKeyPriorityTitleLow);
+	else if (priority == CalPriorityMedium && localizedStr(kL10nKeyPriorityTitleMedium) != nil)
+		return localizedStr(kL10nKeyPriorityTitleMedium);
+	else if (priority == CalPriorityHigh && localizedStr(kL10nKeyPriorityTitleHigh) != nil)
+		return localizedStr(kL10nKeyPriorityTitleHigh);
+
+	// Otherwise use the default, generic one:
+	return [[NSString stringWithFormat:localizedStr(kL10nKeyPriorityTitle),
 		     localizedPriority(priority)] capitalizedString];
 }
 
