@@ -1,5 +1,5 @@
 // ABRecord+HGAdditions.h
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

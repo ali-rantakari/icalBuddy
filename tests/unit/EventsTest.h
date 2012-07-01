@@ -1,5 +1,5 @@
 // icalBuddy events test
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

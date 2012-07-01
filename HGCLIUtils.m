@@ -1,5 +1,5 @@
 // CLI app utils
-// 
+//
 // http://hasseg.org/
 //
 
@@ -59,7 +59,7 @@ void RealPrintf(NSString *aStr, NSString *aFile, va_list opts)
             arguments:opts
             ] autorelease
         ];
-    
+
     [str writeToFile:aFile atomically:NO encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -83,9 +83,9 @@ void DebugPrintf(NSString *aStr, ...)
 {
     if (!debugPrintEnabled)
         return;
-    
+
     NSString *str = strConcat(@"icalBuddy: ", aStr, nil);
-    
+
     va_list argList;
     va_start(argList, aStr);
     RealPrintf(str, @"/dev/stderr", argList);
@@ -105,14 +105,14 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
     // replace tabs with spaces to avoid problems with different programs
     // (that would display our output) using different tab stop lengths:
     replaceInMutableAttrStr(mutableAttrStr, @"\t", ATTR_STR(WHITESPACE(TAB_STOP_LENGTH)));
-    
+
     NSString *str = [[mutableAttrStr string] copy];
-    
+
     NSAttributedString *newlineAttrStr = ATTR_STR(@"\n");
-    
+
     // characters we'll consider as indentation:
     NSCharacterSet *indentChars = [NSCharacterSet characterSetWithCharactersInString:@" •"];
-    
+
     // find all input string indices where we want to
     // wrap the line
     NSUInteger strLength = [str length];
@@ -131,31 +131,31 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
             // insert newline at the wrap index, eating one whitespace
             // *if* we're wrapping at a whitespace (i.e. don't eat characters
             // if we've been forced to wrap in the middle of a word)
-            
+
             NSUInteger indexToWrapAt = ((0 < lastWhitespaceIndex) ? lastWhitespaceIndex : strIndex) + numAddedChars;
             NSUInteger lengthToReplace = ((lastWhitespaceIndex != 0)?1:0);
             NSRange replaceRange = NSMakeRange(indexToWrapAt, lengthToReplace);
-            
+
             NSAttributedString *replaceStr = nil;
             if (currentLineIndentAmount == 0)
                 replaceStr = newlineAttrStr;
             else
                 replaceStr = ATTR_STR(strConcat(@"\n", WHITESPACE(currentLineIndentAmount), nil));
-            
+
             [mutableAttrStr
                 replaceCharactersInRange:replaceRange
                 withAttributedString:replaceStr
                 ];
-            
+
             numAddedChars += [replaceStr length] - lengthToReplace;
-            
+
             lastWhitespaceIndex = 0;
             currentLineLength = (strIndex-(indexToWrapAt-numAddedChars));
         }
         else
         {
             currentUnichar = [str characterAtIndex:strIndex];
-            
+
             if ((lastCharWasIndentation || currentLineLength == 0) &&
                 [indentChars characterIsMember:currentUnichar]
                 )
@@ -165,7 +165,7 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
             }
             else
                 lastCharWasIndentation = NO;
-            
+
             if (currentUnichar == UNICHAR_NEWLINE)
             {
                 lastWhitespaceIndex = 0;
@@ -188,13 +188,13 @@ void wordWrapMutableAttrStr(NSMutableAttributedString *mutableAttrStr, NSUIntege
             {
                 currentLineLength++;
             }
-            
+
             lastCharWasWhitespace = (currentUnichar == UNICHAR_SPACE);
         }
-        
+
         strIndex++;
     }
-    
+
     [str release];
 }
 

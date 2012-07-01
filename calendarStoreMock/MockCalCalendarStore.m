@@ -1,5 +1,5 @@
 // icalBuddy mocked CalendarStore
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -42,10 +42,10 @@ THE SOFTWARE.
 {
     if (!(self = [super init]))
         return nil;
-    
+
     self.calendarsArr = [NSMutableArray array];
     self.itemsArr = [NSMutableArray array];
-    
+
     return self;
 }
 
@@ -94,20 +94,20 @@ THE SOFTWARE.
 
 //  - (NSArray *)eventsWithPredicate:(NSPredicate *)predicate;
 //
-//  This method returns an array of all the CalEvents which match the conditions described in the predicate that is 
-//  passed. At this time, eventsWithPredicate: only suppports predicates generated with one of the class methods added 
+//  This method returns an array of all the CalEvents which match the conditions described in the predicate that is
+//  passed. At this time, eventsWithPredicate: only suppports predicates generated with one of the class methods added
 //  to NSPredicate below.
-//  
-//  If the predicate passed to eventsWithPredicate: was not created with one of the class methods included in this file, 
+//
+//  If the predicate passed to eventsWithPredicate: was not created with one of the class methods included in this file,
 //  nil is returned. If nil is passed as the predicate, an exception will be raised.
 //
-//  For performance reasons, this method will only return occurrences of repeating events that fall within a specific 
-//  four year timespan. If the date range between the startDate and endDate is greater than four years, then the 
+//  For performance reasons, this method will only return occurrences of repeating events that fall within a specific
+//  four year timespan. If the date range between the startDate and endDate is greater than four years, then the
 //  timespan containing recurrences is always the first four years of date range.
 - (NSArray *)eventsWithPredicate:(NSPredicate *)predicate
 {
     NSMutableArray *arr = [NSMutableArray array];
-    
+
     for (CalCalendarItem *item in self.itemsArr)
     {
         if (![item isKindOfClass:[CalEvent class]])
@@ -116,7 +116,7 @@ THE SOFTWARE.
         if ([predicate evaluateWithObject:event])
             [arr addObject:event];
     }
-    
+
     return arr;
 }
 
@@ -129,16 +129,16 @@ THE SOFTWARE.
 
 //  - (NSArray *)tasksWithPredicate:(NSPredicate *)predicate;
 //
-//  This method returns an array of all the CalTasks which match the conditions described in the predicate that is 
-//  passed. At this time, tasksWithPredicate: only suppports predicates generated with one of the class methods added to 
+//  This method returns an array of all the CalTasks which match the conditions described in the predicate that is
+//  passed. At this time, tasksWithPredicate: only suppports predicates generated with one of the class methods added to
 //  NSPredicate below.
 //
-//  If the predicate passed to tasksWithPredicate: was not created with one of the class methods included in thsi file, 
+//  If the predicate passed to tasksWithPredicate: was not created with one of the class methods included in thsi file,
 //  nil is returned. If nil is passed as the predicate, an exception will be raised.
 - (NSArray *)tasksWithPredicate:(NSPredicate *)predicate
 {
     NSMutableArray *arr = [NSMutableArray array];
-    
+
     for (CalCalendarItem *item in self.itemsArr)
     {
         if (![item isKindOfClass:[CalTask class]])
@@ -147,7 +147,7 @@ THE SOFTWARE.
         if ([predicate evaluateWithObject:task])
             [arr addObject:task];
     }
-    
+
     return arr;
 }
 

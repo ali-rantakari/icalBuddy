@@ -1,5 +1,5 @@
 // icalBuddy mocked CalendarStore helper functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

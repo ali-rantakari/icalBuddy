@@ -1,5 +1,5 @@
 // icalBuddy pretty printing functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -36,12 +36,12 @@ typedef struct
 {
     // the order of properties in the output
     NSArray *propertyOrder;
-    
+
     // the prefix strings
     NSString *prefixStrBullet;
     NSString *prefixStrBulletAlert;
     NSString *sectionSeparatorStr;
-    
+
     NSString *timeFormatStr;
     NSString *dateFormatStr;
     NSSet *includedEventProperties;
@@ -49,7 +49,7 @@ typedef struct
     NSSet *includedTaskProperties;
     NSSet *excludedTaskProperties;
     NSString *notesNewlineReplacement;
-    
+
     BOOL displayRelativeDates;
     BOOL excludeEndDates;
     BOOL useCalendarColorsForTitles;

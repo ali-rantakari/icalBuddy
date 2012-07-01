@@ -1,5 +1,5 @@
 // icalBuddy
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -64,7 +64,7 @@ NSString* versionNumberStr()
 int main(int argc, char *argv[])
 {
     NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
-    
+
     // the output buffer string where we add everything we
     // want to print out, and right before terminating
     // convert to an ANSI-escaped string and push it to
@@ -72,10 +72,10 @@ int main(int argc, char *argv[])
     // the formatting of the output right up until the
     // last minute.
     NSMutableAttributedString *stdoutBuffer = kEmptyMutableAttributedString;
-    
+
     now = [NSDate date];
     today = dateForStartOfDay(now);
-    
+
     // read user arguments for specifying paths to the config and
     // localization files before reading any other arguments (we
     // want to load the config first and then read the argv arguments
@@ -86,13 +86,13 @@ int main(int argc, char *argv[])
     NSString *configFilePath = nil;
     NSString *L10nFilePath = nil;
     readConfigAndL10NFilePathArgs(argc, argv, &configFilePath, &L10nFilePath);
-    
+
     initL10N(L10nFilePath);
-    
-    
+
+
     AppOptions opts = NEW_DEFAULT_APP_OPTIONS;
     PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
-    
+
     // read and validate general configuration file
     NSMutableDictionary *configDict = nil;
     NSDictionary *userSuppliedFormattingConfigDict = nil;
@@ -104,17 +104,17 @@ int main(int argc, char *argv[])
         if (configDict != nil)
             userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
     }
-    
+
     readProgramArgs(&opts, &prettyPrintOptions, argc, argv);
-    
+
     NSArray *propertySeparators = nil;
     processAppOptions(&opts, &prettyPrintOptions, &propertySeparators);
-    
+
     initFormatting(userSuppliedFormattingConfigDict, propertySeparators);
-    
+
     initPrettyPrint(stdoutBuffer, prettyPrintOptions);
-    
-    
+
+
     // ------------------------------------------------------------------
     // ------------------------------------------------------------------
     // print version and exit
@@ -169,15 +169,15 @@ int main(int argc, char *argv[])
     {
         BOOL usingSubheadings = (opts.separateByCalendar || opts.separateByDate
                                  || (areWePrintingTasks(&opts) && opts.separateByPriority));
-        
+
         NSArray *calItems = getCalItems(&opts);
         if (calItems == nil)
             return 1;
-        
+
         CalItemPrintOption printOptions = getPrintOptions(&opts);
-        
+
         calItems = sortCalItems(&opts, calItems);
-        
+
         if (usingSubheadings)
         {
             NSArray *sections = putItemsUnderSections(&opts, calItems);
@@ -254,16 +254,16 @@ int main(int argc, char *argv[])
         Printf(@"Copyright 2008-2012 Ali Rantakari, http://hasseg.org/icalBuddy\n");
         Printf(@"\n");
     }
-    
-    
+
+
     // we've been buffering the output for stdout into an attributed string,
     // now's the time to print out that buffer.
     NSDictionary *formattedKeywords = nil;
     if (configDict != nil)
         formattedKeywords = [configDict objectForKey:@"formattedKeywords"];
     flushOutputBuffer(stdoutBuffer, &opts, formattedKeywords);
-    
-    
+
+
     [autoReleasePool release];
     return(0);
 }

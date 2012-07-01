@@ -1,5 +1,5 @@
 // icalBuddy arguments handling functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -78,7 +78,7 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
         else if ([shortName isEqualToString:@"ea"] || [longName isEqualToString:@"excludeAllDayEvents"])
             opts->excludeAllDayEvents = YES;
     }
-    
+
     // value-requiring arguments
     if (value != nil)
     {
@@ -88,7 +88,7 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
             stringValue = value;
         else if ([value respondsToSelector:@selector(stringValue)])
             stringValue = [value stringValue];
-        
+
         if (stringValue != nil)
         {
             if ([shortName isEqualToString:@"b"] || [longName isEqualToString:@"bullet"])
@@ -126,7 +126,7 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
             else if ([shortName isEqualToString:@"ps"] || [longName isEqualToString:@"propertySeparators"])
                 opts->propertySeparatorsStr = stringValue;
         }
-        
+
         // integer value
         if ([value respondsToSelector:@selector(integerValue)])
         {
@@ -142,10 +142,10 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
 void readArgsFromConfigFile(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, NSString *filePath, NSMutableDictionary **retConfigDict)
 {
     NSMutableDictionary *configDict = nil;
-    
+
     if (filePath == nil || [filePath length] == 0)
         return;
-    
+
     BOOL configFileIsDir;
     BOOL configFileExists = [[NSFileManager defaultManager]
         fileExistsAtPath:filePath
@@ -153,11 +153,11 @@ void readArgsFromConfigFile(AppOptions *opts, PrettyPrintOptions *prettyPrintOpt
         ];
     if (!configFileExists || configFileIsDir)
         return;
-    
+
     BOOL configFileIsValid = YES;
-    
+
     configDict = [NSDictionary dictionaryWithContentsOfFile:filePath];
-    
+
     if (configDict == nil)
     {
         PrintfErr(@"* Error in configuration file \"%@\":\n", filePath);
@@ -165,21 +165,21 @@ void readArgsFromConfigFile(AppOptions *opts, PrettyPrintOptions *prettyPrintOpt
         PrintfErr(@"  with a structure specified in the icalBuddyConfig man page.\n");
         configFileIsValid = NO;
     }
-    
+
     if (!configFileIsValid)
     {
         PrintfErr(@"\nTry running \"man icalBuddyConfig\" to read the relevant documentation\n");
         PrintfErr(@"and \"plutil '%@'\" to validate the\nfile's property list syntax.\n\n", filePath);
         return;
     }
-    
+
     if (retConfigDict != NULL)
         *retConfigDict = configDict;
-    
+
     NSDictionary *constArgsDict = [configDict objectForKey:@"constantArguments"];
     if (constArgsDict == nil)
         return;
-    
+
     for (NSString *key in [constArgsDict allKeys])
     {
         handleArgument(nil, key, [constArgsDict objectForKey:key], opts, prettyPrintOptions);
@@ -192,13 +192,13 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
     if (argc > 1)
     {
         opts->output = [NSString stringWithCString: argv[argc-1] encoding: NSASCIIStringEncoding];
-        
+
         opts->output_is_uncompletedTasks = [opts->output isEqualToString:@"uncompletedTasks"];
         opts->output_is_eventsToday = [opts->output hasPrefix:@"eventsToday"];
         opts->output_is_eventsNow = [opts->output isEqualToString:@"eventsNow"];
         opts->output_is_tasksDueBefore = [opts->output hasPrefix:@"tasksDueBefore:"];
         opts->output_is_undatedUncompletedTasks = [opts->output isEqualToString:@"undatedUncompletedTasks"];
-        
+
         if ([opts->output hasPrefix:@"to:"] && argc > 2)
         {
             NSString *secondToLastArg = [NSString stringWithCString: argv[argc-2] encoding: NSASCIIStringEncoding];
@@ -210,24 +210,24 @@ void readProgramArgs(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions, i
             }
         }
     }
-    
+
     for (int i = 1; i < argc; i++)
     {
         if (strncmp(argv[i], "-", 1) != 0)
             continue;
-        
+
         NSString *shortArgName = nil;
         NSString *longArgName = nil;
         NSString *argValue = nil;
-        
+
         if (strncmp(argv[i], "--", 2) == 0)
             longArgName = [[NSString stringWithUTF8String:argv[i]] substringFromIndex:2];
         else
             shortArgName = [[NSString stringWithUTF8String:argv[i]] substringFromIndex:1];
-        
+
         if (i+1 < argc)
             argValue = [NSString stringWithUTF8String:argv[i+1]];
-        
+
         handleArgument(shortArgName, longArgName, argValue, opts, prettyPrintOptions);
     }
 }
@@ -239,7 +239,7 @@ void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigF
 {
     NSString *configFilePath = nil;
     NSString *L10nFilePath = nil;
-    
+
     for (int i = 1; i < argc; i++)
     {
         if (((strcmp(argv[i], "-cf") == 0) || (strcmp(argv[i], "--configFile") == 0)) && (i+1 < argc))
@@ -287,7 +287,7 @@ void readConfigAndL10NFilePathArgs(int argc, char *argv[], NSString **retConfigF
             }
         }
     }
-    
+
     if (retConfigFilePath != NULL)
         *retConfigFilePath = configFilePath;
     if (retL10NConfigFilePath != NULL)
@@ -318,8 +318,8 @@ void processAppOptions(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions,
     }
     else
         prettyPrintOptions->propertyOrder = kDefaultPropertyOrder;
-    
-    
+
+
     NSArray *propertySeparators = nil;
     if (opts->propertySeparatorsStr != nil)
     {
@@ -334,10 +334,10 @@ void processAppOptions(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions,
             PrintfErr(@"  Make sure you start and end the value with the separator character\n  (like this: -ps \"|first|second|third|\")\n");
         }
     }
-    
+
     if (retPropertySeparators != NULL)
         *retPropertySeparators = propertySeparators;
-    
+
     if (opts->strEncoding != nil)
     {
         // process provided output string encoding argument
@@ -362,7 +362,7 @@ void processAppOptions(AppOptions *opts, PrettyPrintOptions *prettyPrintOptions,
             PrintfErr(@"  Using default encoding \"%@\".\n\n", [NSString localizedNameOfStringEncoding: outputStrEncoding]);
         }
     }
-    
+
     // interpret/translate escape sequences for values of arguments
     // that take arbitrary strings
     prettyPrintOptions->sectionSeparatorStr = translateEscapeSequences(prettyPrintOptions->sectionSeparatorStr);

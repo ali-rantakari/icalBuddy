@@ -1,5 +1,5 @@
 // icalBuddy unit test info container
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

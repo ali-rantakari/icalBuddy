@@ -1,5 +1,5 @@
 // icalBuddy localization functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -46,14 +46,14 @@ NSString* localizedStr(NSString *str)
 {
     if (str == nil)
         return nil;
-    
+
     if (L10nStringsDict != nil)
     {
         NSString *localizedStr = [L10nStringsDict objectForKey:str];
         if (localizedStr != nil)
             return localizedStr;
     }
-    
+
     NSString *defaultStr = [defaultStringsDict objectForKey:str];
     NSCAssert((defaultStr != nil), @"defaultStr is nil");
     return defaultStr;
@@ -101,20 +101,20 @@ void initL10N(NSString *configFilePath)
 void readAndValidateL10NConfigFile(NSString *filePath)
 {
     L10nStringsDict = nil;
-    
+
     if (filePath == nil)
         filePath = kL10nFilePath;
-    
+
     filePath = [filePath stringByExpandingTildeInPath];
-    
+
     BOOL L10nFileIsDir;
     BOOL L10nFileExists = [[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&L10nFileIsDir];
     if (L10nFileExists && !L10nFileIsDir)
     {
         BOOL L10nFileIsValid = YES;
-        
+
         L10nStringsDict = [NSDictionary dictionaryWithContentsOfFile:filePath];
-        
+
         if (L10nStringsDict == nil)
         {
             PrintfErr(@"* Error in localization file \"%@\":\n", filePath);
@@ -122,7 +122,7 @@ void readAndValidateL10NConfigFile(NSString *filePath)
             PrintfErr(@"  with a structure specified in the icalBuddyLocalization man page.\n");
             L10nFileIsValid = NO;
         }
-        
+
         if (L10nFileIsValid)
         {
             // validate some specific keys in localization config
@@ -150,7 +150,7 @@ void readAndValidateL10NConfigFile(NSString *filePath)
                 }
             }
         }
-        
+
         if (!L10nFileIsValid)
         {
             PrintfErr(@"\nTry running \"man icalBuddyLocalization\" to read the relevant documentation\n");

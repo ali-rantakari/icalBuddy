@@ -1,5 +1,5 @@
 // icalBuddy output formatting functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -53,9 +53,9 @@ NSArray *propertySeparators;
 void initFormatting(NSDictionary *aFormattingConfigDict, NSArray *aPropertySeparators)
 {
     ansiEscapeHelper = [[ANSIEscapeHelper alloc] init];
-    
+
     formattingConfigDict = aFormattingConfigDict;
-    
+
     // default formatting for different output elements
     defaultFormattingConfigDict = [NSDictionary dictionaryWithObjectsAndKeys:
         kFormatColorCyan,       @"datetimeName",
@@ -83,7 +83,7 @@ void initFormatting(NSDictionary *aFormattingConfigDict, NSArray *aPropertySepar
         kFormatColorBrightBlack,kFormatKeyNoItems,
         nil
         ];
-    
+
     propertySeparators = aPropertySeparators;
     if (propertySeparators == nil || [propertySeparators count] == 0)
         propertySeparators = kDefaultPropertySeparators;
@@ -105,11 +105,11 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 {
     if (color == nil)
         return nil;
-    
+
     enum sgrCode closestSGRCode = [ansiEscapeHelper closestSGRCodeForColor:color isForegroundColor:foreground];
     if (closestSGRCode == SGRCodeNoneOrInvalid)
         return nil;
-    
+
     return [ansiEscapeHelper colorForSGRCode:closestSGRCode];
 }
 
@@ -123,16 +123,16 @@ NSColor *getClosestAnsiColorForColor(NSColor *color, BOOL foreground)
 NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConfig, CalCalendarItem *calItem)
 {
     NSMutableDictionary *returnAttributes = [NSMutableDictionary dictionary];
-    
+
     NSArray *parts = [formattingConfig componentsSeparatedByString:@","];
     NSString *part;
     for (part in parts)
     {
         part = [[part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
-        
+
         NSString *thisAttrName = nil;
         NSObject *thisAttrValue = nil;
-        
+
         BOOL isColorAttribute = NO;
         BOOL isBackgroundColor = NO;
         if ([part hasPrefix:kFormatFgColorPrefix] ||
@@ -184,7 +184,7 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
             thisAttrName = kBlinkAttributeName;
             thisAttrValue = [NSNumber numberWithBool:YES];
         }
-        
+
         if (isColorAttribute)
         {
             enum sgrCode thisColorSGRCode = SGRCodeNoneOrInvalid;
@@ -222,7 +222,7 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
                 thisColorSGRCode = SGRCodeFgCyan;
             else if ([part hasSuffix:kFormatColorCalendarColor] && calItem != nil)
                 thisColorSGRCode = [ansiEscapeHelper closestSGRCodeForColor:[[calItem calendar] color] isForegroundColor:YES];
-            
+
             if (thisColorSGRCode != SGRCodeNoneOrInvalid)
             {
                 if (isBackgroundColor)
@@ -230,11 +230,11 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
                 thisAttrValue = [ansiEscapeHelper colorForSGRCode:thisColorSGRCode];
             }
         }
-        
+
         if (thisAttrName != nil && thisAttrValue != nil)
             [returnAttributes setValue:thisAttrValue forKey:thisAttrName];
     }
-    
+
     return returnAttributes;
 }
 
@@ -246,22 +246,22 @@ NSMutableDictionary* formattingConfigToStringAttributes(NSString *formattingConf
 void processCustomStringAttributes(NSMutableAttributedString **aAttributedString)
 {
     NSMutableAttributedString *str = *aAttributedString;
-    
+
     if (str == nil)
         return;
-    
-    
+
+
     NSArray *attrNames = [NSArray arrayWithObjects:
                           kBlinkAttributeName,
                           nil
                           ];
-    
+
     NSRange limitRange;
     NSRange effectiveRange;
     id attributeValue;
-    
+
     NSMutableArray *codesAndLocations = [NSMutableArray array];
-    
+
     for (NSString *thisAttrName in attrNames)
     {
         limitRange = NSMakeRange(0, [str length]);
@@ -274,12 +274,12 @@ void processCustomStringAttributes(NSMutableAttributedString **aAttributedString
                               inRange:limitRange
                               ];
             int thisSGRCode = SGRCodeNoneOrInvalid;
-            
+
             if ([thisAttrName isEqualToString:kBlinkAttributeName])
             {
                 thisSGRCode = (attributeValue != nil) ? kSGRCodeBlink : kSGRCodeBlinkReset;
             }
-            
+
             if (thisSGRCode != SGRCodeNoneOrInvalid)
             {
                 [codesAndLocations addObject:
@@ -291,26 +291,26 @@ void processCustomStringAttributes(NSMutableAttributedString **aAttributedString
                         ]
                     ];
             }
-            
+
             limitRange = NSMakeRange(NSMaxRange(effectiveRange),
                                      NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
         }
     }
-    
+
     NSUInteger locationOffset = 0;
     for (NSDictionary *dict in codesAndLocations)
     {
         int sgrCode = [[dict objectForKey:@"code"] intValue];
         NSUInteger location = [[dict objectForKey:@"location"] unsignedIntegerValue];
-        
+
         NSAttributedString *ansiStr = ATTR_STR(strConcat(
             kANSIEscapeCSI,
             [NSString stringWithFormat:@"%i", sgrCode],
             kANSIEscapeSGREnd,
             nil));
-        
+
         [str insertAttributedString:ansiStr atIndex:(location+locationOffset)];
-        
+
         locationOffset += [ansiStr length];
     }
 }
@@ -322,18 +322,18 @@ NSDictionary* getStringAttributesForKey(NSString *key, CalCalendarItem *calItem)
 {
     if (key == nil)
         return [NSDictionary dictionary];
-    
+
     NSString *formattingConfig = nil;
-    
+
     if (formattingConfigDict != nil)
         formattingConfig = [formattingConfigDict objectForKey:key];
-    
+
     if (formattingConfig == nil)
         formattingConfig = [defaultFormattingConfigDict objectForKey:key];
-    
+
     if (formattingConfig != nil)
         return formattingConfigToStringAttributes(formattingConfig, calItem);
-    
+
     return [NSDictionary dictionary];
 }
 
@@ -374,7 +374,7 @@ NSDictionary* getPropNameStringAttributes(NSString *propName, CalCalendarItem *c
 {
     if (propName == nil)
         return [NSDictionary dictionary];
-    
+
     NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropNameSuffix];
     return getStringAttributesForKey(formattingConfigKey, calItem);
 }
@@ -385,9 +385,9 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 {
     if (propName == nil)
         return [NSDictionary dictionary];
-    
+
     NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropValueSuffix];
-    
+
     if (propName == kPropName_priority)
     {
         if (propValue != nil)
@@ -400,7 +400,7 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
                 formattingConfigKey = kFormatKeyPriorityValueLow;
         }
     }
-    
+
     return getStringAttributesForKey(formattingConfigKey, calItem);
 }
 
@@ -412,7 +412,7 @@ NSString* getPropSeparatorStr(NSUInteger propertyNumber)
 {
     NSCAssert((propertySeparators != nil), @"propertySeparators is nil");
     NSCAssert(([propertySeparators count] > 0), @"propertySeparators is empty");
-    
+
     // we subtract two here because the first printed property is always
     // prefixed with a bullet (so we only have propertySeparator prefix
     // strings for properties thereafter -- thus -1) and we want a zero-based
@@ -421,7 +421,7 @@ NSString* getPropSeparatorStr(NSUInteger propertyNumber)
     NSUInteger lastIndex = [propertySeparators count]-1;
     if (indexToGet > lastIndex)
         indexToGet = lastIndex;
-    
+
     return [propertySeparators objectAtIndex:indexToGet];
 }
 

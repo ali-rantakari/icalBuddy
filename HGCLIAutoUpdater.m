@@ -1,5 +1,5 @@
 // CLI app auto-update code
-// 
+//
 // http://hasseg.org/
 //
 
@@ -36,13 +36,13 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
     if (first != nil && second != nil)
     {
         int i;
-        
+
         NSMutableArray *firstComponents = [NSMutableArray arrayWithCapacity:3];
         [firstComponents addObjectsFromArray:[first componentsSeparatedByString:@"."]];
-        
+
         NSMutableArray *secondComponents = [NSMutableArray arrayWithCapacity:3];
         [secondComponents addObjectsFromArray:[second componentsSeparatedByString:@"."]];
-        
+
         if ([firstComponents count] != [secondComponents count])
         {
             NSMutableArray *shorter;
@@ -57,13 +57,13 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
                 shorter = firstComponents;
                 longer = secondComponents;
             }
-            
+
             NSUInteger countDiff = [longer count] - [shorter count];
-            
+
             for (i = 0; i < countDiff; i++)
                 [shorter addObject:@"0"];
         }
-        
+
         for (i = 0; i < [firstComponents count]; i++)
         {
             int firstComponentIntVal = [[firstComponents objectAtIndex:i] intValue];
@@ -97,14 +97,14 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 {
     if (!(self = [super init]))
         return nil;
-    
+
     // set defaults
     self.ansiEscapeHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
     self.versionCheckHeaderName = @"Orghassegsoftwarelatestversion";
-    
+
     self.appName = aAppName;
     self.currentVersionStr = aCurrentVersionStr;
-    
+
     return self;
 }
 
@@ -126,15 +126,15 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
     NSURL *versionCheckURL = nil;
     if (self.delegate != nil && [self.delegate respondsToSelector:@selector(latestVersionCheckURLWithCurrentVersion:)])
         versionCheckURL = [self.delegate latestVersionCheckURLWithCurrentVersion:self.currentVersionStr];
-    
+
     NSCAssert((versionCheckURL != nil), @"delegate returned nil for latestVersionCheckURLWithCurrentVersion:");
-    
+
     NSURLRequest *request = [NSURLRequest
         requestWithURL:versionCheckURL
         cachePolicy:NSURLRequestReloadIgnoringCacheData
         timeoutInterval:kServerConnectTimeout
         ];
-    
+
     NSHTTPURLResponse *response = nil;
     NSError *connError = nil;
     [NSURLConnection
@@ -142,7 +142,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         returningResponse:&response
         error:&connError
         ];
-    
+
     if (connError == nil && response != nil)
     {
         NSInteger statusCode = [response statusCode];
@@ -158,7 +158,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         else
         {
             NSString *thisLatestVersionString = [[response allHeaderFields] valueForKey:self.versionCheckHeaderName];
-            
+
             if (thisLatestVersionString == nil)
             {
                 if (error != NULL)
@@ -183,7 +183,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         }
         return nil;
     }
-    
+
     return nil;
 }
 
@@ -193,41 +193,41 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 - (void) checkForUpdatesWithUI
 {
     Printf(@"Checking for updates... ");
-    
+
     NSError *versionCheckError = nil;
     self.latestVersionStr = [self latestUpdateVersionOnServerWithError:&versionCheckError];
-    
+
     if (self.latestVersionStr == nil && versionCheckError != nil)
     {
         PrintfErr(@"...%@", [versionCheckError localizedDescription]);
         return;
     }
-    
+
     if (self.latestVersionStr == nil)
     {
         Printf(@"...you're up to date! (current & latest: %@)\n\n", self.currentVersionStr);
         return;
     }
-    
+
     Printf(@"...update found! (latest: %@  current: %@)\n\n", self.latestVersionStr, self.currentVersionStr);
-    
+
     // check if delegate gives us the URL for a 'latest version' release info web page
     NSURL *latestVersionInfoWebURL = nil;
     if (self.delegate != nil && [self.delegate respondsToSelector:@selector(latestVersionInfoWebURLWithCurrentVersion:latestVersion:)])
         latestVersionInfoWebURL = [self.delegate latestVersionInfoWebURLWithCurrentVersion:self.currentVersionStr latestVersion:self.latestVersionStr];
-    
+
     // check if delegate gives us the URL for a 'latest version' release ZIP archive
     NSURL *latestVersionZIPURL = nil;
     if (self.delegate != nil && [self.delegate respondsToSelector:@selector(latestVersionZIPURLWithCurrentVersion:latestVersion:)])
         latestVersionZIPURL = [self.delegate latestVersionZIPURLWithCurrentVersion:self.currentVersionStr latestVersion:self.latestVersionStr];
-    
-    
+
+
     if (latestVersionInfoWebURL != nil)
         Printf(
             @"Navigate to the following URL to see the release notes and download the latest version:\n\n%@\n\n",
             latestVersionInfoWebURL
             );
-    
+
     Printf(@"What would you like to do?\n");
     if (latestVersionInfoWebURL != nil)
         Printf(@"  w = open the release info website in my browser\n");
@@ -238,26 +238,26 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         Printf(@"      version and then choose whether to automatically\n");
         Printf(@"      download and install the latest version\n");
     }
-    
+
     if (latestVersionInfoWebURL == nil && latestVersionZIPURL == nil)
         return;
-    
+
     char inputChar;
     for(;;)
     {
         Printf(@"[selection]: ");
         scanf("%s&*c",&inputChar);
-        
+
         if (inputChar == 'q' || inputChar == 'Q')
             return;
-        
+
         if (latestVersionZIPURL != nil
             && (inputChar == 'a' || inputChar == 'A'))
         {
             [self autoUpdateSelfFromURL:latestVersionZIPURL];
             break;
         }
-        
+
         if (latestVersionInfoWebURL != nil
             && (inputChar == 'W' || inputChar == 'w'))
         {
@@ -274,17 +274,17 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 // calls to system() and especially the snprintf() calls before them) but
 // this shouldn't be an issue as long as the URLs don't have double quotes
 // in them and they are not too long.
-// 
+//
 - (void) autoUpdateSelfFromURL:(NSURL *)latestVersionZIPURL
 {
     NSCAssert((self.appName != nil), @"self.appName is nil");
     NSCAssert((self.currentVersionStr != nil), @"self.currentVersionStr is nil");
     NSCAssert((self.latestVersionStr != nil), @"self.latestVersionStr is nil");
-    
+
     NSString *tempDir = NSTemporaryDirectory();
     if (tempDir == nil)
         tempDir = @"/tmp";
-    
+
     BOOL updateSuccess = NO;
     int exitStatus = 0;
     size_t CMD_SIZE = 10000;
@@ -293,26 +293,26 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
     NSString *archivePath = [tempDir stringByAppendingPathComponent:archiveFilename];
     NSString *archiveExtractDirname = [NSString stringWithFormat:@"%@-autoUpdate-tempdir", escapeDoubleQuotes(self.appName)];
     NSString *archiveExtractPath = [tempDir stringByAppendingPathComponent:archiveExtractDirname];
-    
-    
+
+
     // check if delegate gives us the URL for changelog HTML data
     NSURL *whatsChangedHTMLURL = nil;
     if (self.delegate != nil && [self.delegate respondsToSelector:@selector(releaseNotesHTMLURLWithCurrentVersion:latestVersion:)])
         whatsChangedHTMLURL = [self.delegate releaseNotesHTMLURLWithCurrentVersion:self.currentVersionStr latestVersion:self.latestVersionStr];
-    
+
     if (whatsChangedHTMLURL != nil)
     {
         Printf(@"\n\n");
         Printf(@"CHANGES SINCE THE CURRENT VERSION (%@):\n", currentVersionStr);
         Printf(@"=============================================\n");
         Printf(@"\n");
-        
+
         NSURLRequest *whatsChangedRequest = [NSURLRequest
             requestWithURL:whatsChangedHTMLURL
             cachePolicy:NSURLRequestReloadIgnoringCacheData
             timeoutInterval:kServerConnectTimeout
             ];
-        
+
         NSHTTPURLResponse *whatsChangedResponse = nil;
         NSError *whatsChangedError = nil;
         NSData *whatsChangedData = [NSURLConnection
@@ -320,7 +320,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
             returningResponse:&whatsChangedResponse
             error:&whatsChangedError
             ];
-        
+
         if (whatsChangedError == nil && whatsChangedResponse != nil && whatsChangedData != nil)
         {
             NSInteger statusCode = [whatsChangedResponse statusCode];
@@ -340,14 +340,14 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
                     ] autorelease];
                 NSMutableAttributedString *whatsChangedMAttrStr = [[[NSMutableAttributedString alloc] init] autorelease];
                 [whatsChangedMAttrStr appendAttributedString:whatsChangedAttrStr];
-                
+
                 // fix bullet points (replace tabs after bullets with spaces)
                 replaceInMutableAttrStr(whatsChangedMAttrStr, @"•\t", ATTR_STR(@"• "));
-                
+
                 wordWrapMutableAttrStr(whatsChangedMAttrStr, 80);
-                
+
                 NSString *whatsChangedFinalOutput = [self.ansiEscapeHelper ansiEscapedStringWithAttributedString:whatsChangedMAttrStr];
-                
+
                 Print(whatsChangedFinalOutput);
             }
         }
@@ -359,12 +359,12 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
             goto cleanup;
         }
     }
-    
+
     Printf(@"\n\n");
     Printf(@"=============================================\n");
     Printf(@"Do you want to automatically download and\n");
     Printf(@"install the latest version (%@) ?\n", latestVersionStr);
-    
+
     char inputChar = '\0';
     while(inputChar != 'y' && inputChar != 'Y' &&
           inputChar != 'n' && inputChar != 'N' &&
@@ -374,19 +374,19 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         Printf(@"[y/n]: ");
         scanf("%s&*c",&inputChar);
     }
-    
+
     if (inputChar != 'y' && inputChar != 'Y')
         goto cleanup;
-    
+
     NSString *zipURLStr = [latestVersionZIPURL absoluteString];
-    
+
     Printf(@"\n\n");
     Printf(@">> Downloading distribution archive...\n");
     Printf(@"--------------------------------------------\n");
     Printf(@" - downloading from: %@\n", zipURLStr);
     Printf(@" - saving archive to: %@\n", archivePath);
     Printf(@"\n");
-    
+
     snprintf(
         cmd, CMD_SIZE,
         "curl \"%s\" > \"%s\"",
@@ -394,19 +394,19 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         [archivePath UTF8String]
         );
     exitStatus = system(cmd);
-    
+
     if (exitStatus != 0)
     {
         PrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
         goto cleanup;
     }
-    
+
     Printf(@"\n\n");
     Printf(@">> Extracting distribution archive...\n");
     Printf(@"--------------------------------------------\n");
     Printf(@" - extracting to: %@\n", archiveExtractPath);
     Printf(@"\n");
-    
+
     snprintf(
         cmd, CMD_SIZE,
         "mkdir -p \"%s\" && unzip \"%s\" -d \"%s\"",
@@ -415,26 +415,26 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         [archiveExtractPath UTF8String]
         );
     exitStatus = system(cmd);
-    
+
     if (exitStatus != 0)
     {
         PrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
         goto cleanup;
     }
-    
+
     Printf(@"\n\n");
     Printf(@">> Running installation script...\n");
     Printf(@"--------------------------------------------\n");
-    
+
     // check if delegate gives us the command for running the installer
     NSString *installCmd = @"./install.command"; // default
     if (self.delegate != nil && [self.delegate respondsToSelector:@selector(commandToRunInstaller)])
         installCmd = [self.delegate commandToRunInstaller];
-    
+
     // notify delegate
     if (self.delegate != nil && [self.delegate respondsToSelector:@selector(autoUpdater:willInstallVersion:)])
         [self.delegate autoUpdater:self willInstallVersion:self.latestVersionStr];
-    
+
     snprintf(
         cmd, CMD_SIZE,
         "cd \"%s\" && %s",
@@ -442,20 +442,20 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
         [installCmd UTF8String]
         );
     exitStatus = system(cmd);
-    
+
     if (exitStatus != 0)
     {
         PrintfErr(@"\n\nAutomatic update failed with exit status %i\n\n", exitStatus);
         goto cleanup;
     }
-    
+
     updateSuccess = YES;
-    
+
 cleanup:
     Printf(@"\n\n");
     Printf(@">> Cleaning up...\n");
     Printf(@"--------------------------------------------\n");
-    
+
     BOOL fileDeleteSuccess = NO;
     if (archivePath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archivePath])
     {
@@ -464,7 +464,7 @@ cleanup:
         if (!fileDeleteSuccess)
             PrintfErr(@"   Could not move to trash.\n");
     }
-    
+
     if (archiveExtractPath != nil && [[NSFileManager defaultManager] fileExistsAtPath:archiveExtractPath])
     {
         Printf(@" - Moving temporary extract folder for distribution archive to trash\n");
@@ -472,14 +472,14 @@ cleanup:
         if (!fileDeleteSuccess)
             PrintfErr(@"   Could not move to trash.\n");
     }
-    
+
     if (updateSuccess)
     {
         Printf(@"\n\n");
         Printf(@"=======================\n");
         Printf(@"%@ has been successfully updated to v%@!\n", self.appName, self.latestVersionStr);
         Printf(@"\n");
-        
+
         // notify delegate
         if (self.delegate != nil && [self.delegate respondsToSelector:@selector(autoUpdater:didInstallVersion:)])
             [self.delegate autoUpdater:self didInstallVersion:self.latestVersionStr];

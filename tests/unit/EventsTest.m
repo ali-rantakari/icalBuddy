@@ -1,5 +1,5 @@
 // icalBuddy events test
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -39,7 +39,7 @@ THE SOFTWARE.
         homeCal, workCal,
         nil
         ];
-    
+
     [CALENDAR_STORE defaultCalendarStore].itemsArr = [NSMutableArray arrayWithObjects:
         newAllDayEvent(homeCal, @"Off from work", nil, @"2010-10-22", @"2010-10-23", nil, nil),
         newEvent(homeCal, @"Feed the cat", @"apartment", @"2010-10-21 15", @"2010-10-21 15", nil, nil),
@@ -54,13 +54,13 @@ THE SOFTWARE.
         setUpWithNowDate:DATE(@"2010-10-22 16:30:00 +0200")
         opts:ARR(@"-sd", @"eventsNow")
         ];
-    
+
     NSArray *items = getCalItems(&opts);
-    
+
     HG_ASSERT_EQUALS([items count], 2);
     HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:0] title], @"Off from work");
     HG_ASSERT_OBJ_EQUALS([[items objectAtIndex:1] title], @"Watch the game");
-    
+
     HG_TEST_DONE;
 }
 

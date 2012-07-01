@@ -1,5 +1,5 @@
 // CLI app auto-update code
-// 
+//
 // http://hasseg.org/
 //
 

@@ -1,5 +1,5 @@
 // icalBuddy all unit tests
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

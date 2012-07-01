@@ -1,5 +1,5 @@
 // Misc utility functions
-// 
+//
 // http://hasseg.org/
 //
 
@@ -51,7 +51,7 @@ NSString *strConcat(NSString *firstStr, ...)
 {
     if (!firstStr)
         return nil;
-    
+
     va_list argList;
     NSMutableString *retVal = [firstStr mutableCopy];
     NSString *str;
@@ -71,7 +71,7 @@ NSString *translateEscapeSequences(NSString *str)
 {
     if (str == nil)
         return nil;
-    
+
     NSMutableString *ms = [NSMutableString stringWithString:str];
     [ms replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
     [ms replaceOccurrencesOfString:@"\\t" withString:@"\t" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
@@ -90,7 +90,7 @@ void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr
 {
     if (str == nil || searchStr == nil || replaceStr == nil)
         return;
-    
+
     NSUInteger replaceStrLength = [replaceStr length];
     NSString *strRegularString = [str string];
     NSRange searchRange = NSMakeRange(0, [strRegularString length]);
@@ -101,7 +101,7 @@ void replaceInMutableAttrStr(NSMutableAttributedString *str, NSString *searchStr
         if (foundRange.location != NSNotFound)
         {
             [str replaceCharactersInRange:foundRange withAttributedString:replaceStr];
-            
+
             strRegularString = [str string];
             searchRange.location = foundRange.location + replaceStrLength;
             searchRange.length = [strRegularString length] - searchRange.location;
@@ -165,9 +165,9 @@ NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
             *error = hgInternalError(0, @"Given string has less than two characters");
         return nil;
     }
-    
+
     NSString *separatorChar = nil;
-    
+
     NSString *firstChar = [str substringToIndex:1];
     NSString *lastChar = [str substringFromIndex:[str length]-1];
     if ([firstChar isEqualToString:lastChar])
@@ -178,7 +178,7 @@ NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
             *error = hgInternalError(0, @"Given string must start and end with the separator character");
         return nil;
     }
-    
+
     if (separatorChar != nil)
     {
         NSString *trimmedStr = [str substringWithRange:NSMakeRange(1,([str length]-2))];
@@ -186,7 +186,7 @@ NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
             trimmedStr = translateEscapeSequences(trimmedStr);
         return [trimmedStr componentsSeparatedByString:separatorChar];
     }
-    
+
     return [NSArray array];
 }
 
@@ -195,7 +195,7 @@ NSArray *arrayFromArbitrarilySeparatedString(NSString *str, BOOL aTranslateEscap
 NSUInteger countOccurrences(NSString *haystack, NSString *needle, NSStringCompareOptions options)
 {
     NSInteger count = -1;
-    
+
     NSRange searchRange = NSMakeRange(0, [haystack length]);
     NSRange result;
     do
@@ -209,7 +209,7 @@ NSUInteger countOccurrences(NSString *haystack, NSString *needle, NSStringCompar
         }
     }
     while (result.location != NSNotFound);
-    
+
     return count;
 }
 
@@ -220,10 +220,10 @@ BOOL moveFileToTrash(NSString *filePath)
 {
     if (filePath == nil)
         return NO;
-    
+
     NSString *fileDir = [filePath stringByDeletingLastPathComponent];
     NSString *fileName = [filePath lastPathComponent];
-    
+
     return [[NSWorkspace sharedWorkspace]
         performFileOperation:NSWorkspaceRecycleOperation
         source:fileDir

@@ -1,5 +1,5 @@
 // icalBuddy all unit tests
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -36,9 +36,9 @@ THE SOFTWARE.
 NSArray *getAllTests()
 {
     NSMutableArray *allTests = [NSMutableArray array];
-    
+
     [allTests addObject:[EventsTest new]];
-    
+
     return allTests;
 }
 

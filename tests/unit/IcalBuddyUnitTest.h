@@ -1,5 +1,5 @@
 // icalBuddy-specific unit test
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -49,7 +49,7 @@ THE SOFTWARE.
 
 @interface IcalBuddyUnitTest : UnitTest
 {
-    
+
 }
 
 - (AppOptions) setUpWithNowDate:(NSDate *)date opts:(NSArray *)argsArr;

@@ -1,5 +1,5 @@
 // icalBuddy unit test
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -82,7 +82,7 @@ THE SOFTWARE.
 
 @interface UnitTest : NSObject
 {
-    
+
 }
 
 - (TestInfo *) runTests;

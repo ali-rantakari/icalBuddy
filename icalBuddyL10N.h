@@ -1,5 +1,5 @@
 // icalBuddy localization functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

@@ -1,5 +1,5 @@
 // icalBuddy
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

@@ -1,5 +1,5 @@
 // icalBuddy output formatting functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

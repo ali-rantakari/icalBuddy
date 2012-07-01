@@ -1,5 +1,5 @@
 // icalBuddy arguments handling functions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

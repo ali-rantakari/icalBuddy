@@ -1,5 +1,5 @@
 // Date utility functions
-// 
+//
 // http://hasseg.org/
 //
 

@@ -1,5 +1,5 @@
 // CLI app utils
-// 
+//
 // http://hasseg.org/
 //
 

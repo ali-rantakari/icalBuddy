@@ -1,5 +1,5 @@
 // icalBuddy-specific unit test
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -36,7 +36,7 @@ THE SOFTWARE.
 {
     if (!(self = [super init]))
         return nil;
-    
+
     return self;
 }
 
@@ -59,24 +59,24 @@ THE SOFTWARE.
         strcpy(cstr_copy, cstr);
         argv[i] = cstr_copy;
     }
-    
-    
-    
+
+
+
     NSMutableAttributedString *stdoutBuffer = kEmptyMutableAttributedString;
-    
+
     now = date;
     today = dateForStartOfDay(now);
-    
+
     // don't read any config or L10N files
     NSString *configFilePath = @"";
     NSString *L10nFilePath = @"";
     readConfigAndL10NFilePathArgs(argc, argv, &configFilePath, &L10nFilePath);
-    
+
     initL10N(L10nFilePath);
-    
+
     AppOptions opts = NEW_DEFAULT_APP_OPTIONS;
     PrettyPrintOptions prettyPrintOptions = getDefaultPrettyPrintOptions();
-    
+
     // read and validate general configuration file
     NSMutableDictionary *configDict = nil;
     NSDictionary *userSuppliedFormattingConfigDict = nil;
@@ -88,14 +88,14 @@ THE SOFTWARE.
         if (configDict != nil)
             userSuppliedFormattingConfigDict = [configDict objectForKey:@"formatting"];
     }
-    
+
     readProgramArgs(&opts, &prettyPrintOptions, argc, argv);
-    
+
     NSArray *propertySeparators = nil;
     processAppOptions(&opts, &prettyPrintOptions, &propertySeparators);
     initFormatting(nil, propertySeparators);
     initPrettyPrint(stdoutBuffer, prettyPrintOptions);
-    
+
     return opts;
 }
 

@@ -1,5 +1,5 @@
 // icalBuddy unit test info container
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -41,9 +41,9 @@ THE SOFTWARE.
 {
     if (!(self = [super init]))
         return nil;
-    
+
     self.output = [NSMutableString string];
-    
+
     return self;
 }
 

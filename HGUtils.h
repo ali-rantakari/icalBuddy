@@ -1,5 +1,5 @@
 // Misc utility functions
-// 
+//
 // http://hasseg.org/
 //
 

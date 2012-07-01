@@ -1,5 +1,5 @@
 // icalBuddy
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -38,7 +38,7 @@ THE SOFTWARE.
 {
     if (!(self = [super initWithAppName:@"icalBuddy"]))
         return nil;
-    
+
     return self;
 }
 

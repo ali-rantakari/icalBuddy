@@ -1,5 +1,5 @@
 // CLI app auto-update code
-// 
+//
 // http://hasseg.org/
 //
 
@@ -51,11 +51,11 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second);
 {
     ANSIEscapeHelper *ansiEscapeHelper;
     NSString *versionCheckHeaderName;
-    
+
     NSString *appName;
     NSString *currentVersionStr;
     NSString *latestVersionStr;
-    
+
     id delegate;
 }
 

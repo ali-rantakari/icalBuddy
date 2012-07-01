@@ -1,5 +1,5 @@
 // CLI app auto-update code
-// 
+//
 // http://hasseg.org/
 //
 
@@ -41,9 +41,9 @@ THE SOFTWARE.
 {
     if (!(self = [super init]))
         return nil;
-    
+
     appName = [aAppName copy];
-    
+
     return self;
 }
 

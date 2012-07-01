@@ -1,5 +1,5 @@
 // icalBuddy unit test
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -37,7 +37,7 @@ THE SOFTWARE.
 {
     if (!(self = [super init]))
         return nil;
-    
+
     return self;
 }
 
@@ -54,27 +54,27 @@ THE SOFTWARE.
 - (NSArray *) getMethodNames
 {
     NSMutableArray *methodsArr = [NSMutableArray array];
-    
+
     unsigned int numMethods;
     Method *methods = class_copyMethodList([self class], &numMethods);
     for (unsigned i = 0; i < numMethods; i++)
         [methodsArr addObject:[NSString stringWithUTF8String:sel_getName(method_getName(methods[i]))]];
     free(methods);
-    
+
     return methodsArr;
 }
 
 - (NSArray *) getTestMethodNames
 {
     NSMutableArray *testMethods = [NSMutableArray array];
-    
+
     NSArray *methodNames = [self getMethodNames];
     for (NSString *name in methodNames)
     {
         if ([name hasPrefix:@"test"])
             [testMethods addObject:name];
     }
-    
+
     return testMethods;
 }
 
@@ -82,25 +82,25 @@ THE SOFTWARE.
 - (TestInfo *) runTests
 {
     TestInfo *testInfo = [[[TestInfo alloc] init] autorelease];
-    
+
     SEL setUpSel = @selector(setUp);
     SEL tearDownSel = @selector(tearDown);
-    
+
     PRINTLN_BOLD(@"------------------------------------------------");
     PRINTLN_BOLD(@"TEST CLASS: %@", [self getClassName]);
-    
+
     if ([self respondsToSelector:setUpSel])
     {
         PRINTLN_B(@"• setUp");
         [self performSelector:setUpSel];
     }
-    
+
     NSArray *testMethods = [self getTestMethodNames];
     for (NSString *name in testMethods)
     {
         PRINTLN_B(@"• Running test: %@", name);
         BOOL success = [[self performSelector:NSSelectorFromString(name)] boolValue];
-        
+
         testInfo.numTests++;
         if (success)
         {
@@ -110,13 +110,13 @@ THE SOFTWARE.
         else
             PRINTLN_R(@"- TEST %@ FAILED.", name);
     }
-    
+
     if ([self respondsToSelector:tearDownSel])
     {
         PRINTLN_B(@"• tearDown");
         [self performSelector:tearDownSel];
     }
-    
+
     return testInfo;
 }
 

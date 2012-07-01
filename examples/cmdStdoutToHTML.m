@@ -13,26 +13,26 @@ NSString *runTask(NSString *path, NSArray *args)
 {
     NSPipe *pipe;
     pipe = [NSPipe pipe];
-    
+
     NSTask *task;
     task = [[NSTask alloc] init];
     [task setLaunchPath: path];
     [task setArguments: args];
     [task setStandardOutput: pipe];
-    
+
     NSFileHandle *file;
     file = [pipe fileHandleForReading];
-    
+
     [task launch];
-    
+
     NSData *data;
     data = [file readDataToEndOfFile];
-    
+
     NSString *string;
     string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    
+
     [task release];
-    
+
     return [string autorelease];
 }
 
@@ -41,12 +41,12 @@ NSString *toHTMLEntities(NSString *str, BOOL minimal)
 {
     if (str == nil)
         return nil;
-    
+
     // escape special chars
     NSString *eStr = [((NSString *)CFXMLCreateStringByEscapingEntities(kCFAllocatorDefault, (CFStringRef)str, NULL)) autorelease];
-    
+
     NSMutableString *ms = [NSMutableString string];
-    
+
     if (minimal)
     {
         // minimal replacements
@@ -68,11 +68,11 @@ NSString *toHTMLEntities(NSString *str, BOOL minimal)
             [ms appendString:[line substringFromIndex:i]];
             [ms appendString:@"<br />"];
         }
-        
+
         // tabs
         [ms replaceOccurrencesOfString:@"\t" withString:@"&nbsp;&nbsp;&nbsp;&nbsp;" options:NSLiteralSearch range:NSMakeRange(0,[ms length])];
     }
-    
+
     return ms;
 }
 
@@ -85,7 +85,7 @@ NSString *cssClassNameForSGRCode(enum sgrCode aSGRCode)
         return @"underlined";
     else if (aSGRCode == SGRCodeUnderlineDouble)
         return @"double-underlined";
-    
+
     NSDictionary *colorNames = [NSDictionary dictionaryWithObjectsAndKeys:
         @"black", [NSNumber numberWithInt:0],
         @"red", [NSNumber numberWithInt:1],
@@ -97,7 +97,7 @@ NSString *cssClassNameForSGRCode(enum sgrCode aSGRCode)
         @"white", [NSNumber numberWithInt:7],
         nil
         ];
-    
+
     NSDictionary *colorTypes = [NSDictionary dictionaryWithObjectsAndKeys:
         @"fg-", [NSNumber numberWithInt:3],
         @"bg-", [NSNumber numberWithInt:4],
@@ -105,7 +105,7 @@ NSString *cssClassNameForSGRCode(enum sgrCode aSGRCode)
         @"bright-bg-", [NSNumber numberWithInt:10],
         nil
         ];
-    
+
     int colorTypeNum = floor(aSGRCode / 10);
     int colorNum = aSGRCode % 10;
     NSString *prefix = nil;
@@ -124,10 +124,10 @@ NSString *cssClassNameForSGRCode(enum sgrCode aSGRCode)
         colorName = [colorNames objectForKey:colorKey];
         break;
     }
-    
+
     if (prefix != nil && colorName != nil)
         return strConcat(prefix, colorName, nil);
-    
+
     return nil;
 }
 
@@ -137,11 +137,11 @@ NSString *htmlFromAttributedString(NSAttributedString *aAttributedString)
 {
     NSString *cleanString = [aAttributedString string];
     NSMutableString* retString = [NSMutableString string];
-    
+
     NSRange effectiveRange;
     NSRange limitRange = NSMakeRange(0, [aAttributedString length]);
     NSDictionary *attrs = nil;
-    
+
     while (limitRange.length > 0)
     {
         // get attributes at current location + span for which they stay constant
@@ -150,15 +150,15 @@ NSString *htmlFromAttributedString(NSAttributedString *aAttributedString)
             longestEffectiveRange:&effectiveRange
             inRange:limitRange
             ];
-        
+
         // determine CSS class names for these attributes
         NSMutableArray *classNames = [NSMutableArray array];
-        
+
         for (NSString *attrName in attrs)
         {
             id attrValue = [attrs valueForKey:attrName];
             enum sgrCode thisSGRCode = SGRCodeNoneOrInvalid;
-            
+
             if ([attrName isEqualToString:NSForegroundColorAttributeName])
             {
                 if ([attrValue isEqual:ansiHelper.defaultStringColor])
@@ -186,13 +186,13 @@ NSString *htmlFromAttributedString(NSAttributedString *aAttributedString)
                 else
                     thisSGRCode = SGRCodeUnderlineNone;
             }
-            
+
             NSString *className = cssClassNameForSGRCode(thisSGRCode);
             if (className == nil)
                 continue;
             [classNames addObject:className];
         }
-        
+
         // append the text within our span into the string we're building,
         // inside a span tag with the CSS class names we have
         if ([classNames count] > 0)
@@ -206,12 +206,12 @@ NSString *htmlFromAttributedString(NSAttributedString *aAttributedString)
         {
             [retString appendString:@"</span>"];
         }
-        
-        
+
+
         limitRange = NSMakeRange(NSMaxRange(effectiveRange),
                                  NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
     }
-    
+
     return retString;
 }
 
@@ -220,14 +220,14 @@ NSString *htmlFromAttributedString(NSAttributedString *aAttributedString)
 int main(int argc, char *argv[])
 {
     NSAutoreleasePool *autoReleasePool = [[NSAutoreleasePool alloc] init];
-    
+
     ansiHelper = [[[ANSIEscapeHelper alloc] init] autorelease];
-    
+
     NSString *arg_outputFilePath = nil;
     NSString *arg_commandToRun = nil;
     BOOL arg_readCommandsFromSTDIN = YES;
     BOOL arg_replaceMinimalHTMLEntities = YES;
-    
+
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-o") == 0)
@@ -240,28 +240,28 @@ int main(int argc, char *argv[])
             arg_readCommandsFromSTDIN = NO;
         }
     }
-    
+
     if (arg_readCommandsFromSTDIN)
     {
         NSFileHandle *stdinHandle = [NSFileHandle fileHandleWithStandardInput];
         NSData *stdinData = [NSData dataWithData:[stdinHandle readDataToEndOfFile]];
         arg_commandToRun = [[[NSString alloc] initWithData:stdinData encoding:NSUTF8StringEncoding] autorelease];
     }
-    
+
     if (arg_commandToRun != nil)
         arg_commandToRun = [arg_commandToRun stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    
+
     if (!arg_readCommandsFromSTDIN && (arg_commandToRun == nil || [arg_commandToRun length] == 0))
     {
         PrintfErr(@"Need command to run as an argument (-c command) or\n");
         PrintfErr(@"specified line-by-line via STDIN.\n");
         return 1;
     }
-    
+
     NSArray *commands = [arg_commandToRun componentsSeparatedByString:@"\n"];
-    
+
     NSMutableDictionary *commandsAndOutputs = [NSMutableDictionary dictionaryWithCapacity:[commands count]];
-    
+
     for (NSString *command in commands)
     {
         NSString *output = runTask(@"/bin/bash", [NSArray arrayWithObjects: @"-c", command, nil]);
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
         output = htmlFromAttributedString([ansiHelper attributedStringWithANSIEscapedString:output]);
         [commandsAndOutputs setObject:output forKey:command];
     }
-    
+
     if (arg_outputFilePath != nil)
     {
         [commandsAndOutputs writeToFile:arg_outputFilePath atomically:YES];
@@ -281,8 +281,8 @@ int main(int argc, char *argv[])
             Print([commandsAndOutputs objectForKey:key]);
         }
     }
-    
-    
+
+
     [autoReleasePool release];
     return 0;
 }

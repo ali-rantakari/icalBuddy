@@ -1,5 +1,5 @@
 // icalBuddy definitions
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -143,14 +143,14 @@ typedef struct
     BOOL alwaysShowTodaysSection;
     BOOL specificCalFilterPrecedesCalTypeFilter;
     BOOL excludeAllDayEvents;
-    
+
     BOOL output_is_uncompletedTasks;
     BOOL output_is_eventsToday;
     BOOL output_is_eventsNow;
     BOOL output_is_eventsFromTo;
     BOOL output_is_tasksDueBefore;
     BOOL output_is_undatedUncompletedTasks;
-    
+
     NSString *output;
     NSArray *includeCals;
     NSArray *excludeCals;
@@ -161,7 +161,7 @@ typedef struct
     NSString *propertySeparatorsStr;
     NSString *eventsFrom;
     NSString *eventsTo;
-    
+
     NSDate *startDate;
     NSDate *endDate;
     NSDate *dueBeforeDate;

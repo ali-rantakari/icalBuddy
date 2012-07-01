@@ -1,5 +1,5 @@
 // icalBuddy calendar store import
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 

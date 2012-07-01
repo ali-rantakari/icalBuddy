@@ -1,5 +1,5 @@
 // ABRecord+HGAdditions.m
-// 
+//
 // http://hasseg.org/icalBuddy
 //
 
@@ -41,7 +41,7 @@ THE SOFTWARE.
     unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit;
     NSDateComponents *dateComponentsRefDate = [calendar components:unitFlags fromDate:referenceDate];
     NSDateComponents *dateComponentsBirth = [calendar components:unitFlags fromDate:birthday];
-    
+
     NSLog(@"Ref year: %i Birth year: %i", [dateComponentsRefDate year], [dateComponentsBirth year]);
 
     if (([dateComponentsRefDate month] < [dateComponentsBirth month])

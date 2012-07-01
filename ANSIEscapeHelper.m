@@ -29,10 +29,10 @@ THE SOFTWARE.
 
 /*
  todo:
- 
+
  - don't add useless "reset" escape codes to the string in
    -ansiEscapedStringWithAttributedString:
- 
+
  */
 
 
@@ -54,7 +54,7 @@ THE SOFTWARE.
         self.defaultStringColor = [NSColor blackColor];
         self.ansiColors = [NSMutableDictionary dictionary];
     }
-    
+
     return self;
 }
 
@@ -72,7 +72,7 @@ THE SOFTWARE.
 {
     if (aString == nil)
         return nil;
-    
+
     NSString *cleanString;
     NSArray *attributesAndRanges = [self attributesForString:aString cleanString:&cleanString];
     NSMutableAttributedString *attributedString = [[[NSMutableAttributedString alloc]
@@ -83,7 +83,7 @@ THE SOFTWARE.
                                                                 nil
                                                                 ]
                                                     ] autorelease];
-    
+
     NSDictionary *thisAttributeDict;
     for (thisAttributeDict in attributesAndRanges)
     {
@@ -93,7 +93,7 @@ THE SOFTWARE.
          range:[[thisAttributeDict objectForKey:kAttrDictKey_range] rangeValue]
          ];
     }
-    
+
     return attributedString;
 }
 
@@ -104,9 +104,9 @@ THE SOFTWARE.
     NSRange limitRange;
     NSRange effectiveRange;
     id attributeValue;
-    
+
     NSMutableArray *codesAndLocations = [NSMutableArray array];
-    
+
     NSArray *attrNames = [NSArray arrayWithObjects:
                           NSFontAttributeName, NSForegroundColorAttributeName,
                           NSBackgroundColorAttributeName, NSUnderlineStyleAttributeName,
@@ -124,9 +124,9 @@ THE SOFTWARE.
                               longestEffectiveRange:&effectiveRange
                               inRange:limitRange
                               ];
-            
+
             enum sgrCode thisSGRCode = SGRCodeNoneOrInvalid;
-            
+
             if ([thisAttrName isEqualToString:NSForegroundColorAttributeName])
             {
                 if (attributeValue != nil)
@@ -166,7 +166,7 @@ THE SOFTWARE.
                 else
                     thisSGRCode = SGRCodeUnderlineNone;
             }
-            
+
             if (thisSGRCode != SGRCodeNoneOrInvalid)
             {
                 [codesAndLocations addObject:
@@ -177,14 +177,14 @@ THE SOFTWARE.
                  ]
                 ];
             }
-            
+
             limitRange = NSMakeRange(NSMaxRange(effectiveRange),
                                      NSMaxRange(limitRange) - NSMaxRange(effectiveRange));
         }
     }
-    
+
     NSString *ansiEscapedString = [self ansiEscapedStringWithCodesAndLocations:codesAndLocations cleanString:[aAttributedString string]];
-    
+
     return ansiEscapedString;
 }
 
@@ -198,13 +198,13 @@ THE SOFTWARE.
         *aCleanString = [NSString stringWithString:aString];
         return [NSArray array];
     }
-    
+
     NSString *cleanString = @"";
-    
+
     // find all escape sequence codes from aString and put them in this array
     // along with their start locations within the "clean" version of aString
     NSMutableArray *formatCodes = [NSMutableArray array];
-    
+
     NSUInteger aStringLength = [aString length];
     NSUInteger coveredLength = 0;
     NSRange searchRange = NSMakeRange(0,aStringLength);
@@ -228,15 +228,15 @@ THE SOFTWARE.
                 thisIndex = (NSMaxRange(thisEscapeSequenceRange)+lengthAddition-1);
                 if (thisIndex >= aStringLength)
                     break;
-                
+
                 int c = (int)[aString characterAtIndex:thisIndex];
-                
+
                 if ((48 <= c) && (c <= 57)) // 0-9
                 {
                     int digit = c-48;
                     code = (code == 0) ? digit : code*10+digit;
                 }
-                
+
                 // ASCII decimal 109 is the SGR (Select Graphic Rendition) final byte
                 // ("m"). this means that the code value we've just read specifies formatting
                 // for the output; exactly what we're interested in.
@@ -255,13 +255,13 @@ THE SOFTWARE.
                     [codes addObject:[NSNumber numberWithUnsignedInt:code]];
                     code = 0;
                 }
-                
+
                 lengthAddition++;
             }
             thisEscapeSequenceRange.length += lengthAddition;
-            
+
             NSUInteger locationInCleanString = coveredLength+thisEscapeSequenceRange.location-searchRange.location;
-            
+
             NSUInteger iCode;
             for (iCode = 0; iCode < [codes count]; iCode++)
             {
@@ -273,23 +273,23 @@ THE SOFTWARE.
                   ]
                  ];
             }
-            
+
             NSUInteger thisCoveredLength = thisEscapeSequenceRange.location-searchRange.location;
             if (thisCoveredLength > 0)
                 cleanString = [cleanString stringByAppendingString:[aString substringWithRange:NSMakeRange(searchRange.location, thisCoveredLength)]];
-            
+
             coveredLength += thisCoveredLength;
             searchRange.location = NSMaxRange(thisEscapeSequenceRange);
             searchRange.length = aStringLength-searchRange.location;
         }
     }
     while(thisEscapeSequenceRange.location != NSNotFound);
-    
+
     if (searchRange.length > 0)
         cleanString = [cleanString stringByAppendingString:[aString substringWithRange:searchRange]];
-    
+
     *aCleanString = cleanString;
-    
+
     return formatCodes;
 }
 
@@ -299,10 +299,10 @@ THE SOFTWARE.
 - (NSString*) ansiEscapedStringWithCodesAndLocations:(NSArray*)aCodesArray cleanString:(NSString*)aCleanString
 {
     NSMutableString* retStr = [NSMutableString stringWithCapacity:[aCleanString length]];
-    
+
     NSSortDescriptor *sortDescriptor = [[[NSSortDescriptor alloc] initWithKey:kCodeDictKey_location ascending:YES] autorelease];
     NSArray *codesArray = [aCodesArray sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
-    
+
     NSUInteger aCleanStringIndex = 0;
     NSUInteger aCleanStringLength = [aCleanString length];
     NSDictionary *thisCodeDict;
@@ -312,25 +312,25 @@ THE SOFTWARE.
                 [[thisCodeDict allKeys] containsObject:kCodeDictKey_location]
             ))
             continue;
-        
+
         enum sgrCode thisCode = [[thisCodeDict objectForKey:kCodeDictKey_code] unsignedIntValue];
         NSUInteger formattingRunStartLocation = [[thisCodeDict objectForKey:kCodeDictKey_location] unsignedIntegerValue];
-        
+
         if (formattingRunStartLocation > aCleanStringLength)
             continue;
-        
+
         if (aCleanStringIndex < formattingRunStartLocation)
             [retStr appendString:[aCleanString substringWithRange:NSMakeRange(aCleanStringIndex, formattingRunStartLocation-aCleanStringIndex)]];
         [retStr appendString:kANSIEscapeCSI];
         [retStr appendString:[NSString stringWithFormat:@"%d", thisCode]];
         [retStr appendString:kANSIEscapeSGREnd];
-        
+
         aCleanStringIndex = formattingRunStartLocation;
     }
-    
+
     if (aCleanStringIndex < aCleanStringLength)
         [retStr appendString:[aCleanString substringFromIndex:aCleanStringIndex]];
-    
+
     return retStr;
 }
 
@@ -348,13 +348,13 @@ THE SOFTWARE.
             *aCleanString = [NSString stringWithString:aString];
         return [NSArray array];
     }
-    
+
     NSMutableArray *attrsAndRanges = [NSMutableArray array];
-    
+
     NSString *cleanString;
-    
+
     NSArray *formatCodes = [self escapeCodesForString:aString cleanString:&cleanString];
-    
+
     // go through all the found escape sequence codes and for each one, create
     // the string formatting attribute name and value, find the next escape
     // sequence that specifies the end of the formatting run started by
@@ -366,15 +366,15 @@ THE SOFTWARE.
         NSDictionary *thisCodeDict = [formatCodes objectAtIndex:iCode];
         enum sgrCode thisCode = [[thisCodeDict objectForKey:kCodeDictKey_code] unsignedIntValue];
         NSUInteger formattingRunStartLocation = [[thisCodeDict objectForKey:kCodeDictKey_location] unsignedIntegerValue];
-        
+
         // the attributed string attribute name for the formatting run introduced
         // by this code
         NSString *thisAttributeName = nil;
-        
+
         // the attributed string attribute value for this formatting run introduced
         // by this code
         NSObject *thisAttributeValue = nil;
-        
+
         // set attribute name
         switch(thisCode)
         {
@@ -426,7 +426,7 @@ THE SOFTWARE.
                 continue;
                 break;
         }
-        
+
         // set attribute value
         switch(thisCode)
         {
@@ -485,8 +485,8 @@ THE SOFTWARE.
             default:
                 break;
         }
-        
-        
+
+
         // find the next sequence that specifies the end of this formatting run
         NSInteger formattingRunEndLocation = -1;
         if (iCode < ([formatCodes count]-1))
@@ -498,7 +498,7 @@ THE SOFTWARE.
             {
                 thisEndCodeCandidateDict = [formatCodes objectAtIndex:iEndCode];
                 thisEndCodeCandidate = [[thisEndCodeCandidateDict objectForKey:kCodeDictKey_code] unsignedIntValue];
-                
+
                 if ([self sgrCode:thisEndCodeCandidate endsFormattingIntroducedByCode:thisCode])
                 {
                     formattingRunEndLocation = [[thisEndCodeCandidateDict objectForKey:kCodeDictKey_location] unsignedIntegerValue];
@@ -508,7 +508,7 @@ THE SOFTWARE.
         }
         if (formattingRunEndLocation == -1)
             formattingRunEndLocation = [cleanString length];
-        
+
         // add attribute name, attribute value and formatting run range
         // to the array we're going to return
         [attrsAndRanges addObject:
@@ -520,10 +520,10 @@ THE SOFTWARE.
          ]
         ];
     }
-    
+
     if (aCleanString != NULL)
         *aCleanString = cleanString;
-    
+
     return attrsAndRanges;
 }
 
@@ -551,14 +551,14 @@ THE SOFTWARE.
         case SGRCodeFgBrightMagenta:
         case SGRCodeFgBrightCyan:
         case SGRCodeFgBrightWhite:
-            return (endCode == SGRCodeAllReset || endCode == SGRCodeFgReset || 
-                    endCode == SGRCodeFgBlack || endCode == SGRCodeFgRed || 
-                    endCode == SGRCodeFgGreen || endCode == SGRCodeFgYellow || 
-                    endCode == SGRCodeFgBlue || endCode == SGRCodeFgMagenta || 
+            return (endCode == SGRCodeAllReset || endCode == SGRCodeFgReset ||
+                    endCode == SGRCodeFgBlack || endCode == SGRCodeFgRed ||
+                    endCode == SGRCodeFgGreen || endCode == SGRCodeFgYellow ||
+                    endCode == SGRCodeFgBlue || endCode == SGRCodeFgMagenta ||
                     endCode == SGRCodeFgCyan || endCode == SGRCodeFgWhite ||
-                    endCode == SGRCodeFgBrightBlack || endCode == SGRCodeFgBrightRed || 
-                    endCode == SGRCodeFgBrightGreen || endCode == SGRCodeFgBrightYellow || 
-                    endCode == SGRCodeFgBrightBlue || endCode == SGRCodeFgBrightMagenta || 
+                    endCode == SGRCodeFgBrightBlack || endCode == SGRCodeFgBrightRed ||
+                    endCode == SGRCodeFgBrightGreen || endCode == SGRCodeFgBrightYellow ||
+                    endCode == SGRCodeFgBrightBlue || endCode == SGRCodeFgBrightMagenta ||
                     endCode == SGRCodeFgBrightCyan || endCode == SGRCodeFgBrightWhite);
             break;
         case SGRCodeBgBlack:
@@ -577,31 +577,31 @@ THE SOFTWARE.
         case SGRCodeBgBrightMagenta:
         case SGRCodeBgBrightCyan:
         case SGRCodeBgBrightWhite:
-            return (endCode == SGRCodeAllReset || endCode == SGRCodeBgReset || 
-                    endCode == SGRCodeBgBlack || endCode == SGRCodeBgRed || 
-                    endCode == SGRCodeBgGreen || endCode == SGRCodeBgYellow || 
-                    endCode == SGRCodeBgBlue || endCode == SGRCodeBgMagenta || 
+            return (endCode == SGRCodeAllReset || endCode == SGRCodeBgReset ||
+                    endCode == SGRCodeBgBlack || endCode == SGRCodeBgRed ||
+                    endCode == SGRCodeBgGreen || endCode == SGRCodeBgYellow ||
+                    endCode == SGRCodeBgBlue || endCode == SGRCodeBgMagenta ||
                     endCode == SGRCodeBgCyan || endCode == SGRCodeBgWhite ||
-                    endCode == SGRCodeBgBrightBlack || endCode == SGRCodeBgBrightRed || 
-                    endCode == SGRCodeBgBrightGreen || endCode == SGRCodeBgBrightYellow || 
-                    endCode == SGRCodeBgBrightBlue || endCode == SGRCodeBgBrightMagenta || 
+                    endCode == SGRCodeBgBrightBlack || endCode == SGRCodeBgBrightRed ||
+                    endCode == SGRCodeBgBrightGreen || endCode == SGRCodeBgBrightYellow ||
+                    endCode == SGRCodeBgBrightBlue || endCode == SGRCodeBgBrightMagenta ||
                     endCode == SGRCodeBgBrightCyan || endCode == SGRCodeBgBrightWhite);
             break;
         case SGRCodeIntensityBold:
         case SGRCodeIntensityNormal:
-            return (endCode == SGRCodeAllReset || endCode == SGRCodeIntensityNormal || 
+            return (endCode == SGRCodeAllReset || endCode == SGRCodeIntensityNormal ||
                     endCode == SGRCodeIntensityBold || endCode == SGRCodeIntensityFaint);
             break;
         case SGRCodeUnderlineSingle:
         case SGRCodeUnderlineDouble:
-            return (endCode == SGRCodeAllReset || endCode == SGRCodeUnderlineNone || 
+            return (endCode == SGRCodeAllReset || endCode == SGRCodeUnderlineNone ||
                     endCode == SGRCodeUnderlineSingle || endCode == SGRCodeUnderlineDouble);
             break;
         default:
             return NO;
             break;
     }
-    
+
     return NO;
 }
 
@@ -616,7 +616,7 @@ THE SOFTWARE.
         if (preferredColor != nil)
             return preferredColor;
     }
-    
+
     switch(code)
     {
         case SGRCodeFgBlack:
@@ -718,7 +718,7 @@ THE SOFTWARE.
         default:
             break;
     }
-    
+
     return kDefaultANSIColorFgBlack;
 }
 
@@ -728,7 +728,7 @@ THE SOFTWARE.
     if (self.ansiColors != nil)
     {
         NSArray *codesForGivenColor = [self.ansiColors allKeysForObject:aColor];
-        
+
         if (codesForGivenColor != nil && [codesForGivenColor count] > 0)
         {
             NSNumber *thisCode;
@@ -740,7 +740,7 @@ THE SOFTWARE.
             }
         }
     }
-    
+
     if (aForeground)
     {
         if ([aColor isEqual:kDefaultANSIColorFgBlack])
@@ -811,7 +811,7 @@ THE SOFTWARE.
         else if ([aColor isEqual:kDefaultANSIColorBgBrightWhite])
             return SGRCodeBgBrightWhite;
     }
-    
+
     return SGRCodeNoneOrInvalid;
 }
 
@@ -860,17 +860,17 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
 {
     if (color == nil)
         return SGRCodeNoneOrInvalid;
-    
+
     enum sgrCode closestColorSGRCode = [self sgrCodeForColor:color isForegroundColor:foreground];
     if (closestColorSGRCode != SGRCodeNoneOrInvalid)
         return closestColorSGRCode;
-    
+
     HSB givenColorHSB = getHSBFromColor(color);
-    
+
     CGFloat closestColorHueDiff = FLT_MAX;
     CGFloat closestColorSaturationDiff = FLT_MAX;
     CGFloat closestColorBrightnessDiff = FLT_MAX;
-    
+
     // (background SGR codes are +10 from foreground ones:)
     NSUInteger sgrCodeShift = (foreground)?0:10;
     NSArray *ansiFgColorCodes = [NSArray
@@ -897,16 +897,16 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
     {
         enum sgrCode thisSGRCode = [thisSGRCodeNumber intValue];
         NSColor *thisColor = [self colorForSGRCode:thisSGRCode];
-        
+
         HSB thisColorHSB = getHSBFromColor(thisColor);
-        
+
         CGFloat hueDiff = fabs(givenColorHSB.hue - thisColorHSB.hue);
         CGFloat saturationDiff = fabs(givenColorHSB.saturation - thisColorHSB.saturation);
         CGFloat brightnessDiff = fabs(givenColorHSB.brightness - thisColorHSB.brightness);
-        
+
         // comparison depends on hue, saturation and brightness
         // (strictly in that order):
-        
+
         if (!floatsEqual(hueDiff, closestColorHueDiff, MAX_HUE_FLOAT_EQUALITY_ABS_ERROR))
         {
             if (hueDiff > closestColorHueDiff)
@@ -917,7 +917,7 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
             closestColorBrightnessDiff = brightnessDiff;
             continue;
         }
-        
+
         if (!floatsEqual(saturationDiff, closestColorSaturationDiff, MAX_HUE_FLOAT_EQUALITY_ABS_ERROR))
         {
             if (saturationDiff > closestColorSaturationDiff)
@@ -928,7 +928,7 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
             closestColorBrightnessDiff = brightnessDiff;
             continue;
         }
-        
+
         if (!floatsEqual(brightnessDiff, closestColorBrightnessDiff, MAX_HUE_FLOAT_EQUALITY_ABS_ERROR))
         {
             if (brightnessDiff > closestColorBrightnessDiff)
@@ -939,7 +939,7 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
             closestColorBrightnessDiff = brightnessDiff;
             continue;
         }
-        
+
         // If hue (especially hue!), saturation and brightness diffs all
         // are equal to some other color, we need to prefer one or the
         // other so we'll select the more 'distinctive' color of the
@@ -950,7 +950,7 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
         // the blue and magenta ANSI colors looks more magenta than
         // blue to me so I put magenta higher than blue in the list
         // below.)
-        // 
+        //
         // subjective ordering of colors from most to least 'distinctive':
         int colorDistinctivenessOrder[6] = {
             SGRCodeFgRed+sgrCodeShift,
@@ -974,7 +974,7 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
             }
         }
     }
-    
+
     return closestColorSGRCode;
 }
 
