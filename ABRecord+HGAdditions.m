@@ -70,10 +70,11 @@ THE SOFTWARE.
 
     if (0 < firstName.length && 0 < lastName.length)
     {
-        if ([[ABAddressBook sharedAddressBook] defaultNameOrdering] == kABFirstNameFirst)
-            return [NSString stringWithFormat:@"%@ %@", firstName, lastName];
-        else
+        // Remember, -sharedAddressBook might return nil
+        if ([[ABAddressBook sharedAddressBook] defaultNameOrdering] != kABFirstNameFirst)
             return [NSString stringWithFormat:@"%@ %@", lastName, firstName];
+        else
+            return [NSString stringWithFormat:@"%@ %@", firstName, lastName];
     }
     else if (0 < firstName.length)
         return firstName;

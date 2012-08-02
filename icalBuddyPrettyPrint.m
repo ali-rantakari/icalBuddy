@@ -294,38 +294,50 @@ PropertyPresentationElements *getEventTitlePresentation(CalEvent *event, CalItem
 
     if ([[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
     {
-        // special case for events in the Birthdays calendar (they don't seem to have titles
-        // so we have to use the URI to find the ABPerson from the Address Book
-        // and print their name from there)
+        ABAddressBook *addressBook = [ABAddressBook sharedAddressBook];
 
-        NSString *personId = [[NSString stringWithFormat:@"%@", [event url]]
-            stringByReplacingOccurrencesOfString:@"addressbook://"
-            withString:@""
-            ];
-        ABRecord *person = [[ABAddressBook sharedAddressBook] recordForUniqueId:personId];
-
-        if (person != nil && [person isMemberOfClass: [ABPerson class]])
+        // If the user has Mountain Lion or later, and has denied icalBuddy access to their
+        // contacts, then -sharedAddressBook will return nil.
+        if (addressBook == nil)
         {
-            NSString *thisTitle = nil;
-            if ([person isEqual:[[ABAddressBook sharedAddressBook] me]])
-                thisTitle = localizedStr(kL10nKeyMyBirthday);
-            else
+            thisPropTempValue = [event title];
+        }
+        else
+        {
+            // special case for events in the Birthdays calendar (they don't seem to have titles
+            // so we have to use the URI to find the ABPerson from the Address Book
+            // and print their name from there)
+
+            NSString *personId = [[NSString stringWithFormat:@"%@", [event url]]
+                stringByReplacingOccurrencesOfString:@"addressbook://"
+                withString:@""
+                ];
+            ABRecord *person = [[ABAddressBook sharedAddressBook] recordForUniqueId:personId];
+
+            if (person != nil && [person isMemberOfClass: [ABPerson class]])
             {
-                NSString *contactFullName = [person hg_fullName];
-                NSInteger contactAge = [person hg_ageOnDate:[event startDate]];
-                NSString *birthdayFormat = localizedStr(kL10nKeySomeonesBirthday);
-                if ([birthdayFormat rangeOfString:@"%i"].location != NSNotFound)
-                    thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName, contactAge];
+                NSString *thisTitle = nil;
+                if ([person isEqual:[[ABAddressBook sharedAddressBook] me]])
+                    thisTitle = localizedStr(kL10nKeyMyBirthday);
                 else
-                    thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName];
+                {
+                    NSString *contactFullName = [person hg_fullName];
+                    NSInteger contactAge = [person hg_ageOnDate:[event startDate]];
+                    NSString *birthdayFormat = localizedStr(kL10nKeySomeonesBirthday);
+                    if ([birthdayFormat rangeOfString:@"%i"].location != NSNotFound)
+                        thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName, contactAge];
+                    else
+                        thisTitle = [NSString stringWithFormat:birthdayFormat, contactFullName];
+                }
+                thisPropTempValue = thisTitle;
             }
-            thisPropTempValue = thisTitle;
         }
     }
     else
         thisPropTempValue = [event title];
 
-    elements.value = M_ATTR_STR(thisPropTempValue);
+    if (thisPropTempValue != nil)
+        elements.value = M_ATTR_STR(thisPropTempValue);
 
     if (!printOptions.calendarAgnostic)
     {
