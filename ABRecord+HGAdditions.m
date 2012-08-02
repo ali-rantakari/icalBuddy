@@ -42,8 +42,6 @@ THE SOFTWARE.
     NSDateComponents *dateComponentsRefDate = [calendar components:unitFlags fromDate:referenceDate];
     NSDateComponents *dateComponentsBirth = [calendar components:unitFlags fromDate:birthday];
 
-    NSLog(@"Ref year: %i Birth year: %i", [dateComponentsRefDate year], [dateComponentsBirth year]);
-
     if (([dateComponentsRefDate month] < [dateComponentsBirth month])
         || (([dateComponentsRefDate month] == [dateComponentsBirth month])
             && ([dateComponentsRefDate day] < [dateComponentsBirth day])))
