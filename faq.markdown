@@ -194,6 +194,19 @@ The `-ic` and `-ec` (or `--includeCals` and `--excludeCals`) arguments can be gi
       UID: 58C43DDA-384E-4866-8077-8C0BBF292C01
 
 
+## Q: Why do I see an error message that says _Address book access is denied for executable at path..._ when I run icalBuddy?
+
+This happens because you have denied icalBuddy access to your address book.
+
+You can do one of two things to fix this:
+
+1. You can allow icalBuddy to access your contacts by going to _System Preferences > Security & Privacy > Privacy_, selecting _Contacts_ from the list on the left and checking the box next to _icalBuddy_.
+2. If you _do not_ want to allow icalBuddy to access your contacts, you can hide this error message (including all other error messages icalBuddy might produce!) by adding ` 2>/dev/null` to the end of the command you use to run it. So for example:
+
+        /usr/local/bin/icalBuddy -sd eventsToday+10 2>/dev/null
+
+
+
 ## Q: For some of my calendar items the bullet point is displayed on the right side of the line instead of on the left side, like it's supposed to. Why is this?
 
 The calendar items in question probably have text in a language that's written from right to left? The Mac OS X text layout system sees this and automatically "flips" the line, putting the bullet point (which was supposed to be at the far left side of the line) to the far right. There are two workarounds I've come up with, depending on the application you're using to invoke icalBuddy:
