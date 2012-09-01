@@ -187,7 +187,7 @@ if __name__ == '__main__':
 						print red('  error: mkdir exit status '+str(exit_status))
 						exit_status = STATUS_ERROR
 					
-					ret = os.system("sudo cp '"+e_src_filepath+"' '"+e_dest_filepath+"'")
+					ret = os.system("sudo cp -p '"+e_src_filepath+"' '"+e_dest_filepath+"'")
 					exit_status = (ret >> 8) & 0xFF
 					if exit_status == 0: print green('  copied.')
 					else:
