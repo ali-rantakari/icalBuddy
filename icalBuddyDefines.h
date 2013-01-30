@@ -168,10 +168,11 @@ typedef struct
     NSDate *dueBeforeDate;
 
     NSUInteger maxNumPrintedAttendees;
+    NSUInteger maxNumNoteCharacters;
 } AppOptions;
 
 #define NEW_DEFAULT_APP_OPTIONS {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
-                                 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,0}
+                                 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,0,0}
 
 
 

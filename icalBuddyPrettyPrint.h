@@ -78,6 +78,7 @@ typedef struct
     BOOL calendarColorsForSectionTitles;
     BOOL priorityAgnostic;
     NSUInteger maxNumPrintedAttendees;
+    NSUInteger maxNumNoteCharacters;
 } CalItemPrintOption;
 
 

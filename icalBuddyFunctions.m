@@ -326,6 +326,7 @@ CalItemPrintOption getPrintOptions(AppOptions *opts)
         printOptions.singleDay = YES;
 
     printOptions.maxNumPrintedAttendees = opts->maxNumPrintedAttendees;
+    printOptions.maxNumNoteCharacters = opts->maxNumNoteCharacters;
 
     return printOptions;
 }

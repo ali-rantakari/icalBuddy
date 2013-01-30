@@ -136,6 +136,10 @@ If the I<command> value C<eventsToday> is used, only output events that occur be
 
 Maximum number of attendees to show for events.
 
+=item B<-nc>, B<--maxNumNoteChars>
+
+Maximum number of characters to display from notes.
+
 =item B<-uid>, B<--showUIDs>
 
 Display event/task UIDs (unique identifiers).
