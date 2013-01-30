@@ -1,7 +1,7 @@
 # icalBuddy makefile
-# 
+#
 # Created by Ali Rantakari on 18 June, 2008
-# 
+#
 
 SHELL=/bin/bash
 
@@ -14,7 +14,7 @@ TEMP_DEPLOYMENT_MANFILE="deployment/man.html"
 TEMP_DEPLOYMENT_L10NMANFILE="deployment/localization-man.html"
 TEMP_DEPLOYMENT_CONFIGMANFILE="deployment/config-man.html"
 TEMP_DEPLOYMENT_FAQFILE="deployment/faq.html"
-FILES_TO_PACKAGE="$(TEMP_DEPLOYMENT_FAQFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyLocalization.pdf Manual-icalBuddyConfig.pdf"
+FILES_TO_PACKAGE="$(TEMP_DEPLOYMENT_FAQFILE) icalBuddy icalBuddy.1 icalBuddyLocalization.1 icalBuddyConfig.1"
 VERSIONCHANGELOGFILELOC="$(TEMP_DEPLOYMENT_DIR)/changelog.html"
 GENERALCHANGELOGFILELOC="changelog.html"
 SCP_TARGET=$(shell cat ./deploymentScpTarget)
@@ -142,39 +142,6 @@ icalBuddyLocalization.1: icalBuddyLocalization.pod
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
-# generate PDF from man page
-#-------------------------------------------------------------------------
-Manual-icalBuddy.pdf: icalBuddy.1
-	@echo
-	@echo ---- Generating PDF from manpage:
-	@echo ======================================
-	man -t ./$? > temp.ps && /System/Library/Printers/Libraries/convert -j "application/pdf" -f ./temp.ps -o ./$@ && rm ./temp.ps
-
-#-------------------------------------------------------------------------
-#-------------------------------------------------------------------------
-# generate PDF from config man page
-#-------------------------------------------------------------------------
-Manual-icalBuddyConfig.pdf: icalBuddyConfig.1
-	@echo
-	@echo ---- Generating PDF from config manpage:
-	@echo ======================================
-	man -t ./$? > temp.ps && /System/Library/Printers/Libraries/convert -j "application/pdf" -f ./temp.ps -o ./$@ && rm ./temp.ps
-
-#-------------------------------------------------------------------------
-#-------------------------------------------------------------------------
-# generate PDF from localization man page
-#-------------------------------------------------------------------------
-Manual-icalBuddyLocalization.pdf: icalBuddyLocalization.1
-	@echo
-	@echo ---- Generating PDF from localization manpage:
-	@echo ======================================
-	man -t ./$? > temp.ps && /System/Library/Printers/Libraries/convert -j "application/pdf" -f ./temp.ps -o ./$@ && rm ./temp.ps
-
-
-
-
-#-------------------------------------------------------------------------
-#-------------------------------------------------------------------------
 # generate FAQ HTML
 #-------------------------------------------------------------------------
 deployment/faq.html: faq.markdown faq-style.css
@@ -197,7 +164,7 @@ deployment/faq.html: faq.markdown faq-style.css
 #-------------------------------------------------------------------------
 # generate documentation
 #-------------------------------------------------------------------------
-docs: icalBuddy.1 deployment/faq.html icalBuddyLocalization.1 icalBuddyConfig.1 Manual-icalBuddy.pdf Manual-icalBuddyConfig.pdf Manual-icalBuddyLocalization.pdf usage.txt
+docs: icalBuddy.1 deployment/faq.html icalBuddyLocalization.1 icalBuddyConfig.1 usage.txt
 	@echo
 	@echo ---- Generating HTML from manpages:
 	@echo ======================================
@@ -215,12 +182,12 @@ package: icalBuddy docs
 	@echo
 	@echo ---- Preparing for deployment:
 	@echo ======================================
-	
+
 # create zip archive
 	mkdir -p $(TEMP_DEPLOYMENT_DIR)
 	echo "-D -j $(TEMP_DEPLOYMENT_ZIPFILE) $(FILES_TO_PACKAGE)" | xargs zip
 	cd "$(DEPLOYMENT_INCLUDES_DIR)"; echo "-g -x *.DS_Store -R ../$(TEMP_DEPLOYMENT_ZIPFILE) *" | xargs zip
-	
+
 # if changelog doesn't already exist in the deployment dir
 # for this version, get 'general' changelog file from root if
 # one exists, and if not, create an empty changelog file
@@ -248,7 +215,7 @@ deploy: package
 	@echo
 	@echo ---- Deploying to server:
 	@echo ======================================
-	
+
 	@echo "Checking latest version number vs. current version number..."
 	@( if [ "$(VERSION_ON_SERVER)" != "$(APP_VERSION)" ];then\
 		echo "Latest version on server is $(VERSION_ON_SERVER). Uploading $(APP_VERSION).";\
@@ -276,11 +243,8 @@ clean:
 	-rm -Rf IcalBuddy*.plist
 	-rm -Rf HG*.plist
 	-rm -Rf ANSIEscape*.plist
-	-rm -Rf Manual-icalBuddy.pdf
 	-rm -Rf icalBuddyConfig.1
-	-rm -Rf Manual-icalBuddyConfig.pdf
 	-rm -Rf icalBuddyLocalization.1
-	-rm -Rf Manual-icalBuddyLocalization.pdf
 	-rm -Rf deployment/*
 
 
