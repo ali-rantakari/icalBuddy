@@ -41,6 +41,7 @@ THE SOFTWARE.
 #define kPropName_location  @"location"
 #define kPropName_notes     @"notes"
 #define kPropName_url       @"url"
+#define kPropName_attendees @"attendees"
 #define kPropName_datetime  @"datetime"
 #define kPropName_priority  @"priority"
 #define kPropName_UID       @"uid"
@@ -111,7 +112,7 @@ THE SOFTWARE.
 
 // default item property order + list of allowed property names (i.e. these must be in
 // the default order and include all of the allowed property names)
-#define kDefaultPropertyOrder [NSArray arrayWithObjects:kPropName_title, kPropName_location, kPropName_notes, kPropName_url, kPropName_datetime, kPropName_priority, kPropName_UID, nil]
+#define kDefaultPropertyOrder [NSArray arrayWithObjects:kPropName_title, kPropName_location, kPropName_notes, kPropName_url, kPropName_attendees, kPropName_datetime, kPropName_priority, kPropName_UID, nil]
 
 #define kDefaultPropertySeparators [NSArray arrayWithObjects:@"\n    ", nil]
 

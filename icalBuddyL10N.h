@@ -35,6 +35,7 @@ THE SOFTWARE.
 #define kL10nKeyPropNameUrl         kPropName_url
 #define kL10nKeyPropNamePriority    kPropName_priority
 #define kL10nKeyPropNameUID         kPropName_UID
+#define kL10nKeyPropNameAttendees   kPropName_attendees
 #define kL10nKeyPropNameDueDate     @"dueDate"
 #define kL10nKeyNoDueDate           @"noDueDate"
 #define kL10nKeyToday               @"today"

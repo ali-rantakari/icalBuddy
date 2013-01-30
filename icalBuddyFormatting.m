@@ -65,6 +65,8 @@ void initFormatting(NSDictionary *aFormattingConfigDict, NSArray *aPropertySepar
         @"",                    @"notesValue",
         kFormatColorCyan,       @"urlName",
         @"",                    @"urlValue",
+        kFormatColorCyan,       @"attendeesName",
+        @"",                    @"attendeesValue",
         kFormatColorCyan,       @"locationName",
         @"",                    @"locationValue",
         kFormatColorCyan,       @"dueDateName",

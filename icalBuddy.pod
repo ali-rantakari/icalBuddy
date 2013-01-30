@@ -170,7 +170,7 @@ Format dates included in the output based on the I<format> formatting string. Se
 
 =item B<-po>, B<--propertyOrder> I<value>
 
-Print properties of events/tasks in the order specified by I<value>, which must be a comma-separated list of property names. The allowed property names are: title, location, notes, url, datetime, priority.
+Print properties of events/tasks in the order specified by I<value>, which must be a comma-separated list of property names. The allowed property names are: title, location, notes, attendees, url, datetime, priority.
 
 =item B<-ps>, B<--propertySeparators> I<value>
 
@@ -206,7 +206,7 @@ Excludes items from specific types of calendars from the output. See B<-ict> for
 
 =item B<-iep>, B<--includeEventProps> I<value>
 
-Includes only event properties specified by I<value> into the output. I<value> must be a comma-separated list of property names. Possible property names are: location, url, notes, datetime, title.
+Includes only event properties specified by I<value> into the output. I<value> must be a comma-separated list of property names. Possible property names are: location, url, notes, attendees, datetime, title.
 
 =item B<-eep>, B<--excludeEventProps> I<value>
 

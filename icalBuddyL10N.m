@@ -67,6 +67,7 @@ void initL10N(NSString *configFilePath)
         @"location",        kL10nKeyPropNameLocation,
         @"notes",           kL10nKeyPropNameNotes,
         @"url",             kL10nKeyPropNameUrl,
+        @"attendees",       kL10nKeyPropNameAttendees,
         @"uid",             kL10nKeyPropNameUID,
         @"due",             kL10nKeyPropNameDueDate,
         @"no due date",     kL10nKeyNoDueDate,

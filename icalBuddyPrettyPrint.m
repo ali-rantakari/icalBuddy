@@ -421,6 +421,27 @@ PropertyPresentationElements *getEventUIDPresentation(CalEvent *event, CalItemPr
     return elements;
 }
 
+PropertyPresentationElements *getEventAttendeesPresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
+{
+    PropertyPresentationElements *elements = [PropertyPresentationElements new];
+
+    elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameAttendees), @":", nil));
+
+    if ([event attendees] != nil && ![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
+    {
+        NSMutableString * attendeeList = [[NSMutableString alloc] initWithString:@""];
+        for (CalAttendee* attendee in [event attendees])
+        {
+            if ([attendeeList length] != 0)
+                [attendeeList appendString:@","];
+            [attendeeList appendString:[NSString stringWithFormat: @"%@", [attendee commonName]]];
+        }
+        elements.value = M_ATTR_STR(([NSString stringWithFormat: @"%@", attendeeList]));
+        [attendeeList release];
+    }
+    return elements;
+}
+
 PropertyPresentationElements *getEventDatetimePresentation(CalEvent *event, CalItemPrintOption printOptions, NSDate *contextDay)
 {
     PropertyPresentationElements *elements = [PropertyPresentationElements new];
@@ -560,6 +581,10 @@ NSMutableAttributedString* getEventPropStr(NSString *propName, CalEvent *event, 
     else if ([propName isEqualToString:kPropName_UID])
     {
         elements = getEventUIDPresentation(event, printOptions, contextDay);
+    }
+    else if ([propName isEqualToString:kPropName_attendees])
+    {
+        elements = getEventAttendeesPresentation(event, printOptions, contextDay);
     }
     else if ([propName isEqualToString:kPropName_datetime])
     {
