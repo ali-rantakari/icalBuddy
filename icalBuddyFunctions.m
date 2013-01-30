@@ -288,7 +288,7 @@ CalItemPrintOption getPrintOptions(AppOptions *opts)
     BOOL printingEvents = areWePrintingEvents(opts);
     BOOL printingTasks = areWePrintingTasks(opts);
 
-    CalItemPrintOption printOptions = {NO,NO,NO,NO,NO};
+    CalItemPrintOption printOptions = {NO,NO,NO,NO,NO,0};
 
     // set default print options
     if (printingEvents)
@@ -324,6 +324,8 @@ CalItemPrintOption getPrintOptions(AppOptions *opts)
     }
     else if (opts->separateByDate)
         printOptions.singleDay = YES;
+
+    printOptions.maxNumPrintedAttendees = opts->maxNumPrintedAttendees;
 
     return printOptions;
 }

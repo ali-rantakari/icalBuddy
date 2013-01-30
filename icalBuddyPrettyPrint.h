@@ -77,6 +77,7 @@ typedef struct
     BOOL withoutPropNames;  // without property names (i.e. print only the values)
     BOOL calendarColorsForSectionTitles;
     BOOL priorityAgnostic;
+    NSUInteger maxNumPrintedAttendees;
 } CalItemPrintOption;
 
 

@@ -132,6 +132,8 @@ void handleArgument(NSString *shortName, NSString *longName, id value,
         {
             if ([shortName isEqualToString:@"li"] || [longName isEqualToString:@"limitItems"])
                 prettyPrintOptions->maxNumPrintedItems = abs([value integerValue]);
+            else if ([shortName isEqualToString:@"na"] || [longName isEqualToString:@"maxNumAttendees"])
+                opts->maxNumPrintedAttendees = abs([value integerValue]);
         }
     }
 }

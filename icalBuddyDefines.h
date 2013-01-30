@@ -166,10 +166,12 @@ typedef struct
     NSDate *startDate;
     NSDate *endDate;
     NSDate *dueBeforeDate;
+
+    NSUInteger maxNumPrintedAttendees;
 } AppOptions;
 
 #define NEW_DEFAULT_APP_OPTIONS {NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,NO,\
-                                 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil}
+                                 nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,0}
 
 
 

@@ -434,6 +434,11 @@ PropertyPresentationElements *getEventAttendeesPresentation(CalEvent *event, Cal
         {
             [attendeeNames addObject:[attendee commonName]];
         }
+        if (0 < printOptions.maxNumPrintedAttendees && printOptions.maxNumPrintedAttendees < attendeeNames.count)
+        {
+            attendeeNames = [[attendeeNames subarrayWithRange:NSMakeRange(0, printOptions.maxNumPrintedAttendees)]
+                             arrayByAddingObject:@"..."].mutableCopy;
+        }
         elements.value = M_ATTR_STR(([attendeeNames componentsJoinedByString:@", "]));
     }
     return elements;

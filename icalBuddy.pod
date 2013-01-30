@@ -132,6 +132,10 @@ Omit property names from the output (i.e. only show property values -- e.g. "My 
 
 If the I<command> value C<eventsToday> is used, only output events that occur between the current time and the end of the day (as opposed to events that occur between the start and end of the day, as by default.)
 
+=item B<-na>, B<--maxNumAttendees>
+
+Maximum number of attendees to show for events.
+
 =item B<-uid>, B<--showUIDs>
 
 Display event/task UIDs (unique identifiers).
