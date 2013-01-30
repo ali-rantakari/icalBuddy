@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>项目</string>
+	<key>notes</key>
+	<string>备注</string>
+	<key>url</key>
+	<string>URL</string>
+	<key>location</key>
+	<string>位置</string>
+	<key>dueDate</key>
+	<string>截止日期</string>
+	<key>noDueDate</key>
+	<string>无截止日期</string>
+	<key>priority</key>
+	<string>优先级</string>
+	<key>high</key>
+	<string>高</string>
+	<key>medium</key>
+	<string>中</string>
+	<key>low</key>
+	<string>低</string>
+	<key>noPriority</key>
+	<string>无</string>
+	<key>priorityTitle</key>
+	<string>%@优先级</string>
+	<key>priorityTitleNone</key>
+	<string>无优先级</string>
+	<key>priorityTitleLow</key>
+	<string>低优先级</string>
+	<key>priorityTitleMedium</key>
+	<string>中优先级</string>
+	<key>priorityTitleHigh</key>
+	<string>高优先级</string>
+	<key>someonesBirthday</key>
+	<string>“%@” 的 %i 岁生日</string>
+	<key>today</key>
+	<string>今天</string>
+	<key>tomorrow</key>
+	<string>明天</string>
+	<key>yesterday</key>
+	<string>昨天</string>
+	<key>dayBeforeYesterday</key>
+	<string>前天</string>
+	<key>dayAfterTomorrow</key>
+	<string>后天</string>
+	<key>xDaysAgo</key>
+	<string>%d天前</string>
+	<key>xDaysFromNow</key>
+	<string>%d天后</string>
+	<key>thisWeek</key>
+	<string>本周</string>
+	<key>lastWeek</key>
+	<string>上周</string>
+	<key>nextWeek</key>
+	<string>下周</string>
+	<key>xWeeksAgo</key>
+	<string>%d周前</string>
+	<key>xWeeksFromNow</key>
+	<string>%d周后</string>
+	<key>dateTimeSeparator</key>
+	<string> </string>
+	<key>noItems</key>
+	<string>无项目</string>
+</dict>
+</plist>
+
