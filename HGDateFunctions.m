@@ -254,9 +254,9 @@ BOOL naturalLanguageDateSpecifiesTime(NSString *input, NSDate *resultDate)
     // towards falsely assuming that no time has been specified than the other
     // way.
     NSUInteger occurrencesOf12InDate = 0;
-    occurrencesOf12InDate = countOccurrences([NSString stringWithFormat:@"%i-%i-%i %i",
-                                                [resultComps year], [resultComps month], [resultComps day]],
-                                             @"12", NSLiteralSearch);
+    occurrencesOf12InDate = countOccurrences([NSString stringWithFormat:@"%i-%i-%i",
+                                              [resultComps year], [resultComps month], [resultComps day]],
+                                              @"12", NSLiteralSearch);
     if (countOccurrences(input, @"12", NSLiteralSearch) > occurrencesOf12InDate)
         return YES;
 
