@@ -429,15 +429,12 @@ PropertyPresentationElements *getEventAttendeesPresentation(CalEvent *event, Cal
 
     if ([event attendees] != nil && ![[[event calendar] type] isEqualToString:CalCalendarTypeBirthday])
     {
-        NSMutableString * attendeeList = [[NSMutableString alloc] initWithString:@""];
-        for (CalAttendee* attendee in [event attendees])
+        NSMutableArray *attendeeNames = [NSMutableArray array];
+        for (CalAttendee *attendee in [event attendees])
         {
-            if ([attendeeList length] != 0)
-                [attendeeList appendString:@","];
-            [attendeeList appendString:[NSString stringWithFormat: @"%@", [attendee commonName]]];
+            [attendeeNames addObject:[attendee commonName]];
         }
-        elements.value = M_ATTR_STR(([NSString stringWithFormat: @"%@", attendeeList]));
-        [attendeeList release];
+        elements.value = M_ATTR_STR(([attendeeNames componentsJoinedByString:@", "]));
     }
     return elements;
 }
