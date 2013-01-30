@@ -386,7 +386,7 @@ PropertyPresentationElements *getEventNotesPresentation(CalEvent *event, CalItem
         else
             thisNewlineReplacement = prettyPrintOptions.notesNewlineReplacement;
 
-        NSString *notes = [event notes];
+        NSString *notes = [[event notes] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSUInteger notesCodePointLength = [notes lengthOfBytesUsingEncoding:NSUTF32StringEncoding] / 4;
         if (0 < printOptions.maxNumNoteCharacters && printOptions.maxNumNoteCharacters < notesCodePointLength)
             notes = [[notes substringWithRange:
