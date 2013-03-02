@@ -440,7 +440,8 @@ PropertyPresentationElements *getEventAttendeesPresentation(CalEvent *event, Cal
         NSMutableArray *attendeeNames = [NSMutableArray array];
         for (CalAttendee *attendee in [event attendees])
         {
-            [attendeeNames addObject:[attendee commonName]];
+            NSString *attendeeDisplayName = [attendee commonName] ?: [NSString stringWithFormat:@"%@", [attendee address]];
+            [attendeeNames addObject:attendeeDisplayName];
         }
         if (0 < printOptions.maxNumPrintedAttendees && printOptions.maxNumPrintedAttendees < attendeeNames.count)
         {
