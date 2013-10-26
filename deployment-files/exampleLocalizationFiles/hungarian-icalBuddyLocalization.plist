@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>cím</string>
+	<key>location</key>
+	<string>helyszín</string>
+	<key>notes</key>
+	<string>megjegyzés</string>
+	<key>url</key>
+	<string>url</string>
+	<key>dueDate</key>
+	<string>lejárat</string>
+	<key>noDueDate</key>
+	<string>nincs jár le</string>
+	<key>priority</key>
+	<string>prio</string>
+	<key>someonesBirthday</key>
+	<string>%@ %i. születésnapja</string>
+	<key>today</key>
+	<string>ma</string>
+	<key>tomorrow</key>
+	<string>holnap</string>
+	<key>yesterday</key>
+	<string>tegnap</string>
+	<key>dayBeforeYesterday</key>
+	<string>tegnapelőtt</string>
+	<key>dayAfterTomorrow</key>
+	<string>holnapután</string>
+	<key>xDaysAgo</key>
+	<string>%d napja</string>
+	<key>xDaysFromNow</key>
+	<string>%d nap múlva</string>
+	<key>thisWeek</key>
+	<string>e hét</string>
+	<key>lastWeek</key>
+	<string>múlt hét</string>
+	<key>nextWeek</key>
+	<string>jövő hét</string>
+	<key>xWeeksAgo</key>
+	<string>%d hete</string>
+	<key>xWeeksFromNow</key>
+	<string>%d hét múlva</string>
+	<key>high</key>
+	<string>magyas</string>
+	<key>medium</key>
+	<string>közepes</string>
+	<key>low</key>
+	<string>alacsony</string>
+	<key>noPriority</key>
+	<string>nincs</string>
+	<key>priorityTitle</key>
+	<string>%@ prioritás</string>
+	<key>priorityTitleNone</key>
+	<string>Nincs prioritás</string>
+	<key>dateTimeSeparator</key>
+	<string> / </string>
+	<key>noItems</key>
+	<string>Nincs bejegyzés.</string>
+</dict>
+</plist>
+
