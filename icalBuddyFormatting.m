@@ -390,7 +390,7 @@ NSDictionary* getPropValueStringAttributes(NSString *propName, NSString *propVal
 
     NSString *formattingConfigKey = [propName stringByAppendingString:kFormatKeyPropValueSuffix];
 
-    if (propName == kPropName_priority)
+    if ([propName isEqualToString:kPropName_priority])
     {
         if (propValue != nil)
         {

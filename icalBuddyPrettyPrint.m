@@ -92,7 +92,7 @@ PrettyPrintOptions getDefaultPrettyPrintOptions()
 // names to be included and a set of property names to be excluded
 BOOL shouldPrintProperty(NSString *propertyName, NSSet *inclusionsSet, NSSet *exclusionsSet)
 {
-    if (propertyName == kPropName_UID)
+    if ([propertyName isEqualToString:kPropName_UID])
         return prettyPrintOptions.showUIDs;
 
     if (propertyName == nil || (inclusionsSet == nil && exclusionsSet == nil))
