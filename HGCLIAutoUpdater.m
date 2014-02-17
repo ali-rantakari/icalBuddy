@@ -35,8 +35,6 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 {
     if (first != nil && second != nil)
     {
-        int i;
-
         NSMutableArray *firstComponents = [NSMutableArray arrayWithCapacity:3];
         [firstComponents addObjectsFromArray:[first componentsSeparatedByString:@"."]];
 
@@ -60,11 +58,11 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 
             NSUInteger countDiff = [longer count] - [shorter count];
 
-            for (i = 0; i < countDiff; i++)
+            for (NSUInteger i = 0; i < countDiff; i++)
                 [shorter addObject:@"0"];
         }
 
-        for (i = 0; i < [firstComponents count]; i++)
+        for (NSUInteger i = 0; i < [firstComponents count]; i++)
         {
             int firstComponentIntVal = [[firstComponents objectAtIndex:i] intValue];
             int secondComponentIntVal = [[secondComponents objectAtIndex:i] intValue];
