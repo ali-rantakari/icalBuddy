@@ -24,6 +24,8 @@ COMPILER_GCC=gcc
 COMPILER_CLANG=clang
 COMPILER=$(COMPILER_CLANG)
 
+CC_WARN_OPTS=-Wall -Wextra -Wno-unused-parameter -Werror
+
 ifdef 64BIT
 	ARCH_64BIT=-arch x86_64
 else
@@ -52,7 +54,7 @@ icalBuddy: $(SOURCE_FILES) icalBuddy.m
 	@echo
 	@echo ---- Compiling main app:
 	@echo ======================================
-	$(COMPILER) $(ARG_DEBUG) -O3 -Wall -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m $(SOURCE_FILES)
+	$(COMPILER) $(ARG_DEBUG) -O3 $(CC_WARN_OPTS) -std=c99 -force_cpusubtype_ALL -mmacosx-version-min=10.5 -arch i386 $(ARCH_64BIT) -framework Cocoa -framework CalendarStore -framework AppKit -framework AddressBook -o $@ icalBuddy.m $(SOURCE_FILES)
 
 
 
