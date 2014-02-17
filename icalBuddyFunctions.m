@@ -288,7 +288,7 @@ CalItemPrintOption getPrintOptions(AppOptions *opts)
     BOOL printingEvents = areWePrintingEvents(opts);
     BOOL printingTasks = areWePrintingTasks(opts);
 
-    CalItemPrintOption printOptions = {NO,NO,NO,NO,NO,0};
+    CalItemPrintOption printOptions = {NO,NO,NO,NO,NO,0,0};
 
     // set default print options
     if (printingEvents)
