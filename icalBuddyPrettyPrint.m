@@ -807,7 +807,7 @@ PropertyPresentationElements *getTaskDatetimePresentation(CalTask *task, CalItem
     elements.name = M_ATTR_STR(strConcat(localizedStr(kL10nKeyPropNameDueDate), @":", nil));
 
     if ([task dueDate] != nil && !printOptions.singleDay)
-        elements.value = M_ATTR_STR(dateStr([task dueDate], ONLY_DATE));
+        elements.value = M_ATTR_STR(dateStr([task dueDate], DATE_AND_TIME));
 
     return elements;
 }
