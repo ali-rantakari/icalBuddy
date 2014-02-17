@@ -99,7 +99,7 @@ THE SOFTWARE.
 
 
 
-- (NSString*) ansiEscapedStringWithAttributedString:(NSAttributedString*)aAttributedString;
+- (NSString*) ansiEscapedStringWithAttributedString:(NSAttributedString*)aAttributedString
 {
     NSRange limitRange;
     NSRange effectiveRange;

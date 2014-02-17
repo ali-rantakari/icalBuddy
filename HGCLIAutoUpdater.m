@@ -118,7 +118,7 @@ NSComparisonResult versionNumberCompare(NSString *first, NSString *second)
 }
 
 
-- (NSString *) latestUpdateVersionOnServerWithError:(NSError **)error;
+- (NSString *) latestUpdateVersionOnServerWithError:(NSError **)error
 {
     // check if delegate gives us the URL where we can get the latest version
     NSURL *versionCheckURL = nil;
