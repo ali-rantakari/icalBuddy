@@ -17,6 +17,8 @@
 	<key>priority</key>
 	<string>prioriteetti</string>
 	<key>someonesBirthday</key>
+	<string>%@:n Syntymäpäivä (%i vuotta)</string>
+	<key>someonesBirthdayNoAge</key>
 	<string>%@:n Syntymäpäivä</string>
 	<key>today</key>
 	<string>tänään</string>

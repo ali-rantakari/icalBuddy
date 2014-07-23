@@ -18,6 +18,8 @@
 	<string>priorytet</string>
 	<key>someonesBirthday</key>
 	<string>%@ ma urodziny</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>%@ ma urodziny</string>
 	<key>today</key>
 	<string>dzisiaj</string>
 	<key>tomorrow</key>

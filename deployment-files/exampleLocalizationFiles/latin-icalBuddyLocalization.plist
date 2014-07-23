@@ -18,6 +18,8 @@
 	<string>momenti</string>
 	<key>someonesBirthday</key>
 	<string>%@ hodie suum diem natalem celebrat</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>%@ hodie suum diem natalem celebrat</string>
 	<key>today</key>
 	<string>hodie</string>
 	<key>tomorrow</key>

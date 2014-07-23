@@ -36,6 +36,8 @@
 	<string>高优先级</string>
 	<key>someonesBirthday</key>
 	<string>“%@” 的 %i 岁生日</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>“%@” 岁生日</string>
 	<key>today</key>
 	<string>今天</string>
 	<key>tomorrow</key>

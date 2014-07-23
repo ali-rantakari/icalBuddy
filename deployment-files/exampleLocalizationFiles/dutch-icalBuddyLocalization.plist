@@ -18,6 +18,8 @@
 	<string>Prioriteit</string>
 	<key>someonesBirthday</key>
 	<string>Verjaardag van %@</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>Verjaardag van %@</string>
 	<key>today</key>
 	<string>Vandaag</string>
 	<key>tomorrow</key>

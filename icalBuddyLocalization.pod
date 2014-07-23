@@ -90,6 +90,10 @@ The lack of a task priority as a title (e.g. C<No priority>).
 
 The title for an event in the Birthdays calendar (e.g. C<%@'s Birthday>.) Must include substring %@ to specify the location of the person's name, and optionally also substring %i to specify the person's age (e.g. C<%@'s Birthday (age %i)>).
 
+=item B<C<someonesBirthdayNoAge>>
+
+The title for an event in the Birthdays calendar (e.g. C<%@'s Birthday>.) Must include substring %@ to specify the location of the person's name.
+
 =item B<C<myBirthday>>
 
 The title for your own birthday event (e.g. "My Birthday".)
@@ -173,6 +177,8 @@ What to print under empty sections (i.e. dates, if separating by date and showin
 		<key>priority</key>
 		<string>priority</string>
 		<key>someonesBirthday</key>
+		<string>%@'s Birthday (age %i)</string>
+		<key>someonesBirthdayNoAge</key>
 		<string>%@'s Birthday</string>
 		<key>today</key>
 		<string>today</string>

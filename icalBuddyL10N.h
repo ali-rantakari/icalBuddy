@@ -60,6 +60,7 @@ THE SOFTWARE.
 #define kL10nKeyPriorityTitleMedium @"priorityTitleMedium"
 #define kL10nKeyPriorityTitleHigh   @"priorityTitleHigh"
 #define kL10nKeySomeonesBirthday    @"someonesBirthday"
+#define kL10nKeySomeonesBirthdayNoAge  @"someonesBirthdayNoAge"
 #define kL10nKeyMyBirthday          @"myBirthday"
 #define kL10nKeyDateTimeSeparator   @"dateTimeSeparator"
 #define kL10nKeyNoItemsInSection    @"noItems"

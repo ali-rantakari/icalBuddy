@@ -73,6 +73,7 @@ void initL10N(NSString *configFilePath)
         @"no due date",     kL10nKeyNoDueDate,
         @"priority",        kL10nKeyPropNamePriority,
         @"%@'s Birthday (age %i)",  kL10nKeySomeonesBirthday,
+        @"%@'s Birthday",   kL10nKeySomeonesBirthdayNoAge,
         @"My Birthday",             kL10nKeyMyBirthday,
         @"today",                   kL10nKeyToday,
         @"tomorrow",                kL10nKeyTomorrow,
@@ -136,6 +137,7 @@ void readAndValidateL10NConfigFile(NSString *filePath)
                 @"%d", kL10nKeyXDaysAgo,
                 @"%d", kL10nKeyXDaysFromNow,
                 @"%@", kL10nKeySomeonesBirthday,
+                @"%@", kL10nKeySomeonesBirthdayNoAge,
                 nil
                 ];
             NSString *thisKey;

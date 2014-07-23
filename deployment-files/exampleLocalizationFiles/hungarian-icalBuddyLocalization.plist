@@ -18,6 +18,8 @@
 	<string>prio</string>
 	<key>someonesBirthday</key>
 	<string>%@ %i. születésnapja</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>%@ születésnapja</string>
 	<key>today</key>
 	<string>ma</string>
 	<key>tomorrow</key>

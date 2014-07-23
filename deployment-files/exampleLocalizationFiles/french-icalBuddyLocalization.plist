@@ -18,6 +18,8 @@
 	<string>priorité</string>
 	<key>someonesBirthday</key>
 	<string>anniversaire de %@</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>anniversaire de %@</string>
 	<key>today</key>
 	<string>aujourd&apos;hui</string>
 	<key>tomorrow</key>

@@ -18,6 +18,8 @@
 	<string>順位</string>
 	<key>someonesBirthday</key>
 	<string>%@の誕生日</string>
+	<key>someonesBirthdayNoAge</key>
+	<string>%@の誕生日</string>
 	<key>today</key>
 	<string>今日</string>
 	<key>tomorrow</key>
