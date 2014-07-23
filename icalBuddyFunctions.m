@@ -182,6 +182,11 @@ NSArray *getTasks(AppOptions *opts, NSArray *calendars)
 NSArray *getCalItems(AppOptions *opts)
 {
     NSArray *calendars = getCalendars(opts);
+    if (calendars.count == 0)
+    {
+        PrintfErr(@"error: No calendars.\n");
+        return nil;
+    }
 
     BOOL printingEvents = areWePrintingEvents(opts);
     BOOL printingTasks = areWePrintingTasks(opts);
