@@ -160,7 +160,7 @@ void readArgsFromConfigFile(AppOptions *opts, PrettyPrintOptions *prettyPrintOpt
 
     BOOL configFileIsValid = YES;
 
-    configDict = [NSDictionary dictionaryWithContentsOfFile:filePath];
+    configDict = [[NSDictionary dictionaryWithContentsOfFile:filePath] mutableCopy];
 
     if (configDict == nil)
     {
