@@ -47,21 +47,19 @@
 	<key>high</key>
 	<string>高い優先度</string>
 	<key>medium</key>
-	<string>中程度の優先度</string>
+	<string>中優先度</string>
 	<key>low</key>
 	<string>低い優先度</string>
-	<!-- TODO: these need to be translated:
 	<key>noPriority</key>
-	<string></string>
+	<string>優先度なし</string>
 	<key>priorityTitleHigh</key>
-	<string></string>
+	<string>高い優先度</string>
 	<key>priorityTitleMedium</key>
-	<string></string>
+	<string>中優先度</string>
 	<key>priorityTitleLow</key>
-	<string></string>
+	<string>低い優先度</string>
 	<key>priorityTitleNone</key>
-	<string></string>
-	-->
+	<string>優先度なし</string>
 	<key>dateTimeSeparator</key>
 	<string></string>
 	<key>noItems</key>
